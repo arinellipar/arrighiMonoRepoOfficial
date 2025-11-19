@@ -84,7 +84,7 @@ namespace CrmArrighi.Controllers
                         UltimaAtividade = s.UltimaAtividade,
                         EnderecoIP = s.EnderecoIP,
                         PaginaAtual = s.PaginaAtual,
-                        TempoOnline = DateTime.UtcNow.Subtract(s.InicioSessao).ToString(@"hh\:mm\:ss")
+                        TempoOnline = DateTime.UtcNow.Subtract(s.InicioSessao).ToString(@"HH\:mm\:ss")
                     })
                     .ToListAsync();
 
@@ -397,7 +397,7 @@ namespace CrmArrighi.Controllers
                     if (estaOnline && sessaoAtiva != null)
                     {
                         // Para usuários online, mostra tempo desde início da sessão
-                        tempoOnline = DateTime.UtcNow.Subtract(sessaoAtiva.InicioSessao).ToString(@"hh\:mm\:ss");
+                        tempoOnline = DateTime.UtcNow.Subtract(sessaoAtiva.InicioSessao).ToString(@"HH\:mm\:ss");
                     }
                     else
                     {
@@ -411,7 +411,7 @@ namespace CrmArrighi.Controllers
                         {
                             // Calcula duração da última sessão (da inicioSessao até ultimaAtividade)
                             var duracao = ultimaSessao.UltimaAtividade.Subtract(ultimaSessao.InicioSessao);
-                            tempoOnline = duracao.ToString(@"hh\:mm\:ss");
+                            tempoOnline = duracao.ToString(@"HH\:mm\:ss");
                         }
                     }
 

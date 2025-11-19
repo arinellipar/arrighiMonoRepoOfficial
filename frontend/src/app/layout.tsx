@@ -8,6 +8,7 @@ import { QueryProvider } from "@/core/providers/QueryProvider";
 import { DatadogProvider } from "@/core/providers/DatadogProvider";
 import ConditionalRouteGuard from "@/components/ConditionalRouteGuard";
 import { Analytics } from "@vercel/analytics/next";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -62,6 +63,7 @@ export default function RootLayout({
             </AuthProvider>
           </QueryProvider>
         </DatadogProvider>
+        <Toaster position="top-right" richColors closeButton />
       </body>
     </html>
   );

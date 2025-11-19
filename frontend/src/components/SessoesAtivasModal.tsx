@@ -59,18 +59,29 @@ export function SessoesAtivasModal({
       return "0m";
     }
 
-    // Se vier no formato hh:mm:ss, converter para formato legível
+    // Se vier no formato HH:mm:ss, converter para formato legível
     const parts = tempo.split(":");
     if (parts.length === 3) {
-      const hours = parseInt(parts[0]);
-      const minutes = parseInt(parts[1]);
+      const hours = parseInt(parts[0], 10);
+      const minutes = parseInt(parts[1], 10);
+      const seconds = parseInt(parts[2], 10);
 
-      if (hours > 0) {
+      // Se tiver mais de 24 horas, mostrar em dias
+      if (hours >= 24) {
+        const days = Math.floor(hours / 24);
+        const remainingHours = hours % 24;
+        if (remainingHours > 0) {
+          return `${days}d ${remainingHours}h`;
+        }
+        return `${days}d`;
+      } else if (hours > 0) {
         return `${hours}h ${minutes}m`;
       } else if (minutes > 0) {
         return `${minutes}m`;
+      } else if (seconds > 0) {
+        return `${seconds}s`;
       } else {
-        return "< 1m";
+        return "< 1s";
       }
     }
 
@@ -319,7 +330,7 @@ export function SessoesAtivasModal({
                               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
                                 {estaOnline ? (
                                   <>
-                                    {/* Página Atual - Destaque especial para tempo real */}
+                                    {/* Página Atual */}
                                     <div className="flex items-center gap-2 text-blue-700 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200 col-span-full sm:col-span-2 lg:col-span-1">
                                       <MapPin className="w-4 h-4 text-blue-600 flex-shrink-0" />
                                       <div className="flex-1 min-w-0">
@@ -330,10 +341,6 @@ export function SessoesAtivasModal({
                                           {sessao.paginaAtual || "Não informado"}
                                         </span>
                                       </div>
-                                      <span className="flex items-center gap-1 text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
-                                        Tempo real
-                                      </span>
                                     </div>
 
                                     <div className="flex items-center gap-2 text-gray-700">
