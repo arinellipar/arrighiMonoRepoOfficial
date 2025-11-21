@@ -32,10 +32,14 @@ namespace CrmArrighi.Controllers
             if (!Request.Headers.TryGetValue("X-Usuario-Id", out var userIdHeader) ||
                 !int.TryParse(userIdHeader.FirstOrDefault(), out int userId))
             {
+                _logger.LogWarning("⚠️ IsAdminAsync: Header X-Usuario-Id não encontrado ou inválido. Header value: {HeaderValue}",
+                    userIdHeader.FirstOrDefault() ?? "null");
                 return false;
             }
 
+            _logger.LogInformation("🔍 IsAdminAsync: Verificando permissões para usuário ID: {UserId}", userId);
             var grupoNome = await _permissionService.GetUserGroupNameAsync(userId);
+            _logger.LogInformation("🔍 IsAdminAsync: Grupo do usuário {UserId}: {GrupoNome}", userId, grupoNome ?? "null");
             return grupoNome == "Administrador";
         }
 
@@ -84,7 +88,8 @@ namespace CrmArrighi.Controllers
                         UltimaAtividade = s.UltimaAtividade,
                         EnderecoIP = s.EnderecoIP,
                         PaginaAtual = s.PaginaAtual,
-                        TempoOnline = DateTime.UtcNow.Subtract(s.InicioSessao).ToString(@"HH\:mm\:ss")
+                        TempoOnline = FormatTempoOnline(DateTime.UtcNow.Subtract(s.InicioSessao)),
+                        EstaOnline = true // Todas as sessões retornadas por este endpoint estão ativas
                     })
                     .ToListAsync();
 
@@ -335,15 +340,18 @@ namespace CrmArrighi.Controllers
         [HttpGet("historico")]
         public async Task<ActionResult<IEnumerable<object>>> GetHistoricoAcessos()
         {
+            _logger.LogInformation("📊 GetHistoricoAcessos: Iniciando requisição de histórico");
+
             // Verificar se usuário é administrador
             if (!await IsAdminAsync())
             {
+                _logger.LogWarning("🚫 GetHistoricoAcessos: Acesso negado - usuário não é administrador");
                 return Forbid("Apenas administradores podem visualizar histórico de sessões");
             }
 
             try
             {
-                _logger.LogInformation("Buscando histórico de acessos de todos os usuários");
+                _logger.LogInformation("✅ GetHistoricoAcessos: Usuário autorizado - buscando histórico de acessos de todos os usuários");
 
                 // 🔥 LIMPEZA: Marca sessões inativas como offline (sem atividade há mais de 15 minutos)
                 var tempoLimite = DateTime.UtcNow.AddMinutes(-15);
@@ -397,7 +405,7 @@ namespace CrmArrighi.Controllers
                     if (estaOnline && sessaoAtiva != null)
                     {
                         // Para usuários online, mostra tempo desde início da sessão
-                        tempoOnline = DateTime.UtcNow.Subtract(sessaoAtiva.InicioSessao).ToString(@"HH\:mm\:ss");
+                        tempoOnline = FormatTempoOnline(DateTime.UtcNow.Subtract(sessaoAtiva.InicioSessao));
                     }
                     else
                     {
@@ -411,7 +419,7 @@ namespace CrmArrighi.Controllers
                         {
                             // Calcula duração da última sessão (da inicioSessao até ultimaAtividade)
                             var duracao = ultimaSessao.UltimaAtividade.Subtract(ultimaSessao.InicioSessao);
-                            tempoOnline = duracao.ToString(@"HH\:mm\:ss");
+                            tempoOnline = FormatTempoOnline(duracao);
                         }
                     }
 
@@ -458,10 +466,28 @@ namespace CrmArrighi.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Erro ao buscar histórico de acessos: {ex.Message}");
-                _logger.LogError($"Stack trace: {ex.StackTrace}");
-                return StatusCode(500, "Erro ao buscar histórico de acessos");
+                _logger.LogError($"❌ ERRO ao buscar histórico de acessos: {ex.Message}");
+                _logger.LogError($"❌ Stack trace: {ex.StackTrace}");
+                _logger.LogError($"❌ Inner exception: {ex.InnerException?.Message}");
+                _logger.LogError($"❌ Exception type: {ex.GetType().Name}");
+                return StatusCode(500, new { error = "Erro ao buscar histórico de acessos", details = ex.Message, type = ex.GetType().Name });
             }
+        }
+
+        private static string FormatTempoOnline(TimeSpan tempo)
+        {
+            if (tempo.TotalSeconds < 0 || double.IsNaN(tempo.TotalSeconds) || double.IsInfinity(tempo.TotalSeconds))
+            {
+                tempo = TimeSpan.Zero;
+            }
+
+            // Limitar para evitar overflow em horas muito grandes (exibe horas totais)
+            var totalHours = (long)Math.Floor(tempo.TotalHours);
+            var minutes = Math.Abs(tempo.Minutes);
+            var seconds = Math.Abs(tempo.Seconds);
+
+            // Formatar como HH:mm:ss permitindo mais de 24h
+            return $"{totalHours:D2}:{minutes:D2}:{seconds:D2}";
         }
 
         private string CalcularTempoOnline(DateTime inicioSessao)

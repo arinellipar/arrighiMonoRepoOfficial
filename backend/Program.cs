@@ -201,6 +201,12 @@ using (var scope = app.Services.CreateScope())
 
     // Fazer seed dos dados
     await seedDataService.SeedAllAsync();
+
+    // 🔥 Verificar e corrigir grupo Administrador após seed
+    Console.WriteLine("🔄 Verificando configuração do grupo Administrador...");
+    await AdminGroupHelper.EnsureAdminGroupIsCorrectAsync(context);
+    await AdminGroupHelper.ListAdministratorsAsync(context);
+    Console.WriteLine("✅ Verificação do grupo Administrador concluída!");
 }
 
 app.Run();
