@@ -342,6 +342,13 @@ namespace CrmArrighi.Controllers
         {
             _logger.LogInformation("📊 GetHistoricoAcessos: Iniciando requisição de histórico");
 
+            // Log de todos os headers para debug
+            _logger.LogInformation("📋 Headers recebidos:");
+            foreach (var header in Request.Headers)
+            {
+                _logger.LogInformation("  {Key}: {Value}", header.Key, header.Value);
+            }
+
             // Verificar se usuário é administrador
             if (!await IsAdminAsync())
             {
