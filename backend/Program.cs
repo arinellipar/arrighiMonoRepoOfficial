@@ -10,6 +10,14 @@ using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ✅ Em desenvolvimento, carregue também o appsettings.Production.json para usar as
+// mesmas credenciais reais configuradas para produção (exigência do cliente).
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddJsonFile("appsettings.Production.json", optional: true, reloadOnChange: true);
+    Console.WriteLine("⚠️ Ambiente Development: appsettings.Production.json carregado para usar Santander real.");
+}
+
 // Configure timezone for Brazil
 TimeZoneInfo brasiliaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
 

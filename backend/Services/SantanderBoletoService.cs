@@ -587,7 +587,7 @@ namespace CrmArrighi.Services
                     throw new InvalidOperationException(
                         "⚠️ Credenciais da API Santander não configuradas. " +
                         "Configure WorkspaceId, ClientId e ClientSecret no appsettings.Production.json ou variáveis de ambiente. " +
-                        "Veja CONFIGURAR_SANTANDER_PRODUCAO.md para instruções.");
+                        "Veja LEIA_ME_SANTANDER.md para instruções.");
                 }
 
                 // Obter access token
