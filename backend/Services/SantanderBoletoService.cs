@@ -878,6 +878,15 @@ namespace CrmArrighi.Services
             {
                 _logger.LogInformation("📄 Iniciando download do PDF do boleto. BankNumber: {BankNumber}, CovenantCode: {CovenantCode}", bankNumber, covenantCode);
 
+                // ⚠️ Modo simulação: retornar link de exemplo
+                var modoSimulacao = _configuration["SantanderAPI:ModoSimulacao"]?.ToLower() == "true";
+                if (modoSimulacao)
+                {
+                    _logger.LogWarning("⚠️ MODO SIMULAÇÃO: Retornando link de PDF de exemplo");
+                    // Retornar um link de PDF de exemplo válido
+                    return "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+                }
+
                 // Obter access token
                 var accessToken = await GetAccessTokenAsync();
 

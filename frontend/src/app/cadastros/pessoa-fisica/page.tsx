@@ -48,23 +48,23 @@ function StatusBadge({
       className={cn(
         "inline-flex items-center rounded-full font-medium",
         isCompact
-          ? "px-1 py-0.5 text-[8px] sm:text-[9px]"
-          : "px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-xs",
+          ? "px-2 py-0.5 text-[9px] sm:text-[10px]"
+          : "px-2.5 py-1 text-[10px] sm:text-xs",
         status === "ativo"
-          ? "bg-green-100 text-green-800 border border-green-200"
-          : "bg-red-100 text-red-800 border border-red-200"
+          ? "bg-green-500/20 text-green-400 border border-green-500/30"
+          : "bg-red-500/20 text-red-400 border border-red-500/30"
       )}
     >
       {status === "ativo" ? (
         <CheckCircle
           className={
-            isCompact ? "w-2 h-2 mr-0.5" : "w-2 h-2 sm:w-2.5 sm:h-2.5 mr-0.5"
+            isCompact ? "w-2.5 h-2.5 mr-1" : "w-3 h-3 mr-1"
           }
         />
       ) : (
         <XCircle
           className={
-            isCompact ? "w-2 h-2 mr-0.5" : "w-2 h-2 sm:w-2.5 sm:h-2.5 mr-0.5"
+            isCompact ? "w-2.5 h-2.5 mr-1" : "w-3 h-3 mr-1"
           }
         />
       )}
@@ -84,22 +84,22 @@ function RoleBadge({
     cliente: {
       label: "Cliente",
       icon: Briefcase,
-      color: "bg-blue-100 text-blue-800 border-blue-200",
+      color: "bg-blue-500/20 text-blue-400 border-blue-500/30",
     },
     consultor: {
       label: "Consultor",
       icon: UserCheck,
-      color: "bg-purple-100 text-purple-800 border-purple-200",
+      color: "bg-purple-500/20 text-purple-400 border-purple-500/30",
     },
     parceiro: {
       label: "Parceiro",
       icon: Handshake,
-      color: "bg-orange-100 text-orange-800 border-orange-200",
+      color: "bg-orange-500/20 text-orange-400 border-orange-500/30",
     },
     usuario: {
       label: "Usuário",
       icon: Shield,
-      color: "bg-green-100 text-green-800 border-green-200",
+      color: "bg-green-500/20 text-green-400 border-green-500/30",
     },
   };
 
@@ -112,14 +112,14 @@ function RoleBadge({
         className={cn(
           "inline-flex items-center rounded-full font-medium border",
           isCompact
-            ? "px-1 py-0.5 text-[7px] sm:text-[8px]"
-            : "px-1.5 py-0.5 text-[8px] sm:text-[9px]",
+            ? "px-2 py-0.5 text-[9px] sm:text-[10px]"
+            : "px-2.5 py-1 text-[10px] sm:text-xs",
           config.color
         )}
       >
         <Icon
           className={
-            isCompact ? "w-2 h-2 mr-0.5" : "w-2 h-2 sm:w-2.5 sm:h-2.5 mr-0.5"
+            isCompact ? "w-2.5 h-2.5 mr-1" : "w-3 h-3 mr-1"
           }
         />
         {config.label}
@@ -131,7 +131,7 @@ function RoleBadge({
 function LoadingSpinner() {
   return (
     <div className="flex items-center justify-center py-12">
-      <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+      <Loader2 className="w-8 h-8 animate-spin text-gold-400" />
     </div>
   );
 }
@@ -344,7 +344,7 @@ export default function PessoaFisicaPage() {
                 <h1 className="text-base sm:text-lg lg:text-xl font-bold gradient-text">
                   Pessoas Físicas
                 </h1>
-                <p className="text-[10px] sm:text-xs text-secondary-600">
+                <p className="text-[10px] sm:text-xs text-neutral-300">
                   Gerenciar cadastros de pessoas físicas
                 </p>
               </div>
@@ -372,13 +372,13 @@ export default function PessoaFisicaPage() {
           >
             <div className="flex flex-col md:flex-row gap-2 sm:gap-3 lg:gap-4 w-full">
               <div className="flex-1 relative">
-                <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+                <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gold-500 w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
                 <input
                   type="text"
                   placeholder="Buscar por nome, CPF ou email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-7 sm:pl-8 lg:pl-10 pr-3 sm:pr-4 py-1.5 sm:py-2 lg:py-3 bg-secondary-50 border border-secondary-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 text-[11px] sm:text-xs lg:text-sm"
+                  className="w-full pl-7 sm:pl-8 lg:pl-10 pr-3 sm:pr-4 py-1.5 sm:py-2 lg:py-3 bg-neutral-800/50 border border-neutral-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all duration-200 text-[11px] sm:text-xs lg:text-sm"
                 />
                 {selectedPersonId && (
                   <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
@@ -394,7 +394,7 @@ export default function PessoaFisicaPage() {
                   whileTap={{ scale: 0.98 }}
                   onClick={handleViewPerson}
                   disabled={!selectedPersonId}
-                  className="btn-mobile flex items-center justify-center space-x-1 sm:space-x-2 px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 lg:py-3 bg-secondary-100 hover:bg-secondary-200 disabled:bg-secondary-50 disabled:text-secondary-400 text-secondary-700 rounded-lg sm:rounded-xl font-medium transition-all duration-200 text-[11px] sm:text-xs lg:text-sm"
+                    className="btn-mobile flex items-center justify-center space-x-2 px-4 py-3 bg-blue-500/20 hover:bg-blue-500/30 disabled:bg-neutral-800/50 disabled:text-neutral-600 text-blue-400 rounded-xl font-medium transition-all duration-200 border border-blue-500/30 disabled:border-neutral-700"
                   title="Visualizar pessoa selecionada"
                 >
                   <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
@@ -405,7 +405,7 @@ export default function PessoaFisicaPage() {
                   whileTap={{ scale: 0.98 }}
                   onClick={handleEditSelected}
                   disabled={!selectedPersonId}
-                  className="btn-mobile flex items-center justify-center space-x-1 sm:space-x-2 px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 lg:py-3 bg-accent-100 hover:bg-accent-200 disabled:bg-secondary-50 disabled:text-secondary-400 text-accent-700 rounded-lg sm:rounded-xl font-medium transition-all duration-200 text-[11px] sm:text-xs lg:text-sm"
+                    className="btn-mobile flex items-center justify-center space-x-2 px-4 py-3 bg-orange-500/20 hover:bg-orange-500/30 disabled:bg-neutral-800/50 disabled:text-neutral-600 text-orange-400 rounded-xl font-medium transition-all duration-200 border border-orange-500/30 disabled:border-neutral-700"
                   title="Editar pessoa selecionada"
                 >
                   <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
@@ -416,7 +416,7 @@ export default function PessoaFisicaPage() {
                   whileTap={{ scale: 0.98 }}
                   onClick={handleDeleteSelected}
                   disabled={!selectedPersonId}
-                  className="btn-mobile flex items-center justify-center space-x-1 sm:space-x-2 px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 lg:py-3 bg-red-100 hover:bg-red-200 disabled:bg-secondary-50 disabled:text-secondary-400 text-red-700 rounded-lg sm:rounded-xl font-medium transition-all duration-200 text-[11px] sm:text-xs lg:text-sm"
+                    className="btn-mobile flex items-center justify-center space-x-2 px-4 py-3 bg-red-500/20 hover:bg-red-500/30 disabled:bg-neutral-800/50 disabled:text-neutral-600 text-red-400 rounded-xl font-medium transition-all duration-200 border border-red-500/30 disabled:border-neutral-700"
                   title="Excluir pessoa selecionada"
                 >
                   <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
@@ -436,10 +436,10 @@ export default function PessoaFisicaPage() {
             <div className="bg-neutral-900/95 backdrop-blur-xl rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-5 shadow-lg border border-neutral-800 w-full">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] sm:text-xs lg:text-sm text-secondary-600 font-medium">
+                  <p className="text-[11px] sm:text-xs lg:text-sm text-neutral-300 font-medium">
                     Total de Pessoas
                   </p>
-                  <p className="text-base sm:text-lg lg:text-xl font-bold text-secondary-900">
+                  <p className="text-base sm:text-lg lg:text-xl font-bold text-neutral-50">
                     {stats.total}
                   </p>
                 </div>
@@ -452,7 +452,7 @@ export default function PessoaFisicaPage() {
             <div className="bg-neutral-900/95 backdrop-blur-xl rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-5 shadow-lg border border-neutral-800 w-full">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] sm:text-xs lg:text-sm text-secondary-600 font-medium">
+                  <p className="text-[11px] sm:text-xs lg:text-sm text-neutral-300 font-medium">
                     Pessoas Ativas
                   </p>
                   <p className="text-base sm:text-lg lg:text-xl font-bold text-blue-600">
@@ -468,7 +468,7 @@ export default function PessoaFisicaPage() {
             <div className="bg-neutral-900/95 backdrop-blur-xl rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-5 shadow-lg border border-neutral-800 w-full">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] sm:text-xs lg:text-sm text-secondary-600 font-medium">
+                  <p className="text-[11px] sm:text-xs lg:text-sm text-neutral-300 font-medium">
                     Novas este mês
                   </p>
                   <p className="text-base sm:text-lg lg:text-xl font-bold text-accent-600">
@@ -494,8 +494,8 @@ export default function PessoaFisicaPage() {
               transition={{ delay: 0.3 }}
               className="bg-neutral-900/95 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-lg border border-neutral-800 overflow-hidden w-full"
             >
-              <div className="px-3 sm:px-4 lg:px-6 py-2.5 sm:py-3 lg:py-4 border-b border-secondary-200/50">
-                <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-secondary-900">
+              <div className="px-3 sm:px-4 lg:px-6 py-2.5 sm:py-3 lg:py-4 border-b border-neutral-700/50">
+                <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-neutral-50">
                   Lista de Pessoas ({filteredPessoas.length} registros)
                 </h3>
               </div>
@@ -503,12 +503,12 @@ export default function PessoaFisicaPage() {
               {filteredPessoas.length === 0 ? (
                 <div className="text-center py-12">
                   <Users className="w-16 h-16 text-secondary-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-secondary-900 mb-2">
+                  <h3 className="text-lg font-semibold text-neutral-50 mb-2">
                     {searchTerm
                       ? "Nenhum resultado encontrado"
                       : "Nenhuma pessoa cadastrada"}
                   </h3>
-                  <p className="text-secondary-600">
+                  <p className="text-neutral-300">
                     {searchTerm
                       ? "Tente ajustar o termo de busca"
                       : "Clique em 'Nova Pessoa' para começar"}
@@ -532,10 +532,10 @@ export default function PessoaFisicaPage() {
                           isTableCompact ? "table-compact" : ""
                         }`}
                       >
-                        <thead className="bg-secondary-50/50">
+                        <thead className="bg-neutral-800/50/50">
                           <tr>
                             <th
-                              className={`px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 text-left font-medium text-secondary-500 uppercase tracking-wider ${
+                              className={`px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 text-left font-medium text-neutral-400 uppercase tracking-wider ${
                                 isTableCompact
                                   ? "text-[9px] sm:text-[10px]"
                                   : "text-[10px] sm:text-xs"
@@ -544,7 +544,7 @@ export default function PessoaFisicaPage() {
                               Pessoa
                             </th>
                             <th
-                              className={`px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 text-left font-medium text-secondary-500 uppercase tracking-wider hidden sm:table-cell ${
+                              className={`px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 text-left font-medium text-neutral-400 uppercase tracking-wider hidden sm:table-cell ${
                                 isTableCompact
                                   ? "text-[9px] sm:text-[10px]"
                                   : "text-[10px] sm:text-xs"
@@ -553,7 +553,7 @@ export default function PessoaFisicaPage() {
                               CPF
                             </th>
                             <th
-                              className={`px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 text-left font-medium text-secondary-500 uppercase tracking-wider hidden sm:table-cell ${
+                              className={`px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 text-left font-medium text-neutral-400 uppercase tracking-wider hidden sm:table-cell ${
                                 isTableCompact
                                   ? "text-[9px] sm:text-[10px]"
                                   : "text-[10px] sm:text-xs"
@@ -562,7 +562,7 @@ export default function PessoaFisicaPage() {
                               Contato
                             </th>
                             <th
-                              className={`px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 text-left font-medium text-secondary-500 uppercase tracking-wider hidden sm:table-cell ${
+                              className={`px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 text-left font-medium text-neutral-400 uppercase tracking-wider hidden sm:table-cell ${
                                 isTableCompact
                                   ? "text-[9px] sm:text-[10px]"
                                   : "text-[10px] sm:text-xs"
@@ -571,7 +571,7 @@ export default function PessoaFisicaPage() {
                               Status
                             </th>
                             <th
-                              className={`px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 text-left font-medium text-secondary-500 uppercase tracking-wider hidden sm:table-cell ${
+                              className={`px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 text-left font-medium text-neutral-400 uppercase tracking-wider hidden sm:table-cell ${
                                 isTableCompact
                                   ? "text-[9px] sm:text-[10px]"
                                   : "text-[10px] sm:text-xs"
@@ -597,7 +597,7 @@ export default function PessoaFisicaPage() {
                               className={`transition-colors duration-200 cursor-pointer ${
                                 selectedPersonId === pessoa.id
                                   ? "bg-secondary-200 hover:bg-secondary-200 border-l-4 border-accent-500"
-                                  : "hover:bg-secondary-50/50"
+                                  : "hover:bg-neutral-800/50/50"
                               }`}
                             >
                               <td
@@ -631,7 +631,7 @@ export default function PessoaFisicaPage() {
                                   </div>
                                   <div className="min-w-0 flex-1">
                                     <div
-                                      className={`font-medium text-secondary-900 ${
+                                      className={`font-medium text-neutral-50 ${
                                         isTableCompact
                                           ? "text-[10px] sm:text-[11px]"
                                           : "text-[11px] sm:text-xs lg:text-sm"
@@ -671,7 +671,7 @@ export default function PessoaFisicaPage() {
                                     })()}
 
                                     <div
-                                      className={`text-secondary-500 truncate hidden sm:block ${
+                                      className={`text-neutral-400 truncate hidden sm:block ${
                                         isTableCompact
                                           ? "text-[9px] sm:text-[10px]"
                                           : "text-[10px] sm:text-xs"
@@ -683,7 +683,7 @@ export default function PessoaFisicaPage() {
                                 </div>
                               </td>
                               <td
-                                className={`px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 whitespace-nowrap text-secondary-600 hidden sm:table-cell ${
+                                className={`px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 whitespace-nowrap text-neutral-300 hidden sm:table-cell ${
                                   isTableCompact
                                     ? "text-[9px] sm:text-[10px] py-1 sm:py-1.5"
                                     : "text-[10px] sm:text-xs lg:text-sm"
@@ -697,7 +697,7 @@ export default function PessoaFisicaPage() {
                                 }`}
                               >
                                 <div
-                                  className={`text-secondary-900 ${
+                                  className={`text-neutral-50 ${
                                     isTableCompact
                                       ? "text-[9px] sm:text-[10px]"
                                       : "text-[10px] sm:text-xs lg:text-sm"
@@ -706,7 +706,7 @@ export default function PessoaFisicaPage() {
                                   {pessoa.emailEmpresarial}
                                 </div>
                                 <div
-                                  className={`text-secondary-500 ${
+                                  className={`text-neutral-400 ${
                                     isTableCompact
                                       ? "text-[9px] sm:text-[10px]"
                                       : "text-[10px] sm:text-xs lg:text-sm"
@@ -726,7 +726,7 @@ export default function PessoaFisicaPage() {
                                 />
                               </td>
                               <td
-                                className={`px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 whitespace-nowrap text-secondary-600 hidden sm:table-cell ${
+                                className={`px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 whitespace-nowrap text-neutral-300 hidden sm:table-cell ${
                                   isTableCompact
                                     ? "text-[9px] sm:text-[10px] py-1 sm:py-1.5"
                                     : "text-[10px] sm:text-xs lg:text-sm"
@@ -745,9 +745,9 @@ export default function PessoaFisicaPage() {
 
               {/* Paginação */}
               {filteredPessoas.length > 0 && (
-                <div className="px-3 sm:px-4 lg:px-6 py-2.5 sm:py-3 lg:py-4 bg-secondary-50/30 border-t border-secondary-200/50">
+                <div className="px-3 sm:px-4 lg:px-6 py-2.5 sm:py-3 lg:py-4 bg-neutral-800/50/30 border-t border-neutral-700/50">
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0">
-                    <div className="text-xs sm:text-sm text-secondary-500 text-center sm:text-left">
+                    <div className="text-xs sm:text-sm text-neutral-400 text-center sm:text-left">
                       Mostrando {filteredPessoas.length} de {pessoas.length}{" "}
                       registros
                     </div>
@@ -762,7 +762,7 @@ export default function PessoaFisicaPage() {
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="btn-mobile px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white bg-primary-600 border border-transparent rounded-lg hover:bg-primary-700 transition-colors duration-200"
+                        className="btn-mobile px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white bg-gold-500 border border-transparent rounded-lg hover:bg-gold-600 transition-colors duration-200"
                       >
                         Próximo
                       </motion.button>
@@ -817,7 +817,7 @@ export default function PessoaFisicaPage() {
                       <div className="p-2 bg-amber-100 rounded-full">
                         <AlertCircle className="w-6 h-6 text-amber-600" />
                       </div>
-                      <h3 className="text-lg font-semibold text-secondary-900">
+                      <h3 className="text-lg font-semibold text-neutral-50">
                         {error.toLowerCase().includes("cpf")
                           ? "CPF já cadastrado"
                           : error.toLowerCase().includes("e-mail") ||
@@ -826,7 +826,7 @@ export default function PessoaFisicaPage() {
                           : "Dados já cadastrados"}
                       </h3>
                     </div>
-                    <p className="text-secondary-700 mb-6">
+                    <p className="text-neutral-200 mb-6">
                       {error.toLowerCase().includes("cpf")
                         ? "Já existe uma pessoa física cadastrada com este CPF. Você pode voltar à página anterior ou corrigir os dados no formulário."
                         : error.toLowerCase().includes("e-mail") ||
@@ -845,7 +845,7 @@ export default function PessoaFisicaPage() {
                           // Voltar para a listagem de pessoas físicas
                           router.push("/cadastros/pessoa-fisica");
                         }}
-                        className="px-4 py-2 text-secondary-700 bg-secondary-100 hover:bg-secondary-200 rounded-lg font-medium transition-colors duration-200"
+                        className="px-4 py-2 text-neutral-200 bg-secondary-100 hover:bg-secondary-200 rounded-lg font-medium transition-colors duration-200"
                       >
                         Voltar
                       </motion.button>
@@ -853,7 +853,7 @@ export default function PessoaFisicaPage() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => clearError()}
-                        className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors duration-200"
+                        className="px-4 py-2 bg-gold-500 hover:bg-gold-600 text-white rounded-lg font-medium transition-colors duration-200"
                       >
                         Corrigir dados
                       </motion.button>
@@ -877,18 +877,18 @@ export default function PessoaFisicaPage() {
                   initial={{ scale: 0.95, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.95, opacity: 0 }}
-                  className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl"
+                  className="bg-neutral-900/95 rounded-2xl p-6 max-w-md w-full shadow-xl"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex items-center space-x-3 mb-4">
                     <div className="p-2 bg-red-100 rounded-full">
                       <AlertCircle className="w-6 h-6 text-red-600" />
                     </div>
-                    <h3 className="text-lg font-semibold text-secondary-900">
+                    <h3 className="text-lg font-semibold text-neutral-50">
                       Confirmar Exclusão
                     </h3>
                   </div>
-                  <p className="text-secondary-600 mb-6">
+                  <p className="text-neutral-300 mb-6">
                     Tem certeza que deseja excluir esta pessoa física?
                     <br />
                     <strong className="text-secondary-800">
@@ -906,7 +906,7 @@ export default function PessoaFisicaPage() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setShowDeleteConfirm(null)}
-                      className="px-4 py-2 text-secondary-700 bg-secondary-100 hover:bg-secondary-200 rounded-lg font-medium transition-colors duration-200"
+                      className="px-4 py-2 text-neutral-200 bg-secondary-100 hover:bg-secondary-200 rounded-lg font-medium transition-colors duration-200"
                     >
                       Cancelar
                     </motion.button>

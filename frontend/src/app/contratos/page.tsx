@@ -137,6 +137,9 @@ export default function ContratosPage() {
   const [filtroProximoContato, setFiltroProximoContato] = useState<
     "hoje" | "semana" | "mes" | "todos"
   >("todos");
+  const [filtroDataContrato, setFiltroDataContrato] = useState<
+    "hoje" | "semana" | "mes" | "ano" | "todos"
+  >("todos");
   const [selectedContrato, setSelectedContrato] = useState<Contrato | null>(
     null
   );
@@ -215,19 +218,23 @@ export default function ContratosPage() {
         const termo = searchTerm.toLowerCase();
 
         // Buscar em múltiplos campos para maior flexibilidade
+        // Validar que cliente existe antes de acessar propriedades
         const clienteNome =
-          contrato.cliente?.pessoaFisica?.nome ||
-          contrato.cliente?.pessoaJuridica?.razaoSocial ||
-          "";
-        const consultorNome = contrato.consultor?.pessoaFisica?.nome || "";
+          (contrato.cliente && (
+            contrato.cliente.pessoaFisica?.nome ||
+            contrato.cliente.pessoaJuridica?.razaoSocial
+          )) || "";
+        const consultorNome = (contrato.consultor && contrato.consultor.pessoaFisica?.nome) || "";
         const clienteEmail =
-          contrato.cliente?.pessoaFisica?.emailEmpresarial ||
-          contrato.cliente?.pessoaJuridica?.email ||
-          "";
+          (contrato.cliente && (
+            contrato.cliente.pessoaFisica?.emailEmpresarial ||
+            contrato.cliente.pessoaJuridica?.email
+          )) || "";
         const clienteCpfCnpj =
-          contrato.cliente?.pessoaFisica?.cpf ||
-          contrato.cliente?.pessoaJuridica?.cnpj ||
-          "";
+          (contrato.cliente && (
+            contrato.cliente.pessoaFisica?.cpf ||
+            contrato.cliente.pessoaJuridica?.cnpj
+          )) || "";
         const numeroPasta = contrato.numeroPasta || "";
         const tipoServico = contrato.tipoServico || "";
         const situacao = contrato.situacao || "";
@@ -335,6 +342,55 @@ export default function ContratosPage() {
         }
       }
 
+      // Filtro por data de cadastro do contrato
+      if (filtroDataContrato !== "todos") {
+        if (!contrato.dataCadastro) {
+          return false;
+        }
+
+        try {
+          const dataCadastro = parseISO(contrato.dataCadastro);
+          const hoje = new Date();
+          hoje.setHours(0, 0, 0, 0);
+
+          switch (filtroDataContrato) {
+            case "hoje":
+              const amanha = new Date(hoje);
+              amanha.setDate(amanha.getDate() + 1);
+              if (
+                !isAfter(dataCadastro, hoje) ||
+                !isBefore(dataCadastro, amanha)
+              ) {
+                return false;
+              }
+              break;
+            case "semana":
+              const semanaAtras = new Date(hoje);
+              semanaAtras.setDate(semanaAtras.getDate() - 7);
+              if (!isAfter(dataCadastro, semanaAtras)) {
+                return false;
+              }
+              break;
+            case "mes":
+              const mesAtras = new Date(hoje);
+              mesAtras.setMonth(mesAtras.getMonth() - 1);
+              if (!isAfter(dataCadastro, mesAtras)) {
+                return false;
+              }
+              break;
+            case "ano":
+              const anoAtras = new Date(hoje);
+              anoAtras.setFullYear(anoAtras.getFullYear() - 1);
+              if (!isAfter(dataCadastro, anoAtras)) {
+                return false;
+              }
+              break;
+          }
+        } catch {
+          return false;
+        }
+      }
+
       return true;
     });
   }, [
@@ -343,6 +399,7 @@ export default function ContratosPage() {
     filtroSituacao,
     filtroConsultor,
     filtroProximoContato,
+    filtroDataContrato,
   ]);
 
   // Filtrar clientes na aba de clientes
@@ -666,13 +723,13 @@ export default function ContratosPage() {
     <MainLayout>
       <div className="space-y-6">
         {/* Header com Estatísticas */}
-        <div className="bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-sm border border-neutral-200/60 p-6">
+        <div className="bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-lg border border-neutral-800 p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-neutral-900">
+              <h1 className="text-2xl font-bold text-gradient-gold">
                 Gestão de Contratos
               </h1>
-              <p className="text-sm text-neutral-600 mt-1">
+              <p className="text-sm text-neutral-400 mt-1">
                 Gerencie contratos e acompanhe negociações
               </p>
             </div>
@@ -683,7 +740,7 @@ export default function ContratosPage() {
                 setClienteSelecionadoId(null);
                 openForm();
               }}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white rounded-lg font-medium transition-all shadow-sm"
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-neutral-950 rounded-lg font-medium transition-all shadow-lg shadow-gold-500/20"
             >
               <Plus className="w-4 h-4" />
               Novo Contrato
@@ -808,18 +865,18 @@ export default function ContratosPage() {
         </div>
 
         {/* Filtros e Busca */}
-        <div className="bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-sm border border-neutral-200/60 p-4">
+        <div className="bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-lg border border-neutral-800 p-4">
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Busca */}
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500" />
                 <input
                   type="text"
                   placeholder="Buscar por cliente, consultor, email, CPF/CNPJ, pasta, tipo de serviço..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-4 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all"
                 />
               </div>
             </div>
@@ -833,7 +890,7 @@ export default function ContratosPage() {
                     e.target.value as SituacaoContrato | "todas"
                   )
                 }
-                className="appearance-none pl-10 pr-10 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all cursor-pointer"
+                className="appearance-none pl-10 pr-10 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all cursor-pointer"
               >
                 <option value="todas">Todas as Situações</option>
                 {SituacaoContratoOptions.map((option) => (
@@ -842,8 +899,8 @@ export default function ContratosPage() {
                   </option>
                 ))}
               </select>
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500 pointer-events-none" />
             </div>
 
             {/* Filtro de Consultor */}
@@ -857,7 +914,7 @@ export default function ContratosPage() {
                       : Number(e.target.value)
                   )
                 }
-                className="appearance-none pl-10 pr-10 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all cursor-pointer"
+                className="appearance-none pl-10 pr-10 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all cursor-pointer"
               >
                 <option value="todos">Todos os Consultores</option>
                 {consultores.map((consultor) => (
@@ -866,8 +923,8 @@ export default function ContratosPage() {
                   </option>
                 ))}
               </select>
-              <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+              <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500 pointer-events-none" />
             </div>
 
             {/* Filtro de Próximo Contato */}
@@ -879,15 +936,36 @@ export default function ContratosPage() {
                     e.target.value as "hoje" | "semana" | "mes" | "todos"
                   )
                 }
-                className="appearance-none pl-10 pr-10 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all cursor-pointer"
+                className="appearance-none pl-10 pr-10 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all cursor-pointer"
               >
                 <option value="todos">Todos os Prazos</option>
                 <option value="hoje">Vence Hoje</option>
                 <option value="semana">Vence esta Semana</option>
                 <option value="mes">Vence este Mês</option>
               </select>
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500 pointer-events-none" />
+            </div>
+
+            {/* Filtro por Data de Contrato */}
+            <div className="relative">
+              <select
+                value={filtroDataContrato}
+                onChange={(e) =>
+                  setFiltroDataContrato(
+                    e.target.value as "hoje" | "semana" | "mes" | "ano" | "todos"
+                  )
+                }
+                className="appearance-none pl-10 pr-10 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all cursor-pointer"
+              >
+                <option value="todos">Todas as Datas</option>
+                <option value="hoje">Criados Hoje</option>
+                <option value="semana">Últimos 7 dias</option>
+                <option value="mes">Último Mês</option>
+                <option value="ano">Último Ano</option>
+              </select>
+              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500 pointer-events-none" />
             </div>
 
             {/* Toggle View Mode */}
@@ -897,8 +975,8 @@ export default function ContratosPage() {
                 className={cn(
                   "p-2 rounded-lg transition-all",
                   viewMode === "cards"
-                    ? "bg-primary-100 text-primary-600"
-                    : "bg-neutral-50 text-neutral-400 hover:bg-neutral-100"
+                    ? "bg-gradient-to-r from-gold-500 to-gold-600 text-neutral-950 shadow-lg shadow-gold-500/20"
+                    : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-neutral-200"
                 )}
               >
                 <svg
@@ -918,8 +996,8 @@ export default function ContratosPage() {
                 className={cn(
                   "p-2 rounded-lg transition-all",
                   viewMode === "table"
-                    ? "bg-primary-100 text-primary-600"
-                    : "bg-neutral-50 text-neutral-400 hover:bg-neutral-100"
+                    ? "bg-gradient-to-r from-gold-500 to-gold-600 text-neutral-950 shadow-lg shadow-gold-500/20"
+                    : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-neutral-200"
                 )}
               >
                 <svg
@@ -951,13 +1029,14 @@ export default function ContratosPage() {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ delay: index * 0.05 }}
-                    className="bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-sm border border-neutral-200/60 hover:shadow-lg transition-all duration-300 overflow-hidden group"
+                    whileHover={{ scale: 1.02, y: -4 }}
+                    className="bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-lg border border-neutral-800 hover:border-gold-500/30 hover:shadow-xl hover:shadow-gold-500/10 transition-all duration-300 overflow-hidden group cursor-pointer"
                   >
                     {/* Header do Card */}
-                    <div className="p-4 border-b border-neutral-100">
+                    <div className="p-4 border-b border-neutral-800">
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-neutral-900 truncate">
+                          <h3 className="font-semibold text-neutral-50 truncate group-hover:text-gradient-gold transition-all">
                             {(() => {
                               const nome =
                                 contrato.cliente?.pessoaFisica?.nome ||
@@ -969,7 +1048,7 @@ export default function ContratosPage() {
                                 : "Cliente não identificado";
                             })()}
                           </h3>
-                          <p className="text-xs text-neutral-500 mt-1">
+                          <p className="text-xs text-neutral-400 mt-1">
                             #{index + 1} • {formatDate(contrato.dataCadastro)}
                           </p>
                         </div>
@@ -980,11 +1059,11 @@ export default function ContratosPage() {
                     </div>
 
                     {/* Corpo do Card */}
-                    <div className="p-4 space-y-3">
+                    <div className="p-4 space-y-3 bg-gradient-to-br from-neutral-900 to-neutral-950">
                       {/* Consultor */}
                       <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-neutral-400" />
-                        <span className="text-sm text-neutral-600">
+                        <Users className="w-4 h-4 text-gold-500" />
+                        <span className="text-sm text-neutral-300">
                           {contrato.consultor?.pessoaFisica?.nome ||
                             "Sem consultor"}
                         </span>
@@ -993,19 +1072,19 @@ export default function ContratosPage() {
                       {/* Valores */}
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <p className="text-xs text-neutral-500">
+                          <p className="text-xs text-neutral-400">
                             Valor Devido
                           </p>
-                          <p className="text-sm font-semibold text-neutral-900">
+                          <p className="text-sm font-semibold text-neutral-50">
                             {formatCurrency(contrato.valorDevido || 0)}
                           </p>
                         </div>
                         {contrato.valorNegociado && (
                           <div>
-                            <p className="text-xs text-neutral-500">
+                            <p className="text-xs text-neutral-400">
                               Negociado
                             </p>
-                            <p className="text-sm font-semibold text-green-600">
+                            <p className="text-sm font-semibold text-green-400">
                               {formatCurrency(contrato.valorNegociado)}
                             </p>
                           </div>
@@ -1015,8 +1094,8 @@ export default function ContratosPage() {
                       {/* Datas de Contato */}
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-neutral-400" />
-                          <span className="text-xs text-neutral-600">
+                          <Clock className="w-4 h-4 text-gold-500" />
+                          <span className="text-xs text-neutral-300">
                             Último: {formatDate(contrato.dataUltimoContato)}
                           </span>
                         </div>
@@ -1025,11 +1104,11 @@ export default function ContratosPage() {
                             "flex items-center gap-2",
                             isProximoContatoVencido(
                               contrato.dataProximoContato
-                            ) && "text-red-600"
+                            ) && "text-red-400"
                           )}
                         >
                           <Calendar className="w-4 h-4" />
-                          <span className="text-xs font-medium">
+                          <span className="text-xs font-medium text-neutral-200">
                             Próximo: {formatDate(contrato.dataProximoContato)}
                           </span>
                         </div>
@@ -1037,14 +1116,14 @@ export default function ContratosPage() {
 
                       {/* Observações */}
                       {contrato.observacoes && (
-                        <p className="text-xs text-neutral-500 line-clamp-2">
+                        <p className="text-xs text-neutral-400 line-clamp-2">
                           {contrato.observacoes}
                         </p>
                       )}
                     </div>
 
                     {/* Ações */}
-                    <div className="p-4 bg-neutral-50 border-t border-neutral-100">
+                    <div className="p-4 bg-neutral-950/50 border-t border-neutral-800">
                       <div className="flex items-center gap-2">
                         <Tooltip content="Ver Detalhes">
                           <motion.button
@@ -1054,7 +1133,7 @@ export default function ContratosPage() {
                               setSelectedContrato(contrato);
                               setShowDetalhes(true);
                             }}
-                            className="flex-1 flex items-center justify-center gap-1 p-2 bg-white hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"
+                            className="flex-1 flex items-center justify-center gap-1 p-2 bg-neutral-800 hover:bg-blue-500/20 text-blue-400 rounded-lg transition-all border border-neutral-700 hover:border-blue-500/30"
                           >
                             <Eye className="w-4 h-4" />
                             <span className="text-xs font-medium">
@@ -1071,7 +1150,7 @@ export default function ContratosPage() {
                               setSelectedContrato(contrato);
                               setShowMudancaSituacao(true);
                             }}
-                            className="flex-1 flex items-center justify-center gap-1 p-2 bg-white hover:bg-orange-50 text-orange-600 rounded-lg transition-colors"
+                            className="flex-1 flex items-center justify-center gap-1 p-2 bg-neutral-800 hover:bg-orange-500/20 text-orange-400 rounded-lg transition-all border border-neutral-700 hover:border-orange-500/30"
                           >
                             <Settings className="w-4 h-4" />
                             <span className="text-xs font-medium">
@@ -1085,7 +1164,7 @@ export default function ContratosPage() {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => handleViewBoletos(contrato)}
-                            className="flex-1 flex items-center justify-center gap-1 p-2 bg-white hover:bg-green-50 text-green-600 rounded-lg transition-colors"
+                            className="flex-1 flex items-center justify-center gap-1 p-2 bg-neutral-800 hover:bg-green-500/20 text-green-400 rounded-lg transition-all border border-neutral-700 hover:border-green-500/30"
                           >
                             <CreditCard className="w-4 h-4" />
                             <span className="text-xs font-medium">Boletos</span>
@@ -1100,7 +1179,7 @@ export default function ContratosPage() {
                               setSelectedContrato(contrato);
                               openForm();
                             }}
-                            className="p-2 bg-white hover:bg-primary-50 text-primary-600 rounded-lg transition-colors"
+                            className="p-2 bg-neutral-800 hover:bg-gold-500/20 text-gold-400 rounded-lg transition-all border border-neutral-700 hover:border-gold-500/30"
                           >
                             <Edit className="w-4 h-4" />
                           </motion.button>
@@ -1111,7 +1190,7 @@ export default function ContratosPage() {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => handleDeleteContrato(contrato.id)}
-                            className="p-2 bg-white hover:bg-red-50 text-red-600 rounded-lg transition-colors"
+                            className="p-2 bg-neutral-800 hover:bg-red-500/20 text-red-400 rounded-lg transition-all border border-neutral-700 hover:border-red-500/30"
                           >
                             <Trash2 className="w-4 h-4" />
                           </motion.button>
@@ -1124,27 +1203,27 @@ export default function ContratosPage() {
             </div>
           ) : (
             /* View de Tabela */
-            <div className="bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-sm border border-neutral-200/60 overflow-hidden">
+            <div className="bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-lg border border-neutral-800 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-neutral-50 border-b border-neutral-200">
+                  <thead className="bg-neutral-950/50 border-b border-neutral-800">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gold-500 uppercase tracking-wider">
                         Cliente
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
                         Consultor
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
                         Situação
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
                         Valores
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
                         Próximo Contato
                       </th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-neutral-600 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-center text-xs font-medium text-neutral-400 uppercase tracking-wider">
                         Ações
                       </th>
                     </tr>
@@ -1153,11 +1232,11 @@ export default function ContratosPage() {
                     {contratosFiltrados.map((contrato, index) => (
                       <tr
                         key={contrato.id}
-                        className="hover:bg-neutral-50 transition-colors"
+                        className="hover:bg-neutral-800/50 transition-colors"
                       >
                         <td className="px-4 py-3">
                           <div>
-                            <p className="text-sm font-medium text-neutral-900">
+                            <p className="text-sm font-medium text-neutral-50">
                               {contrato.cliente?.pessoaFisica?.nome ||
                                 contrato.cliente?.pessoaJuridica?.razaoSocial}
                             </p>
@@ -1167,7 +1246,7 @@ export default function ContratosPage() {
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <p className="text-sm text-neutral-700">
+                          <p className="text-sm text-neutral-300">
                             {contrato.consultor?.pessoaFisica?.nome}
                           </p>
                         </td>
@@ -1176,7 +1255,7 @@ export default function ContratosPage() {
                         </td>
                         <td className="px-4 py-3">
                           <div>
-                            <p className="text-sm font-medium text-neutral-900">
+                            <p className="text-sm font-medium text-neutral-50">
                               {formatCurrency(contrato.valorDevido || 0)}
                             </p>
                             {contrato.valorNegociado && (
@@ -1194,7 +1273,7 @@ export default function ContratosPage() {
                                 contrato.dataProximoContato
                               )
                                 ? "text-red-600 font-medium"
-                                : "text-neutral-700"
+                                : "text-neutral-300"
                             )}
                           >
                             {formatDate(contrato.dataProximoContato)}
@@ -1267,27 +1346,27 @@ export default function ContratosPage() {
         {activeTab === "clientes" && (
           <>
             {clientesFiltrados.length > 0 ? (
-              <div className="bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-sm border border-neutral-200/60 overflow-hidden">
+              <div className="bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-sm border border-neutral-700/60 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-neutral-50 border-b border-neutral-200">
+                    <thead className="bg-neutral-800/50 border-b border-neutral-700">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
                           Cliente
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
                           Tipo
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
                           Documento
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
                           Contato
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
                           Filial
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-neutral-600 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-neutral-400 uppercase tracking-wider">
                           Ações
                         </th>
                       </tr>
@@ -1299,10 +1378,10 @@ export default function ContratosPage() {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.02 * index }}
-                          className="hover:bg-neutral-50"
+                          className="hover:bg-neutral-800/50"
                         >
                           <td className="px-4 py-3">
-                            <div className="text-sm font-medium text-neutral-900">
+                            <div className="text-sm font-medium text-neutral-50">
                               {cliente.nome || cliente.razaoSocial}
                             </div>
                             <div className="text-xs text-neutral-500">
@@ -1324,16 +1403,16 @@ export default function ContratosPage() {
                               })()}
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-sm text-neutral-700">
+                          <td className="px-4 py-3 text-sm text-neutral-300">
                             {cliente.tipo === "fisica" ? "Física" : "Jurídica"}
                           </td>
-                          <td className="px-4 py-3 text-sm text-neutral-700">
+                          <td className="px-4 py-3 text-sm text-neutral-300">
                             {cliente.cpf || cliente.cnpj || "—"}
                           </td>
-                          <td className="px-4 py-3 text-sm text-neutral-700">
+                          <td className="px-4 py-3 text-sm text-neutral-300">
                             {cliente.telefone1 || "N/A"}
                           </td>
-                          <td className="px-4 py-3 text-sm text-neutral-700">
+                          <td className="px-4 py-3 text-sm text-neutral-300">
                             {cliente.filial?.nome || "Não informada"}
                           </td>
                           <td className="px-4 py-3">
@@ -1364,13 +1443,13 @@ export default function ContratosPage() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-sm border border-neutral-200/60 p-12 text-center"
+                className="bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-sm border border-neutral-700/60 p-12 text-center"
               >
                 <Users className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-neutral-900 mb-2">
+                <h3 className="text-lg font-semibold text-neutral-50 mb-2">
                   Nenhum cliente encontrado
                 </h3>
-                <p className="text-neutral-600 mb-6">
+                <p className="text-neutral-400 mb-6">
                   {searchTerm
                     ? "Tente ajustar o termo de busca para ver mais resultados"
                     : "Não há clientes cadastrados no sistema"}
@@ -1392,13 +1471,13 @@ export default function ContratosPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-sm border border-neutral-200/60 p-12 text-center"
+            className="bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-sm border border-neutral-700/60 p-12 text-center"
           >
             <FileText className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-neutral-900 mb-2">
+            <h3 className="text-lg font-semibold text-neutral-50 mb-2">
               Nenhum contrato encontrado
             </h3>
-            <p className="text-neutral-600 mb-6">
+            <p className="text-neutral-400 mb-6">
               {searchTerm ||
               filtroSituacao !== "todas" ||
               filtroConsultor !== "todos" ||
