@@ -579,6 +579,17 @@ namespace CrmArrighi.Services
                 _logger.LogInformation("🔍 Consultando status do boleto por Nosso Número - BeneficiaryCode: {BeneficiaryCode}, BankNumber: {BankNumber}",
                     beneficiaryCode, bankNumber);
 
+                // Verificar se as credenciais estão configuradas
+                if (string.IsNullOrEmpty(_clientId) || _clientId == "PRODUCTION_CLIENT_ID" ||
+                    string.IsNullOrEmpty(_clientSecret) || _clientSecret == "PRODUCTION_CLIENT_SECRET" ||
+                    string.IsNullOrEmpty(_workspaceId) || _workspaceId == "PRODUCTION_WORKSPACE_ID")
+                {
+                    throw new InvalidOperationException(
+                        "⚠️ Credenciais da API Santander não configuradas. " +
+                        "Configure WorkspaceId, ClientId e ClientSecret no appsettings.Production.json ou variáveis de ambiente. " +
+                        "Veja CONFIGURAR_SANTANDER_PRODUCAO.md para instruções.");
+                }
+
                 // Obter access token
                 var accessToken = await GetAccessTokenAsync();
 
@@ -756,7 +767,7 @@ namespace CrmArrighi.Services
 
             // ✅ Pegar o primeiro item do array _content
             var billData = santanderResponse._content.First();
-            
+
             _logger.LogInformation("📊 Dados do boleto - Status: {Status}, Valor Pago: {PaidValue}, Valor Nominal: {NominalValue}",
                 billData.status, billData.paidValue, billData.nominalValue);
 

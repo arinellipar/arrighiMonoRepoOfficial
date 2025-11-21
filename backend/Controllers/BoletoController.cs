@@ -252,7 +252,7 @@ namespace CrmArrighi.Controllers
                 _logger.LogInformation("📊 Encontrados {Total} boletos para sincronizar", boletos.Count);
 
                 var beneficiaryCode = _configuration["SantanderAPI:CovenantCode"] ?? "0596794";
-                
+
                 var resultados = new
                 {
                     Total = boletos.Count,
@@ -272,15 +272,15 @@ namespace CrmArrighi.Controllers
                     try
                     {
                         var statusAnterior = boleto.Status;
-                        
+
                         // Consultar status
                         var statusResponse = await _santanderService.ConsultarStatusPorNossoNumeroAsync(beneficiaryCode, boleto.BankNumber);
-                        
+
                         // Atualizar no banco
                         await AtualizarStatusBoletoNoBanco(boleto, statusResponse);
-                        
+
                         sucessoCount++;
-                        
+
                         if (statusAnterior != boleto.Status)
                         {
                             atualizadosList.Add(new
@@ -290,8 +290,8 @@ namespace CrmArrighi.Controllers
                                 StatusAnterior = statusAnterior,
                                 StatusNovo = boleto.Status
                             });
-                            
-                            _logger.LogInformation("✅ Boleto {Id} atualizado: {Anterior} → {Novo}", 
+
+                            _logger.LogInformation("✅ Boleto {Id} atualizado: {Anterior} → {Novo}",
                                 boleto.Id, statusAnterior, boleto.Status);
                         }
                     }
@@ -304,7 +304,7 @@ namespace CrmArrighi.Controllers
                             NsuCode = boleto.NsuCode,
                             Erro = ex.Message
                         });
-                        
+
                         _logger.LogError(ex, "❌ Erro ao sincronizar boleto {Id}", boleto.Id);
                     }
                 }
@@ -360,10 +360,10 @@ namespace CrmArrighi.Controllers
                 try
                 {
                     var beneficiaryCode = _configuration["SantanderAPI:CovenantCode"] ?? "0596794";
-                    
+
                     // ✅ Usar novo método de consulta de status
                     var statusResponse = await _santanderService.ConsultarStatusPorNossoNumeroAsync(beneficiaryCode, boleto.BankNumber);
-                    
+
                     // ✅ Atualizar status no banco
                     await AtualizarStatusBoletoNoBanco(boleto, statusResponse);
 
@@ -1213,24 +1213,24 @@ namespace CrmArrighi.Controllers
             try
             {
                 var statusAnterior = boleto.Status;
-                
+
                 // Atualizar Status principal
                 if (!string.IsNullOrEmpty(statusResponse.Status))
                 {
                     boleto.Status = statusResponse.Status.ToUpper();
-                    _logger.LogInformation("📝 Atualizando status do boleto ID {BoletoId}: {StatusAnterior} → {StatusNovo}", 
+                    _logger.LogInformation("📝 Atualizando status do boleto ID {BoletoId}: {StatusAnterior} → {StatusNovo}",
                         boleto.Id, statusAnterior, boleto.Status);
                 }
 
                 // Atualizar campos relacionados ao pagamento
                 if (statusResponse.PaidValue.HasValue && statusResponse.PaidValue > 0)
                 {
-                    _logger.LogInformation("💰 Boleto ID {BoletoId} foi pago. Valor: R$ {Valor}", 
+                    _logger.LogInformation("💰 Boleto ID {BoletoId} foi pago. Valor: R$ {Valor}",
                         boleto.Id, statusResponse.PaidValue);
                 }
 
                 // Atualizar data de liquidação
-                if (!string.IsNullOrEmpty(statusResponse.SettlementDate) && 
+                if (!string.IsNullOrEmpty(statusResponse.SettlementDate) &&
                     DateTime.TryParse(statusResponse.SettlementDate, out DateTime settlementDate))
                 {
                     boleto.DataAtualizacao = settlementDate;
@@ -1272,12 +1272,12 @@ namespace CrmArrighi.Controllers
                 {
                     if (boleto.Status == "LIQUIDADO" || boleto.Status == "BAIXADO")
                     {
-                        _logger.LogInformation("🎉 BOLETO PAGO! ID: {BoletoId}, Status: {Status}, NSU: {NsuCode}", 
+                        _logger.LogInformation("🎉 BOLETO PAGO! ID: {BoletoId}, Status: {Status}, NSU: {NsuCode}",
                             boleto.Id, boleto.Status, boleto.NsuCode);
                     }
                     else if (boleto.Status == "CANCELADO")
                     {
-                        _logger.LogInformation("❌ Boleto CANCELADO! ID: {BoletoId}, NSU: {NsuCode}", 
+                        _logger.LogInformation("❌ Boleto CANCELADO! ID: {BoletoId}, NSU: {NsuCode}",
                             boleto.Id, boleto.NsuCode);
                     }
                 }
