@@ -85,6 +85,10 @@ namespace CrmArrighi.Services
                 if (dto.Nome.Trim().Length > 200)
                     result.AddFieldError("nome", "Nome não pode exceder 200 caracteres");
 
+                // ✅ Validar se contém apenas letras (incluindo acentos) e espaços - SEM SÍMBOLOS
+                if (!IsValidName(dto.Nome))
+                    result.AddFieldError("nome", "Nome deve conter apenas letras e espaços (sem números ou símbolos como parênteses, hífens, etc)");
+
                 // Verifica se tem pelo menos nome e sobrenome
                 var nomePartes = dto.Nome.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
                 if (nomePartes.Length < 2)
@@ -184,12 +188,66 @@ namespace CrmArrighi.Services
         }
 
         /// <summary>
+        /// Valida se o nome contém apenas letras (incluindo acentos) e espaços - SEM SÍMBOLOS
+        /// </summary>
+        private static bool IsValidName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return false;
+
+            // Remove espaços para validação
+            var nomeSemEspacos = name.Replace(" ", "");
+            
+            // Verifica se todos os caracteres são letras (incluindo acentuação)
+            // Permite: a-z, A-Z, á, é, í, ó, ú, ã, õ, â, ê, ô, ç, etc.
+            // Bloqueia: números, parênteses (), hífens -, pontos ., vírgulas, etc.
+            foreach (char c in nomeSemEspacos)
+            {
+                if (!char.IsLetter(c))
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Remove caracteres inválidos do nome, mantendo apenas letras e espaços
+        /// </summary>
+        private static string SanitizeName(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return string.Empty;
+
+            // Remove caracteres que não são letras ou espaços
+            var chars = new List<char>();
+            bool lastWasSpace = false;
+
+            foreach (char c in name)
+            {
+                if (char.IsLetter(c))
+                {
+                    chars.Add(char.ToUpper(c));
+                    lastWasSpace = false;
+                }
+                else if (char.IsWhiteSpace(c) && !lastWasSpace && chars.Count > 0)
+                {
+                    chars.Add(' ');
+                    lastWasSpace = true;
+                }
+            }
+
+            // Remove espaço no final se houver
+            var result = new string(chars.ToArray()).Trim();
+            return result;
+        }
+
+        /// <summary>
         /// Sanitiza os dados de entrada
         /// </summary>
         public static void SanitizeData(CreatePessoaFisicaDTO dto)
         {
             // Sanitização de strings
-            dto.Nome = dto.Nome?.Trim().ToUpperInvariant() ?? "";
+            dto.Nome = SanitizeName(dto.Nome?.Trim()) ?? "";
             dto.Codinome = dto.Codinome?.Trim().ToUpperInvariant();
             dto.EmailEmpresarial = EmailValidator.Normalize(dto.EmailEmpresarial ?? "");
             dto.EmailPessoal = EmailValidator.Normalize(dto.EmailPessoal ?? "");

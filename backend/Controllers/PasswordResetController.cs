@@ -101,7 +101,7 @@ namespace CrmArrighi.Controllers
                 {
                     UsuarioId = usuario.Id,
                     Token = token,
-                    DataExpiracao = DateTime.Now.AddHours(1), // Expira em 1 hora
+                    DataExpiracao = DateTime.UtcNow.AddHours(24), // Expira em 24 horas
                     Utilizado = false
                 };
 
@@ -163,16 +163,17 @@ namespace CrmArrighi.Controllers
                 }
 
                 // Verificar se expirou
-                if (DateTime.Now > passwordReset.DataExpiracao)
+                if (DateTime.UtcNow > passwordReset.DataExpiracao)
                 {
-                    _logger.LogWarning("⚠️ Token expirado: {Token}", resetDTO.Token);
+                    _logger.LogWarning("⚠️ Token expirado: {Token}, Expiração: {Expiracao}, Agora: {Agora}",
+                        resetDTO.Token, passwordReset.DataExpiracao, DateTime.UtcNow);
                     return BadRequest(new { message = "Este link de reset expirou. Solicite um novo" });
                 }
 
                 // Atualizar senha do usuário
                 passwordReset.Usuario.Senha = resetDTO.NovaSenha;
                 passwordReset.Utilizado = true;
-                passwordReset.DataUtilizacao = DateTime.Now;
+                passwordReset.DataUtilizacao = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
 
@@ -218,7 +219,7 @@ namespace CrmArrighi.Controllers
                 {
                     UsuarioId = usuario.Id,
                     Token = token,
-                    DataExpiracao = DateTime.Now.AddHours(1),
+                    DataExpiracao = DateTime.UtcNow.AddHours(24), // Expira em 24 horas
                     Utilizado = false
                 };
 

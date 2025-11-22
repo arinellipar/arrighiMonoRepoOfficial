@@ -600,7 +600,7 @@ namespace CrmArrighi.Controllers
         {
             if (string.IsNullOrEmpty(texto)) return "";
 
-            // Remover acentos e caracteres especiais para evitar problemas em APIs externas
+            // Remover acentos primeiro
             var normalizado = texto
                 .Replace("á", "a").Replace("à", "a").Replace("ã", "a").Replace("â", "a")
                 .Replace("é", "e").Replace("ê", "e")
@@ -618,6 +618,48 @@ namespace CrmArrighi.Controllers
                 .Replace("–", "-").Replace("—", "-")
                 .Replace("\r", " ").Replace("\n", " ")
                 .Replace("\t", " ");
+
+            // ✅ API Santander: Remover caracteres especiais (só aceita alfanumérico e espaços)
+            // Remove: . - & / \ ( ) [ ] { } @ # $ % * + = ! ? : ; , < > | _ ~ ` ^ ' "
+            normalizado = normalizado
+                .Replace(".", " ")      // Ponto → Ex: "LTDA." vira "LTDA"
+                .Replace("-", " ")      // Hífen → Ex: "EMPRESA-SP" vira "EMPRESA SP"
+                .Replace("&", "E")      // E comercial → "A & B" vira "A E B"
+                .Replace("/", " ")      // Barra
+                .Replace("\\", " ")     // Barra invertida
+                .Replace("(", " ")      // Parênteses
+                .Replace(")", " ")
+                .Replace("[", " ")      // Colchetes
+                .Replace("]", " ")
+                .Replace("{", " ")      // Chaves
+                .Replace("}", " ")
+                .Replace("@", " ")      // Arroba
+                .Replace("#", " ")      // Hashtag
+                .Replace("$", " ")      // Cifrão
+                .Replace("%", " ")      // Porcentagem
+                .Replace("*", " ")      // Asterisco
+                .Replace("+", " ")      // Mais
+                .Replace("=", " ")      // Igual
+                .Replace("!", " ")      // Exclamação
+                .Replace("?", " ")      // Interrogação
+                .Replace(":", " ")      // Dois pontos
+                .Replace(";", " ")      // Ponto e vírgula
+                .Replace(",", " ")      // Vírgula
+                .Replace("<", " ")      // Menor que
+                .Replace(">", " ")      // Maior que
+                .Replace("|", " ")      // Pipe
+                .Replace("_", " ")      // Underscore
+                .Replace("~", " ")      // Til
+                .Replace("`", " ")      // Crase
+                .Replace("^", " ")      // Circunflexo
+                .Replace("'", " ")      // Aspas simples
+                .Replace("\"", " ");    // Aspas duplas
+
+            // Remove espaços múltiplos e trim
+            while (normalizado.Contains("  "))
+            {
+                normalizado = normalizado.Replace("  ", " ");
+            }
 
             return normalizado.Trim();
         }
