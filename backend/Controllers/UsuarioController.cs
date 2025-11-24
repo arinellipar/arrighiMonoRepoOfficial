@@ -701,6 +701,70 @@ namespace CrmArrighi.Controllers
             }
         }
 
+        // GET: api/Usuario/verificar-cpf-disponivel/{cpf}
+        [HttpGet("verificar-cpf-disponivel/{cpf}")]
+        public async Task<ActionResult<bool>> VerificarCpfDisponivel(string cpf)
+        {
+            try
+            {
+                Console.WriteLine($"🔍 VerificarCpfDisponivel: Verificando CPF: {cpf}");
+
+                // Remover caracteres especiais do CPF para busca
+                var cpfLimpo = cpf.Replace(".", "").Replace("-", "").Replace(" ", "");
+                Console.WriteLine($"🔍 VerificarCpfDisponivel: CPF limpo: {cpfLimpo}");
+
+                // Verificar se CPF já existe em PessoaFisica
+                var pessoaFisicaExiste = await _context.PessoasFisicas
+                    .AnyAsync(p => p.Cpf != null &&
+                        p.Cpf.Replace(".", "").Replace("-", "").Replace(" ", "") == cpfLimpo);
+
+                if (!pessoaFisicaExiste)
+                {
+                    // CPF NÃO existe em PessoaFisica - BLOQUEAR
+                    Console.WriteLine($"❌ VerificarCpfDisponivel: CPF não cadastrado como Pessoa Física");
+                    return Ok(new {
+                        disponivel = false,
+                        motivo = "pessoa_nao_cadastrada",
+                        mensagem = "CPF não encontrado. É necessário cadastrar a pessoa física primeiro em Cadastros > Pessoa Física."
+                    });
+                }
+
+                Console.WriteLine($"✅ VerificarCpfDisponivel: CPF existe em PessoaFisica");
+
+                // Verificar se já tem usuário associado
+                var usuarioExiste = await _context.Usuarios
+                    .Include(u => u.PessoaFisica)
+                    .AnyAsync(u => u.PessoaFisica != null &&
+                        u.PessoaFisica.Cpf != null &&
+                        u.PessoaFisica.Cpf.Replace(".", "").Replace("-", "").Replace(" ", "") == cpfLimpo);
+
+                if (usuarioExiste)
+                {
+                    Console.WriteLine($"❌ VerificarCpfDisponivel: CPF já tem usuário cadastrado");
+                    return Ok(new {
+                        disponivel = false,
+                        motivo = "usuario_existente",
+                        mensagem = "CPF já possui usuário cadastrado. Faça login ou recupere sua senha."
+                    });
+                }
+
+                Console.WriteLine($"✅ VerificarCpfDisponivel: CPF disponível para criar usuário");
+                return Ok(new {
+                    disponivel = true,
+                    motivo = "pessoa_sem_usuario",
+                    mensagem = "CPF encontrado. Pode criar usuário para esta pessoa."
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ VerificarCpfDisponivel: Erro: {ex.Message}");
+                return StatusCode(500, new {
+                    disponivel = false,
+                    mensagem = "Erro ao verificar CPF"
+                });
+            }
+        }
+
         // DELETE: api/Usuario/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUsuario(int id)
