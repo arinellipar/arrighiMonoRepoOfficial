@@ -84,6 +84,12 @@ builder.Services.AddScoped<DatabaseIndexService>();
 // Register Seed Data Service
 builder.Services.AddScoped<ISeedDataService, SeedDataService>();
 
+// Register Inadimplencia Analysis Service (IA de previsão de risco)
+builder.Services.AddScoped<IInadimplenciaAnalysisService, InadimplenciaAnalysisService>();
+
+// Register Forecast Service (Previsão de Receita)
+builder.Services.AddScoped<IForecastService, ForecastService>();
+
 // Register Usuario Filial Service
 builder.Services.AddScoped<IUsuarioFilialService, UsuarioFilialService>();
 

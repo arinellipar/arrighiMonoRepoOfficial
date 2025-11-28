@@ -66,9 +66,13 @@ namespace CrmArrighi.Data
                 .HasIndex(p => p.Cnpj)
                 .IsUnique();
 
+            // ✅ E-mail de PJ NÃO é mais único para permitir grupos empresariais
+            // Empresas do mesmo grupo podem compartilhar o mesmo e-mail corporativo
+            // CNPJ continua sendo único (identificação fiscal)
+            // Segurança: E-mail de PJ não é usado para autenticação (Usuario tem login próprio)
             modelBuilder.Entity<PessoaJuridica>()
-                .HasIndex(p => p.Email)
-                .IsUnique();
+                .HasIndex(p => p.Email);
+            // .IsUnique(); // ❌ REMOVIDO - permite múltiplas empresas com mesmo e-mail
 
             // Configurações para Usuario
             modelBuilder.Entity<Usuario>()

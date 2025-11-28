@@ -23,6 +23,9 @@ namespace CrmArrighi.Models
         [System.ComponentModel.DataAnnotations.Schema.NotMapped]
         public PessoaFisica? ResponsavelTecnico { get; set; }
 
+        // ✅ E-mail de contato da empresa (pode ser compartilhado por empresas do mesmo grupo)
+        // Exemplo: Matriz e filiais podem usar o mesmo e-mail corporativo
+        // CNPJ continua sendo o identificador único
         [Required(ErrorMessage = "O e-mail é obrigatório")]
         [EmailAddress(ErrorMessage = "E-mail inválido")]
         [StringLength(150, ErrorMessage = "O e-mail deve ter no máximo 150 caracteres")]

@@ -4,6 +4,7 @@ using CrmArrighi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CadastroPessoas.Migrations
 {
     [DbContext(typeof(CrmArrighiContext))]
-    partial class CrmArrighiContextModelSnapshot : ModelSnapshot
+    [Migration("20251127123206_RemoverEmailUnicoPJ")]
+    partial class RemoverEmailUnicoPJ
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

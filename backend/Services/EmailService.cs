@@ -209,7 +209,7 @@ namespace CrmArrighi.Services
                         </div>
                         <div class='footer'>
                             <p><strong>© 2025 Arrighi Advogados</strong></p>
-                            <p>CRM Tributário v2.0</p>
+                            <p>CRM Judiciário v2.0</p>
                             <p style='margin-top: 12px; font-size: 11px; color: #525252;'>Este é um e-mail automático, por favor não responda.</p>
                         </div>
                     </div>

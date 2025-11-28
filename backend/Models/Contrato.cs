@@ -20,7 +20,7 @@ namespace CrmArrighi.Models
 
         [Required(ErrorMessage = "A situação é obrigatória")]
         [StringLength(50, ErrorMessage = "A situação deve ter no máximo 50 caracteres")]
-        public string Situacao { get; set; } = string.Empty; // Leed, Prospecto, Contrato Enviado, Contrato Assinado, Retornar, Sem Interesse
+        public string Situacao { get; set; } = string.Empty; // Leed, Prospecto, Contrato Enviado, Contrato Assinado, Quitado, Retornar, Sem Interesse
 
         public DateTime? DataUltimoContato { get; set; }
         public DateTime? DataProximoContato { get; set; }

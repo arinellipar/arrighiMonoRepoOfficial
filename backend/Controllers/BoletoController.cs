@@ -690,7 +690,10 @@ namespace CrmArrighi.Controllers
             var payerNameTruncado = TruncarTexto(LimparTexto(nomeCliente), 40);
             var payerAddressTruncado = TruncarTexto(LimparTexto(endereco?.Logradouro ?? "Endereco nao informado"), 40);
             var payerNeighborhoodTruncado = TruncarTexto(LimparTexto(endereco?.Bairro ?? "Bairro nao informado"), 30);
-            var payerCityTruncado = TruncarTexto(LimparTexto(endereco?.Cidade ?? "Cidade nao informada"), 20);
+            
+            // Limpar cidade removendo UF se vier junto (ex: "BELO HORIZONTE MG" → "BELO HORIZONTE")
+            var cidadeLimpa = LimparCidade(endereco?.Cidade);
+            var payerCityTruncado = TruncarTexto(LimparTexto(cidadeLimpa), 20);
 
             _logger.LogInformation("📝 Nome truncado: '{Original}' → '{Truncado}'", nomeCliente, payerNameTruncado);
 
@@ -717,7 +720,7 @@ namespace CrmArrighi.Controllers
                 PayerAddress = payerAddressTruncado,
                 PayerNeighborhood = payerNeighborhoodTruncado,
                 PayerCity = payerCityTruncado,
-                PayerState = !string.IsNullOrWhiteSpace(endereco?.Estado) ? endereco.Estado.ToUpper() : "SP",
+                PayerState = NormalizarEstado(endereco?.Estado, endereco?.Cidade),
                 PayerZipCode = FormatarCep(endereco?.Cep),
 
                 // Configurações opcionais
@@ -735,6 +738,123 @@ namespace CrmArrighi.Controllers
             };
 
             return boleto;
+        }
+
+        private static readonly HashSet<string> UfsValidas = new HashSet<string>
+        {
+            "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
+            "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
+            "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+        };
+
+        private static readonly Dictionary<string, string> CidadeParaEstado = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "BELO HORIZONTE", "MG" },
+            { "SAO PAULO", "SP" },
+            { "RIO DE JANEIRO", "RJ" },
+            { "BRASILIA", "DF" },
+            { "SALVADOR", "BA" },
+            { "FORTALEZA", "CE" },
+            { "CURITIBA", "PR" },
+            { "RECIFE", "PE" },
+            { "PORTO ALEGRE", "RS" },
+            { "MANAUS", "AM" },
+            { "GOIANIA", "GO" },
+            { "BELEM", "PA" },
+            { "VITORIA", "ES" },
+            { "FLORIANOPOLIS", "SC" },
+            { "NATAL", "RN" },
+            { "CAMPO GRANDE", "MS" },
+            { "JOAO PESSOA", "PB" },
+            { "SAO LUIS", "MA" },
+            { "MACEIO", "AL" },
+            { "CUIABA", "MT" },
+            { "TERESINA", "PI" },
+            { "ARACAJU", "SE" },
+            { "PORTO VELHO", "RO" },
+            { "BOA VISTA", "RR" },
+            { "MACAPA", "AP" },
+            { "PALMAS", "TO" },
+            { "RIO BRANCO", "AC" }
+        };
+
+        private string LimparCidade(string? cidade)
+        {
+            if (string.IsNullOrWhiteSpace(cidade))
+            {
+                return "Cidade nao informada";
+            }
+
+            var cidadeLimpa = cidade.Trim().ToUpper();
+
+            // Verificar se termina com espaço + 2 letras (formato "CIDADE UF")
+            var partes = cidadeLimpa.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (partes.Length >= 2)
+            {
+                var ultimaParte = partes[partes.Length - 1];
+                // Se a última parte é uma UF válida, remover
+                if (ultimaParte.Length == 2 && UfsValidas.Contains(ultimaParte))
+                {
+                    // Remover a UF do nome da cidade
+                    var cidadeSemUf = string.Join(" ", partes.Take(partes.Length - 1));
+                    _logger.LogInformation("🧹 Cidade limpa: '{Original}' → '{Limpa}'", cidade, cidadeSemUf);
+                    return cidadeSemUf;
+                }
+            }
+
+            return cidadeLimpa;
+        }
+
+        private string NormalizarEstado(string? estadoOriginal, string? cidade)
+        {
+            // Normalizar estado original
+            var estadoNormalizado = estadoOriginal?.Trim().ToUpper();
+
+            // Se o estado é válido, retorna
+            if (!string.IsNullOrWhiteSpace(estadoNormalizado) && UfsValidas.Contains(estadoNormalizado))
+            {
+                _logger.LogDebug("✅ Estado válido: {Estado}", estadoNormalizado);
+                return estadoNormalizado;
+            }
+
+            // Log de estado inválido
+            if (!string.IsNullOrWhiteSpace(estadoOriginal))
+            {
+                _logger.LogWarning("⚠️ Estado inválido detectado: '{Estado}' - Tentando corrigir...", estadoOriginal);
+            }
+
+            // Tentar extrair do campo cidade se tiver formato "CIDADE UF"
+            if (!string.IsNullOrWhiteSpace(cidade))
+            {
+                var cidadeLimpa = cidade.Trim().ToUpper();
+
+                // Verificar se termina com espaço + 2 letras (formato "CIDADE UF")
+                var partes = cidadeLimpa.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                if (partes.Length >= 2)
+                {
+                    var ultimaParte = partes[partes.Length - 1];
+                    if (ultimaParte.Length == 2 && UfsValidas.Contains(ultimaParte))
+                    {
+                        _logger.LogInformation("✅ Estado extraído do campo cidade: '{Cidade}' → UF: {UF}", cidade, ultimaParte);
+                        return ultimaParte;
+                    }
+                }
+
+                // Verificar pelo mapeamento de cidades conhecidas
+                foreach (var (cidadeKey, uf) in CidadeParaEstado)
+                {
+                    if (cidadeLimpa.Contains(cidadeKey))
+                    {
+                        _logger.LogInformation("✅ Estado identificado pela cidade: '{Cidade}' → UF: {UF}", cidade, uf);
+                        return uf;
+                    }
+                }
+            }
+
+            // Fallback: retornar SP como padrão
+            _logger.LogWarning("⚠️ Não foi possível determinar o estado. Usando SP como padrão. Estado original: '{Estado}', Cidade: '{Cidade}'",
+                estadoOriginal, cidade);
+            return "SP";
         }
 
         private (string nome, string tipoDoc, string numeroDoc, Endereco? endereco) ObterDadosCliente(Cliente cliente)
