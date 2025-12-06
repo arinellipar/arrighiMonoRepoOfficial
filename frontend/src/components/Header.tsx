@@ -18,6 +18,7 @@ import {
   CreditCard,
   TrendingUp,
   History,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -137,6 +138,16 @@ const menuItems: MenuGroup[] = [
       },
     ],
   },
+  {
+    label: "Portal",
+    items: [
+      {
+        label: "Portal do Cliente",
+        href: "/portal-cliente",
+        icon: <Shield className="w-4 h-4 text-gold-500" />,
+      },
+    ],
+  },
 ];
 
 export default function Header() {
@@ -177,7 +188,7 @@ export default function Header() {
                     Arrighi
                   </h1>
                   <p className="text-base text-neutral-400 font-medium -mt-0.5">
-                    CRM TRIBUTÁRIO
+                    CRM JUDICIÁRIO
                   </p>
                 </div>
               </Link>

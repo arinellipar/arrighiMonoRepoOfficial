@@ -28,11 +28,13 @@ import {
   ChevronDown,
   CreditCard,
   Settings,
+  Brain,
 } from "lucide-react";
 import MainLayout from "@/components/MainLayout";
 import ContratoForm from "@/components/forms/ContratoForm";
 import ContratoDetalhes from "@/components/ContratoDetalhes";
 import MudancaSituacaoModal from "@/components/MudancaSituacaoModal";
+import ContractAnalysisModal from "@/components/ContractAnalysisModal";
 import { Tooltip } from "@/components";
 import { useContratos } from "@/hooks/useContratos";
 import { useClientes } from "@/hooks/useClientes";
@@ -150,6 +152,7 @@ export default function ContratosPage() {
   const [showMudancaSituacao, setShowMudancaSituacao] = useState(false);
   const [showBoletos, setShowBoletos] = useState(false);
   const [showNovoBoleto, setShowNovoBoleto] = useState(false);
+  const [showAnalysis, setShowAnalysis] = useState(false);
   const [selectedBoleto, setSelectedBoleto] = useState<Boleto | null>(null);
   const [showBoletoDetails, setShowBoletoDetails] = useState(false);
   const { openForm, closeForm } = useForm();
@@ -1210,6 +1213,21 @@ export default function ContratosPage() {
                           </motion.button>
                         </Tooltip>
 
+                        <Tooltip content="Análise IA">
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => {
+                              setSelectedContrato(contrato);
+                              setShowAnalysis(true);
+                            }}
+                            className="flex-1 flex items-center justify-center gap-1 p-2 bg-neutral-800 hover:bg-purple-500/20 text-purple-400 rounded-lg transition-all border border-neutral-700 hover:border-purple-500/30"
+                          >
+                            <Brain className="w-4 h-4" />
+                            <span className="text-xs font-medium">IA</span>
+                          </motion.button>
+                        </Tooltip>
+
                         <Tooltip content="Editar">
                           <motion.button
                             whileHover={{ scale: 1.05 }}
@@ -1348,6 +1366,17 @@ export default function ContratosPage() {
                                 className="p-1.5 hover:bg-green-50 text-green-600 rounded transition-colors"
                               >
                                 <CreditCard className="w-4 h-4" />
+                              </button>
+                            </Tooltip>
+                            <Tooltip content="Análise IA">
+                              <button
+                                onClick={() => {
+                                  setSelectedContrato(contrato);
+                                  setShowAnalysis(true);
+                                }}
+                                className="p-1.5 hover:bg-purple-500/20 text-purple-500 rounded transition-colors"
+                              >
+                                <Brain className="w-4 h-4" />
                               </button>
                             </Tooltip>
                             <Tooltip content="Editar">
@@ -1728,6 +1757,16 @@ export default function ContratosPage() {
           }}
         />
       )}
+
+      {/* Modal de Análise de Contrato com IA */}
+      <ContractAnalysisModal
+        isOpen={showAnalysis}
+        onClose={() => {
+          setShowAnalysis(false);
+          setSelectedContrato(null);
+        }}
+        contrato={selectedContrato}
+      />
     </MainLayout>
   );
 }

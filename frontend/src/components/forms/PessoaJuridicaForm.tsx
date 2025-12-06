@@ -57,6 +57,7 @@ interface FormData {
     cep: string;
     numero: string;
     complemento: string;
+    estado: string;
   };
 }
 
@@ -88,6 +89,7 @@ const initialFormData: FormData = {
     cep: "",
     numero: "",
     complemento: "",
+    estado: "",
   },
 };
 
@@ -347,6 +349,7 @@ export default function PessoaJuridicaForm({
           cep: initialData.endereco.cep || "",
           numero: initialData.endereco.numero || "",
           complemento: initialData.endereco.complemento || "",
+          estado: initialData.endereco.estado || "",
         } : {
           cidade: "",
           bairro: "",
@@ -354,6 +357,7 @@ export default function PessoaJuridicaForm({
           cep: "",
           numero: "",
           complemento: "",
+          estado: "",
         },
       });
     }
@@ -474,6 +478,7 @@ export default function PessoaJuridicaForm({
               logradouro: cepData.logradouro,
               bairro: cepData.bairro,
               cidade: cepData.cidade,
+              estado: cepData.estado,
               numero: prev.endereco.numero,
               complemento: cepData.complemento || prev.endereco.complemento,
             },
@@ -562,6 +567,7 @@ export default function PessoaJuridicaForm({
         cep: formData.endereco.cep,
         numero: formData.endereco.numero,
         complemento: formData.endereco.complemento || undefined,
+        estado: formData.endereco.estado,
       },
     };
 
@@ -838,6 +844,17 @@ export default function PessoaJuridicaForm({
               onChange={(value) => handleFieldChange("cidade", value, true)}
               error={errors["endereco.cidade"]}
               icon={<Building className="w-5 h-5" />}
+            />
+            <InputField
+              label="Estado"
+              name="estado"
+              isEndereco
+              required
+              value={formData.endereco.estado}
+              onChange={(value) => handleFieldChange("estado", value, true)}
+              error={errors["endereco.estado"]}
+              icon={<MapPin className="w-5 h-5" />}
+              placeholder="UF"
             />
           </div>
         </FormSection>

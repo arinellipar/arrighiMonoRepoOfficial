@@ -8,6 +8,7 @@ export interface Endereco {
   cep: string;
   numero: string;
   complemento?: string;
+  estado: string;
 }
 
 export interface CreateEnderecoDTO {
@@ -17,6 +18,7 @@ export interface CreateEnderecoDTO {
   cep: string;
   numero: string;
   complemento?: string;
+  estado: string;
 }
 
 export interface PessoaFisica {
