@@ -690,7 +690,7 @@ namespace CrmArrighi.Controllers
             var payerNameTruncado = TruncarTexto(LimparTexto(nomeCliente), 40);
             var payerAddressTruncado = TruncarTexto(LimparTexto(endereco?.Logradouro ?? "Endereco nao informado"), 40);
             var payerNeighborhoodTruncado = TruncarTexto(LimparTexto(endereco?.Bairro ?? "Bairro nao informado"), 30);
-            
+
             // Limpar cidade removendo UF se vier junto (ex: "BELO HORIZONTE MG" → "BELO HORIZONTE")
             var cidadeLimpa = LimparCidade(endereco?.Cidade);
             var payerCityTruncado = TruncarTexto(LimparTexto(cidadeLimpa), 20);

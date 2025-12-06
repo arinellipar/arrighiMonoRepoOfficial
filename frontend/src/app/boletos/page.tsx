@@ -10,6 +10,7 @@ import { StatusBadge } from "@/components/boletos/StatusBadge";
 import { NovoBoletoModal } from "@/components/boletos/NovoBoletoModal";
 import { SincronizarTodosButton } from "@/components/boletos/SincronizarTodosButton";
 import { BoletoDetailsModal } from "@/components/boletos/BoletoDetailsModal";
+import { GerarBoletosLoteModal } from "@/components/boletos/GerarBoletosLoteModal";
 import MainLayout from "@/components/MainLayout";
 import {
   Plus,
@@ -34,6 +35,7 @@ import {
   TrendingUp,
   Receipt,
   ArrowUpDown,
+  Layers,
 } from "lucide-react";
 import error from "next/error";
 import { formatDate } from "date-fns";
@@ -61,6 +63,7 @@ export default function BoletosPage() {
   const [selectedBoleto, setSelectedBoleto] = useState<Boleto | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showNewBoletoModal, setShowNewBoletoModal] = useState(false);
+  const [showGerarLoteModal, setShowGerarLoteModal] = useState(false);
   const [downloadingPdfId, setDownloadingPdfId] = useState<number | null>(null);
   const [downloadingPdfName, setDownloadingPdfName] = useState<string>("");
 
@@ -247,12 +250,42 @@ export default function BoletosPage() {
     return new Date(date).toLocaleDateString("pt-BR");
   };
 
+  // Parsear data de vencimento corretamente
+  const parseDueDate = (dueDate: string): Date => {
+    let vencimento: Date;
+
+    // Extrair apenas a parte da data (antes do T se existir)
+    const datePart = dueDate.includes("T") ? dueDate.split("T")[0] : dueDate;
+
+    if (datePart.includes("-")) {
+      // Formato ISO: 2020-12-06 ou 0020-12-06
+      const [year, month, day] = datePart.split("-").map(Number);
+      // Corrigir anos com 2 dígitos ou anos muito pequenos (< 100)
+      const correctedYear = year < 100 ? year + 2000 : year;
+      vencimento = new Date(correctedYear, month - 1, day);
+    } else if (datePart.includes("/")) {
+      // Formato brasileiro: 06/12/2020 ou 06/12/20
+      const parts = datePart.split("/").map(Number);
+      // Corrigir anos com 2 dígitos
+      const correctedYear = parts[2] < 100 ? parts[2] + 2000 : parts[2];
+      vencimento = new Date(correctedYear, parts[1] - 1, parts[0]);
+    } else {
+      vencimento = new Date(dueDate);
+      // Verificar se o ano é muito pequeno e corrigir
+      if (vencimento.getFullYear() < 100) {
+        vencimento.setFullYear(vencimento.getFullYear() + 2000);
+      }
+    }
+
+    vencimento.setHours(0, 0, 0, 0);
+    return vencimento;
+  };
+
   // Calcular dias de atraso para boletos vencidos
   const calcularDiasAtraso = (dueDate: string): number | null => {
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
-    const vencimento = new Date(dueDate);
-    vencimento.setHours(0, 0, 0, 0);
+    const vencimento = parseDueDate(dueDate);
 
     if (vencimento < hoje) {
       const diffTime = hoje.getTime() - vencimento.getTime();
@@ -260,6 +293,22 @@ export default function BoletosPage() {
       return diffDays;
     }
     return null;
+  };
+
+  // Formatar tempo de atraso (anos + dias quando > 365 dias)
+  const formatarTempoAtraso = (dias: number): string => {
+    if (dias >= 365) {
+      const anos = Math.floor(dias / 365);
+      const diasRestantes = dias % 365;
+
+      if (diasRestantes === 0) {
+        return `${anos} ano${anos > 1 ? "s" : ""}`;
+      }
+      return `${anos} ano${anos > 1 ? "s" : ""} e ${diasRestantes} dia${
+        diasRestantes > 1 ? "s" : ""
+      }`;
+    }
+    return `${dias} dia${dias > 1 ? "s" : ""}`;
   };
 
   // Verificar se boleto está vencido
@@ -277,8 +326,7 @@ export default function BoletosPage() {
 
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
-    const vencimento = new Date(boleto.dueDate);
-    vencimento.setHours(0, 0, 0, 0);
+    const vencimento = parseDueDate(boleto.dueDate);
     return vencimento < hoje;
   };
 
@@ -386,6 +434,16 @@ export default function BoletosPage() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => setShowGerarLoteModal(true)}
+                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-xl font-medium shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all duration-300"
+              >
+                <Layers className="w-5 h-5" />
+                Gerar em Lote
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setShowNewBoletoModal(true)}
                 className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-neutral-950 rounded-xl font-medium shadow-lg shadow-gold-500/20 hover:shadow-gold-500/30 transition-all duration-300"
               >
@@ -451,10 +509,12 @@ export default function BoletosPage() {
                   </div>
                 </div>
                 <p className="text-neutral-400 text-sm mb-1">{stat.label}</p>
-                <p className={cn(
-                  "font-bold text-neutral-50 break-words",
-                  stat.isWide ? "text-2xl" : "text-3xl"
-                )}>
+                <p
+                  className={cn(
+                    "font-bold text-neutral-50 break-words",
+                    stat.isWide ? "text-2xl" : "text-3xl"
+                  )}
+                >
                   {stat.value}
                 </p>
               </motion.div>
@@ -681,10 +741,9 @@ export default function BoletosPage() {
                             <StatusBadge status={boleto.status} />
                             {isVencido(boleto) && (
                               <span className="text-xs font-bold text-red-400">
-                                {calcularDiasAtraso(boleto.dueDate)} dia
-                                {calcularDiasAtraso(boleto.dueDate)! > 1
-                                  ? "s"
-                                  : ""}{" "}
+                                {formatarTempoAtraso(
+                                  calcularDiasAtraso(boleto.dueDate)!
+                                )}{" "}
                                 de atraso
                               </span>
                             )}
@@ -716,11 +775,10 @@ export default function BoletosPage() {
                             </p>
                             {isVencido(boleto) && (
                               <p className="text-xs font-bold text-red-400 mt-1">
-                                Vencido há {calcularDiasAtraso(boleto.dueDate)}{" "}
-                                dia
-                                {calcularDiasAtraso(boleto.dueDate)! > 1
-                                  ? "s"
-                                  : ""}
+                                Vencido há{" "}
+                                {formatarTempoAtraso(
+                                  calcularDiasAtraso(boleto.dueDate)!
+                                )}
                               </p>
                             )}
                           </div>
@@ -733,10 +791,9 @@ export default function BoletosPage() {
                               <AlertTriangle className="w-4 h-4 text-red-400" />
                               <p className="text-sm font-semibold text-red-800">
                                 Boleto vencido há{" "}
-                                {calcularDiasAtraso(boleto.dueDate)} dia
-                                {calcularDiasAtraso(boleto.dueDate)! > 1
-                                  ? "s"
-                                  : ""}
+                                {formatarTempoAtraso(
+                                  calcularDiasAtraso(boleto.dueDate)!
+                                )}
                               </p>
                             </div>
                           </div>
@@ -878,10 +935,9 @@ export default function BoletosPage() {
                             <StatusBadge status={boleto.status} />
                             {isVencido(boleto) && (
                               <span className="text-xs font-bold text-red-400">
-                                {calcularDiasAtraso(boleto.dueDate)} dia
-                                {calcularDiasAtraso(boleto.dueDate)! > 1
-                                  ? "s"
-                                  : ""}{" "}
+                                {formatarTempoAtraso(
+                                  calcularDiasAtraso(boleto.dueDate)!
+                                )}{" "}
                                 de atraso
                               </span>
                             )}
@@ -900,10 +956,9 @@ export default function BoletosPage() {
                             {isVencido(boleto) && (
                               <p className="text-xs font-bold text-red-400 mt-1">
                                 ⚠️ Vencido há{" "}
-                                {calcularDiasAtraso(boleto.dueDate)} dia
-                                {calcularDiasAtraso(boleto.dueDate)! > 1
-                                  ? "s"
-                                  : ""}
+                                {formatarTempoAtraso(
+                                  calcularDiasAtraso(boleto.dueDate)!
+                                )}
                               </p>
                             )}
                           </div>
@@ -1084,7 +1139,9 @@ export default function BoletosPage() {
 
                     {/* Texto */}
                     <div className="flex-1">
-                      <p className="font-bold text-lg mb-1 text-neutral-100">Baixando PDF...</p>
+                      <p className="font-bold text-lg mb-1 text-neutral-100">
+                        Baixando PDF...
+                      </p>
                       <p className="text-neutral-300 text-sm">
                         Boleto #{downloadingPdfId}
                       </p>
@@ -1134,6 +1191,15 @@ export default function BoletosPage() {
             onSuccess={() => {
               fetchBoletos();
               setShowNewBoletoModal(false);
+            }}
+          />
+
+          {/* Modal Gerar Boletos em Lote */}
+          <GerarBoletosLoteModal
+            isOpen={showGerarLoteModal}
+            onClose={() => setShowGerarLoteModal(false)}
+            onSuccess={() => {
+              fetchBoletos();
             }}
           />
         </div>

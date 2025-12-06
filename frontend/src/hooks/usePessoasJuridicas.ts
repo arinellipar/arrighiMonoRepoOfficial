@@ -142,8 +142,10 @@ export function usePessoasJuridicas() {
   const buscarPorCnpj = useCallback(async (cnpj: string) => {
     try {
       console.log("🔧 buscarPorCnpj: Buscando CNPJ:", cnpj);
+      const cnpjLimpo = cnpj.replace(/\D/g, "");
+      console.log("🔧 buscarPorCnpj: CNPJ limpo:", cnpjLimpo);
       const response = await apiClient.get(
-        `/PessoaJuridica/buscar-por-cnpj/${cnpj}`
+        `/PessoaJuridica/buscar-por-cnpj/${encodeURIComponent(cnpjLimpo)}`
       );
       console.log("🔧 buscarPorCnpj: Resposta:", response);
       return response.data as PessoaJuridica;
