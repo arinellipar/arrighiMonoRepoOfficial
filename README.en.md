@@ -89,6 +89,14 @@ English | [Français](./README.fr.md) | [Português](./README.md)
 | Framer Motion | 12.23 | Animations |
 | TanStack Query | 5.62 | Server state management |
 
+### Backend
+| Technology | Description |
+|------------|-------------|
+| .NET Core | API framework |
+| C# | Programming language |
+| Entity Framework | Database ORM |
+| SQL Server | Database |
+
 ### Artificial Intelligence
 | Technology | Description |
 |------------|-------------|
@@ -109,26 +117,28 @@ English | [Français](./README.fr.md) | [Português](./README.md)
 
 - **Node.js** 18.17 or higher
 - **pnpm** 10.x (recommended) or npm/yarn
-- **Backend API** running at `http://localhost:5101`
+- **.NET 8** or higher (for backend)
+- **SQL Server** (for database)
 
 ---
 
 ## 🚀 Installation
 
-### 1. Clone the repository
+### Frontend
+
+#### 1. Navigate to the frontend directory
 
 ```bash
-git clone https://github.com/your-username/arrighiMonoRepoOfficial.git
-cd arrighiMonoRepoOfficial/frontend
+cd frontend
 ```
 
-### 2. Install dependencies
+#### 2. Install dependencies
 
 ```bash
 pnpm install
 ```
 
-### 3. Configure environment variables
+#### 3. Configure environment variables
 
 ```bash
 cp .env.example .env
@@ -141,7 +151,7 @@ NEXT_PUBLIC_API_URL=http://localhost:5101/api
 OPENAI_API_KEY=your-openai-key
 ```
 
-### 4. Run the development server
+#### 4. Run the development server
 
 ```bash
 pnpm dev
@@ -149,57 +159,81 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+### Backend
+
+#### 1. Navigate to the backend directory
+
+```bash
+cd backend
+```
+
+#### 2. Restore packages
+
+```bash
+dotnet restore
+```
+
+#### 3. Run migrations
+
+```bash
+dotnet ef database update
+```
+
+#### 4. Run the server
+
+```bash
+dotnet run
+```
+
+The API will be available at `http://localhost:5101`.
+
 ---
 
 ## 📁 Project Structure
 
 ```
-frontend/
-├── src/
-│   ├── app/                    # Next.js routes (App Router)
-│   │   ├── api/                # API Routes
-│   │   │   ├── ai/             # AI endpoints
-│   │   │   └── portal-cliente/ # Client Portal APIs
-│   │   ├── boletos/            # Invoices page
-│   │   ├── cadastros/          # Registrations (Individual/Legal Entity)
-│   │   ├── clientes/           # Client management
-│   │   ├── contratos/          # Contract management
-│   │   ├── dashboard/          # Dashboard and financials
-│   │   ├── portal-cliente/     # Client Portal
-│   │   └── usuarios/           # User management
+arrighiMonoRepoOfficial/
+├── frontend/                   # Next.js application
+│   ├── src/
+│   │   ├── app/                # Next.js routes (App Router)
+│   │   │   ├── api/            # API Routes
+│   │   │   ├── boletos/        # Invoices page
+│   │   │   ├── cadastros/      # Registrations (Individual/Legal Entity)
+│   │   │   ├── clientes/       # Client management
+│   │   │   ├── contratos/      # Contract management
+│   │   │   ├── dashboard/      # Dashboard and financials
+│   │   │   ├── portal-cliente/ # Client Portal
+│   │   │   └── usuarios/       # User management
+│   │   │
+│   │   ├── components/         # React components
+│   │   ├── contexts/           # React contexts
+│   │   ├── hooks/              # Custom Hooks
+│   │   ├── lib/                # Utilities
+│   │   ├── services/           # API services
+│   │   ├── types/              # TypeScript definitions
+│   │   └── theme/              # Theme configuration
 │   │
-│   ├── components/             # React components
-│   │   ├── boletos/            # Invoice components
-│   │   ├── forms/              # Forms
-│   │   ├── guards/             # Route guards
-│   │   ├── historico/          # Client history
-│   │   └── permissions/        # Permission components
-│   │
-│   ├── contexts/               # React contexts
-│   │   ├── AuthContext.tsx     # Main authentication
-│   │   └── ClienteAuthContext.tsx # Portal auth
-│   │
-│   ├── hooks/                  # Custom Hooks
-│   │   ├── useClientes.ts
-│   │   ├── useContratos.ts
-│   │   ├── useBoletos.ts
-│   │   └── ...
-│   │
-│   ├── lib/                    # Utilities and configurations
-│   ├── services/               # API services
-│   ├── types/                  # TypeScript definitions
-│   └── theme/                  # Theme configuration
+│   ├── public/                 # Static files
+│   └── package.json
 │
-├── public/                     # Static files
-├── .env                        # Environment variables
-├── next.config.ts              # Next.js configuration
-├── tailwind.config.js          # Tailwind configuration
-└── package.json
+├── backend/                    # .NET Core API
+│   ├── Controllers/            # API Controllers
+│   ├── Data/                   # Database context
+│   ├── Migrations/             # EF Migrations
+│   ├── Models/                 # Data models
+│   ├── Services/               # Business services
+│   └── Program.cs              # Entry point
+│
+├── README.md                   # Documentation (PT-BR)
+├── README.en.md                # Documentation (English)
+└── README.fr.md                # Documentation (Français)
 ```
 
 ---
 
 ## 📜 Available Scripts
+
+### Frontend
 
 | Command | Description |
 |---------|-------------|
@@ -209,9 +243,20 @@ frontend/
 | `pnpm lint` | Run code linting |
 | `pnpm type-check` | Check TypeScript types |
 
+### Backend
+
+| Command | Description |
+|---------|-------------|
+| `dotnet run` | Start the server |
+| `dotnet build` | Build the project |
+| `dotnet ef database update` | Apply migrations |
+| `dotnet test` | Run tests |
+
 ---
 
 ## 🔐 Environment Variables
+
+### Frontend
 
 | Variable | Description | Required |
 |----------|-------------|----------|
@@ -219,22 +264,39 @@ frontend/
 | `OPENAI_API_KEY` | OpenAI API key | For AI |
 | `NEXT_PUBLIC_SENTRY_DSN` | Sentry DSN | For monitoring |
 
+### Backend
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `ConnectionStrings__DefaultConnection` | SQL Server connection string | ✅ |
+| `JWT__Secret` | JWT secret key | ✅ |
+
 ---
 
 ## 🌐 Deployment
 
-### Vercel (Recommended)
+### Frontend - Vercel (Recommended)
 
 ```bash
+cd frontend
 pnpm build
 vercel deploy --prod
 ```
 
-### Docker
+### Frontend - Docker
 
 ```bash
-docker build -t crm-juridico .
-docker run -p 3000:3000 crm-juridico
+cd frontend
+docker build -t crm-juridico-frontend .
+docker run -p 3000:3000 crm-juridico-frontend
+```
+
+### Backend - Docker
+
+```bash
+cd backend
+docker build -t crm-juridico-backend .
+docker run -p 5101:5101 crm-juridico-backend
 ```
 
 ---
