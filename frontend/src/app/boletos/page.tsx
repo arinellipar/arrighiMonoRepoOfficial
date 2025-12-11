@@ -87,17 +87,20 @@ export default function BoletosPage() {
 
   // Função auxiliar para verificar se o boleto foi pago
   const verificarSeFoiPago = (boleto: Boleto): boolean => {
+    // Se tem foiPago explícito, usar ele
     if (boleto.foiPago !== undefined) {
       return boleto.foiPago;
     }
+    // LIQUIDADO = sempre pago
     if (boleto.status === "LIQUIDADO") {
       return true;
     }
-    if (
-      boleto.status === "BAIXADO" &&
-      boleto.paidValue &&
-      boleto.paidValue > 0
-    ) {
+    // BAIXADO = pago via PIX (Santander retorna BAIXADO para pagamentos PIX)
+    if (boleto.status === "BAIXADO") {
+      return true;
+    }
+    // Se tem paidValue > 0, foi pago
+    if (boleto.paidValue && boleto.paidValue > 0) {
       return true;
     }
     return false;

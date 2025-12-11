@@ -14,8 +14,13 @@ export function StatusBadge({
   size = "md",
 }: StatusBadgeProps) {
   const getStatusConfig = (status: string, foiPago?: boolean, paidValue?: number) => {
-    // Primeiro, verificar se foi pago usando foiPago ou paidValue
-    const isPago = foiPago ?? (status === "LIQUIDADO" || (status === "BAIXADO" && (paidValue ?? 0) > 0));
+    // BAIXADO = Boleto baixado do sistema (pago via PIX ou expirado)
+    // Como o Santander retorna BAIXADO para pagamentos PIX, tratamos como pago por padrão
+    // A menos que explicitamente marcado como não pago (foiPago === false)
+    const isBaixadoPago = status.toUpperCase() === "BAIXADO" && foiPago !== false;
+
+    // Primeiro, verificar se foi pago usando foiPago, paidValue ou status BAIXADO
+    const isPago = foiPago ?? (status === "LIQUIDADO" || isBaixadoPago || (paidValue ?? 0) > 0);
 
     // Se foi pago
     if (isPago) {
@@ -35,8 +40,8 @@ export function StatusBadge({
 
     // Se não foi pago, verificar o status
     switch (status.toUpperCase()) {
+      // BAIXADO com foiPago === false = Expirado (cancelado sem pagamento)
       case "BAIXADO":
-        // BAIXADO sem pagamento = Expirado
         return {
           color: "bg-red-500/20 text-red-400 border-red-500/30",
           text: "Expirado",
