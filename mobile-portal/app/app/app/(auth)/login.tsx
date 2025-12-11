@@ -15,7 +15,7 @@ import { router } from 'expo-router';
 import { useAuthStore } from '../../src/stores/authStore';
 import { Button } from '../../src/components/Button';
 import { Input } from '../../src/components/Input';
-import { LockIcon, IdCardIcon, ShieldLockIcon } from '../../src/components/Icons';
+import { LockIcon, IdCardIcon, ShieldLockIcon, AlertIcon } from '../../src/components/Icons';
 import { colors, shadows, borderRadius } from '../../src/theme/colors';
 
 const { width, height } = Dimensions.get('window');
@@ -133,7 +133,7 @@ export default function LoginScreen() {
               {/* Error Message */}
               {error ? (
                 <View style={styles.errorContainer}>
-                  <Text style={styles.errorIcon}>⚠️</Text>
+                  <AlertIcon size={18} color="#f87171" />
                   <Text style={styles.errorText}>{error}</Text>
                 </View>
               ) : null}
@@ -156,6 +156,8 @@ export default function LoginScreen() {
                   onChangeText={setSenha}
                   secureTextEntry
                   icon={<LockIcon size={20} color="#d4af37" />}
+                  textContentType="oneTimeCode"
+                  passwordRules=""
                 />
 
                 <TouchableOpacity style={styles.forgotPassword}>
@@ -346,9 +348,6 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 16,
     gap: 10,
-  },
-  errorIcon: {
-    fontSize: 18,
   },
   errorText: {
     flex: 1,

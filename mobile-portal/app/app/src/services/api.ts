@@ -1,7 +1,8 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001/api';
+// Use o IP da sua máquina para testes no dispositivo físico
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.15.2:3001/api';
 
 class ApiService {
   private api: AxiosInstance;

@@ -76,16 +76,30 @@ let AuthService = AuthService_1 = class AuthService {
             let cliente = null;
             let nome = 'Cliente';
             let email = null;
+            let tipoPessoa = 'PF';
             this.logger.log('Buscando por CPF...');
             const pf = await this.pessoaFisicaRepository.findOne({
                 where: { CPF: documentoLimpo },
             });
             if (pf) {
                 this.logger.log(`Pessoa Física encontrada: ${pf.Nome}`);
-                cliente = await this.clienteRepository.findOne({
+                nome = pf.Nome;
+                tipoPessoa = 'PF';
+                const clientes = await this.clienteRepository.find({
                     where: { PessoaFisicaId: pf.Id },
                 });
-                nome = pf.Nome;
+                for (const c of clientes) {
+                    const cred = await this.credencialRepository.findOne({
+                        where: { ClienteId: c.Id, Ativo: true },
+                    });
+                    if (cred) {
+                        cliente = c;
+                        break;
+                    }
+                }
+                if (!cliente && clientes.length > 0) {
+                    cliente = clientes[0];
+                }
             }
             if (!cliente) {
                 this.logger.log('Buscando por CNPJ...');
@@ -94,10 +108,23 @@ let AuthService = AuthService_1 = class AuthService {
                 });
                 if (pj) {
                     this.logger.log(`Pessoa Jurídica encontrada: ${pj.RazaoSocial}`);
-                    cliente = await this.clienteRepository.findOne({
+                    nome = pj.RazaoSocial;
+                    tipoPessoa = 'PJ';
+                    const clientes = await this.clienteRepository.find({
                         where: { PessoaJuridicaId: pj.Id },
                     });
-                    nome = pj.RazaoSocial;
+                    for (const c of clientes) {
+                        const cred = await this.credencialRepository.findOne({
+                            where: { ClienteId: c.Id, Ativo: true },
+                        });
+                        if (cred) {
+                            cliente = c;
+                            break;
+                        }
+                    }
+                    if (!cliente && clientes.length > 0) {
+                        cliente = clientes[0];
+                    }
                 }
             }
             if (!cliente) {
@@ -134,7 +161,7 @@ let AuthService = AuthService_1 = class AuthService {
                     nome,
                     email,
                     documento: documentoLimpo,
-                    tipoPessoa: cliente.PessoaFisicaId ? 'PF' : 'PJ',
+                    tipoPessoa,
                 },
             };
         }
@@ -154,36 +181,60 @@ let AuthService = AuthService_1 = class AuthService {
             let cliente = null;
             let nome = 'Cliente';
             let emailCliente = null;
-            const pf = await this.pessoaFisicaRepository.findOne({
+            let clientesComMesmoDocumento = [];
+            let pf = null;
+            pf = await this.pessoaFisicaRepository.findOne({
                 where: { CPF: documentoLimpo },
             });
             if (pf) {
-                cliente = await this.clienteRepository.findOne({
+                clientesComMesmoDocumento = await this.clienteRepository.find({
                     where: { PessoaFisicaId: pf.Id },
                 });
                 nome = pf.Nome;
                 emailCliente = pf.EmailEmpresarial || pf.EmailPessoal || null;
             }
-            if (!cliente) {
+            if (clientesComMesmoDocumento.length === 0) {
                 const pj = await this.pessoaJuridicaRepository.findOne({
                     where: { CNPJ: documentoLimpo },
                 });
                 if (pj) {
-                    cliente = await this.clienteRepository.findOne({
+                    clientesComMesmoDocumento = await this.clienteRepository.find({
                         where: { PessoaJuridicaId: pj.Id },
                     });
                     nome = pj.RazaoSocial;
                     emailCliente = pj.Email || null;
                 }
             }
-            if (!cliente) {
+            if (clientesComMesmoDocumento.length === 0) {
                 throw new common_1.BadRequestException('CPF/CNPJ não encontrado no sistema. Você precisa ser um cliente cadastrado para criar uma conta.');
             }
-            const credencialExistente = await this.credencialRepository.findOne({
-                where: { ClienteId: cliente.Id },
-            });
-            if (credencialExistente) {
-                throw new common_1.BadRequestException('Este CPF/CNPJ já possui uma conta cadastrada. Use a opção de login.');
+            for (const c of clientesComMesmoDocumento) {
+                const credencialExistente = await this.credencialRepository.findOne({
+                    where: { ClienteId: c.Id },
+                });
+                if (credencialExistente) {
+                    throw new common_1.BadRequestException('Este CPF/CNPJ já possui uma conta cadastrada. Use a opção de login.');
+                }
+            }
+            const clienteIds = clientesComMesmoDocumento.map(c => c.Id).join(',');
+            const melhorClienteQuery = await this.credencialRepository.manager.query(`
+        SELECT TOP 1 c.Id,
+               (SELECT COUNT(*) FROM Boletos b INNER JOIN Contratos ct ON b.ContratoId = ct.Id WHERE ct.ClienteId = c.Id AND b.Ativo = 1) as QtdBoletos,
+               (SELECT COUNT(*) FROM Contratos WHERE ClienteId = c.Id AND Ativo = 1) as QtdContratos
+        FROM Clientes c
+        WHERE c.Id IN (${clienteIds})
+        ORDER BY
+          (SELECT COUNT(*) FROM Boletos b INNER JOIN Contratos ct ON b.ContratoId = ct.Id WHERE ct.ClienteId = c.Id AND b.Ativo = 1) DESC,
+          (SELECT COUNT(*) FROM Contratos WHERE ClienteId = c.Id AND Ativo = 1) DESC,
+          c.Id DESC
+      `);
+            if (melhorClienteQuery.length > 0) {
+                const melhorClienteId = melhorClienteQuery[0].Id;
+                cliente = clientesComMesmoDocumento.find(c => c.Id === melhorClienteId) || clientesComMesmoDocumento[0];
+                this.logger.log(`Múltiplos clientes encontrados. Selecionado cliente ${cliente.Id} (${melhorClienteQuery[0].QtdBoletos} boletos, ${melhorClienteQuery[0].QtdContratos} contratos ativos).`);
+            }
+            else {
+                cliente = clientesComMesmoDocumento[0];
             }
             const emailFinal = email || emailCliente || `${documentoLimpo}@portal.arrighi.com.br`;
             if (email) {

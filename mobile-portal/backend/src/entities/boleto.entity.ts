@@ -2,8 +2,6 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
-  JoinColumn,
 } from 'typeorm';
 
 @Entity('Boletos')
@@ -15,13 +13,70 @@ export class Boleto {
   ContratoId: number;
 
   @Column({ length: 100, nullable: true })
-  BankSlipId: string;
+  NsuCode: string;
+
+  @Column({ type: 'datetime', nullable: true })
+  NsuDate: Date;
 
   @Column({ length: 50, nullable: true })
   CovenantCode: string;
 
   @Column({ length: 100, nullable: true })
-  OurNumber: string;
+  BankNumber: string;
+
+  @Column({ length: 100, nullable: true })
+  ClientNumber: string;
+
+  @Column({ type: 'datetime' })
+  DueDate: Date;
+
+  @Column({ type: 'datetime', nullable: true })
+  IssueDate: Date;
+
+  @Column({ type: 'decimal', precision: 18, scale: 2 })
+  NominalValue: number;
+
+  @Column({ length: 100, nullable: true })
+  DocumentKind: string;
+
+  @Column({ length: 200, nullable: true })
+  PayerName: string;
+
+  @Column({ length: 20, nullable: true })
+  PayerDocumentType: string;
+
+  @Column({ length: 20, nullable: true })
+  PayerDocumentNumber: string;
+
+  @Column({ length: 200, nullable: true })
+  PayerAddress: string;
+
+  @Column({ length: 100, nullable: true })
+  PayerNeighborhood: string;
+
+  @Column({ length: 100, nullable: true })
+  PayerCity: string;
+
+  @Column({ length: 10, nullable: true })
+  PayerState: string;
+
+  @Column({ length: 20, nullable: true })
+  PayerZipCode: string;
+
+  @Column({ type: 'decimal', precision: 18, scale: 2, nullable: true })
+  FinePercentage: number;
+
+  @Column({ nullable: true })
+  FineQuantityDays: number;
+
+  @Column({ type: 'decimal', precision: 18, scale: 2, nullable: true })
+  InterestPercentage: number;
+
+  @Column({ type: 'decimal', precision: 18, scale: 2, nullable: true })
+  DeductionValue: number;
+
+  @Column({ nullable: true })
+  WriteOffQuantityDays: number;
 
   @Column({ length: 100, nullable: true })
   BarCode: string;
@@ -29,42 +84,39 @@ export class Boleto {
   @Column({ length: 100, nullable: true })
   DigitableLine: string;
 
-  @Column({ type: 'decimal', precision: 18, scale: 2 })
-  NominalValue: number;
+  @Column({ type: 'datetime', nullable: true })
+  EntryDate: Date;
 
-  @Column({ type: 'date' })
-  DueDate: Date;
+  @Column({ type: 'text', nullable: true })
+  QrCodePix: string;
 
-  @Column({ length: 200, nullable: true })
-  PayerName: string;
-
-  @Column({ length: 20, nullable: true })
-  PayerDocumentNumber: string;
+  @Column({ type: 'text', nullable: true })
+  QrCodeUrl: string;
 
   @Column({ length: 50 })
   Status: string;
 
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ type: 'text', nullable: true })
+  Messages: string;
+
+  @Column({ type: 'datetime' })
   DataCadastro: Date;
 
   @Column({ type: 'datetime', nullable: true })
-  DataPagamento: Date;
-
-  @Column({ type: 'decimal', precision: 18, scale: 2, nullable: true })
-  PaidValue: number;
-
-  @Column({ nullable: true })
-  NumeroParcela: number;
+  DataAtualizacao: Date;
 
   @Column({ default: true })
   Ativo: boolean;
 
+  @Column({ length: 100, nullable: true })
+  ErrorCode: string;
+
+  @Column({ type: 'text', nullable: true })
+  ErrorMessage: string;
+
+  @Column({ length: 100, nullable: true })
+  TraceId: string;
+
   @Column({ nullable: true })
-  FoiPago: boolean;
-
-  @Column({ type: 'text', nullable: true })
-  QRCodePix: string;
-
-  @Column({ type: 'text', nullable: true })
-  QRCodeUrl: string;
+  NumeroParcela: number;
 }

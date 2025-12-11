@@ -15,7 +15,7 @@ import { router } from 'expo-router';
 import { useAuthStore } from '../../src/stores/authStore';
 import { Button } from '../../src/components/Button';
 import { Input } from '../../src/components/Input';
-import { LockIcon, LockCheckIcon, IdCardIcon, UserIcon, ShieldLockIcon } from '../../src/components/Icons';
+import { LockIcon, LockCheckIcon, IdCardIcon, UserIcon, ShieldLockIcon, AlertIcon, LightbulbIcon } from '../../src/components/Icons';
 import { colors, shadows, borderRadius } from '../../src/theme/colors';
 
 const { width, height } = Dimensions.get('window');
@@ -142,7 +142,7 @@ export default function RegisterScreen() {
               {/* Error Message */}
               {error ? (
                 <View style={styles.errorContainer}>
-                  <Text style={styles.errorIcon}>⚠️</Text>
+                  <AlertIcon size={18} color="#f87171" />
                   <Text style={styles.errorText}>{error}</Text>
                 </View>
               ) : null}
@@ -164,6 +164,8 @@ export default function RegisterScreen() {
                   onChangeText={setSenha}
                   secureTextEntry
                   icon={<LockIcon size={20} color="#d4af37" />}
+                  textContentType="oneTimeCode"
+                  passwordRules=""
                 />
 
                 <Input
@@ -173,6 +175,8 @@ export default function RegisterScreen() {
                   onChangeText={setConfirmarSenha}
                   secureTextEntry
                   icon={<LockCheckIcon size={20} color="#d4af37" />}
+                  textContentType="oneTimeCode"
+                  passwordRules=""
                 />
 
                 {/* Password Strength */}
@@ -195,7 +199,7 @@ export default function RegisterScreen() {
 
                 {/* Info Box */}
                 <View style={styles.infoBox}>
-                  <Text style={styles.infoIcon}>💡</Text>
+                  <LightbulbIcon size={18} color="#d4af37" />
                   <Text style={styles.infoText}>
                     Você precisa ser um cliente cadastrado para criar uma conta.
                     Use o CPF/CNPJ registrado em seu contrato.
@@ -348,9 +352,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     gap: 10,
   },
-  errorIcon: {
-    fontSize: 18,
-  },
   errorText: {
     flex: 1,
     color: '#f87171',
@@ -400,9 +401,6 @@ const styles = StyleSheet.create({
     marginVertical: 16,
     gap: 10,
     alignItems: 'flex-start',
-  },
-  infoIcon: {
-    fontSize: 16,
   },
   infoText: {
     flex: 1,

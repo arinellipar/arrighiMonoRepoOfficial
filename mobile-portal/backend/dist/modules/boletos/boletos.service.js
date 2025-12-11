@@ -95,7 +95,7 @@ let BoletosService = class BoletosService {
                 Ativo: true,
                 Status: 'LIQUIDADO',
             },
-            order: { DataPagamento: 'DESC' },
+            order: { DataAtualizacao: 'DESC' },
         });
         return boletos.map((b) => this.mapBoletoToDto(b));
     }
@@ -132,7 +132,7 @@ let BoletosService = class BoletosService {
             },
         });
         const totalAberto = boletosAbertos.reduce((sum, b) => sum + Number(b.NominalValue), 0);
-        const totalPago = boletosPagos.reduce((sum, b) => sum + Number(b.PaidValue || b.NominalValue), 0);
+        const totalPago = boletosPagos.reduce((sum, b) => sum + Number(b.NominalValue), 0);
         const boletosVencidos = boletosAbertos.filter((b) => new Date(b.DueDate) < hoje);
         const totalVencido = boletosVencidos.reduce((sum, b) => sum + Number(b.NominalValue), 0);
         const proximoBoleto = boletosAbertos
@@ -158,11 +158,12 @@ let BoletosService = class BoletosService {
         const hoje = new Date();
         const vencimento = new Date(boleto.DueDate);
         const diasParaVencer = Math.ceil((vencimento.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
+        const foiPago = boleto.Status === 'LIQUIDADO';
         let statusDisplay = boleto.Status;
-        if (boleto.FoiPago || boleto.Status === 'LIQUIDADO') {
+        if (foiPago) {
             statusDisplay = 'PAGO';
         }
-        else if (boleto.Status === 'BAIXADO' && !boleto.FoiPago) {
+        else if (boleto.Status === 'BAIXADO') {
             statusDisplay = 'EXPIRADO';
         }
         else if (diasParaVencer < 0 &&
@@ -176,16 +177,16 @@ let BoletosService = class BoletosService {
             linhaDigitavel: boleto.DigitableLine,
             valor: boleto.NominalValue,
             dataVencimento: boleto.DueDate,
-            dataPagamento: boleto.DataPagamento,
-            valorPago: boleto.PaidValue,
+            dataCadastro: boleto.DataCadastro,
             status: boleto.Status,
             statusDisplay,
             numeroParcela: boleto.NumeroParcela,
             diasParaVencer,
             vencido: diasParaVencer < 0 &&
                 !['LIQUIDADO', 'BAIXADO', 'CANCELADO'].includes(boleto.Status),
-            qrCodePix: boleto.QRCodePix,
-            qrCodeUrl: boleto.QRCodeUrl,
+            foiPago,
+            qrCodePix: boleto.QrCodePix,
+            qrCodeUrl: boleto.QrCodeUrl,
         };
     }
 };

@@ -125,9 +125,9 @@ export class NotificationsService {
         ContratoId: In(contratoIds),
         Ativo: true,
         Status: 'LIQUIDADO',
-        DataPagamento: Between(umMesAtras, hoje),
+        DataAtualizacao: Between(umMesAtras, hoje),
       },
-      order: { DataPagamento: 'DESC' },
+      order: { DataAtualizacao: 'DESC' },
       take: 5,
     });
 
@@ -136,13 +136,13 @@ export class NotificationsService {
         id: `pago-${boleto.Id}`,
         tipo: 'pagamento_confirmado',
         titulo: 'Pagamento confirmado',
-        mensagem: `Pagamento de R$ ${Number(boleto.PaidValue || boleto.NominalValue).toFixed(2)} confirmado`,
-        data: boleto.DataPagamento || new Date(),
+        mensagem: `Pagamento de R$ ${Number(boleto.NominalValue).toFixed(2)} confirmado`,
+        data: boleto.DataAtualizacao || new Date(),
         lida: true,
         dados: {
           boletoId: boleto.Id,
-          valor: boleto.PaidValue || boleto.NominalValue,
-          dataPagamento: boleto.DataPagamento,
+          valor: boleto.NominalValue,
+          dataConfirmacao: boleto.DataAtualizacao,
         },
       });
     }

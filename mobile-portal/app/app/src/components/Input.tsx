@@ -8,6 +8,7 @@ import {
   TextInputProps,
 } from 'react-native';
 import { colors, borderRadius } from '../theme/colors';
+import { AlertIcon } from './Icons';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -99,8 +100,11 @@ export function Input({
           onBlur={handleBlur}
           autoCapitalize="none"
           autoCorrect={false}
-          textContentType="none"
           autoComplete="off"
+          spellCheck={false}
+          textContentType={secureTextEntry ? "oneTimeCode" : "none"}
+          importantForAutofill="no"
+          keyboardAppearance="dark"
           {...props}
         />
 
@@ -134,7 +138,7 @@ export function Input({
 
       {error && (
         <View style={styles.errorContainer}>
-          <Text style={styles.errorIcon}>⚠️</Text>
+          <AlertIcon size={14} color="#f87171" />
           <Text style={styles.errorText}>{error}</Text>
         </View>
       )}
@@ -158,7 +162,7 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(38, 38, 38, 0.5)',
+    backgroundColor: '#1a1a1a',
     borderRadius: borderRadius.xl,
     borderWidth: 1,
     overflow: 'hidden',
@@ -179,6 +183,7 @@ const styles = StyleSheet.create({
   },
   iconLeft: {
     paddingLeft: 16,
+    backgroundColor: 'transparent',
   },
   iconRight: {
     position: 'absolute',
@@ -227,9 +232,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 6,
     gap: 4,
-  },
-  errorIcon: {
-    fontSize: 12,
   },
   errorText: {
     fontSize: 12,

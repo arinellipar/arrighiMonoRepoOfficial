@@ -14,24 +14,42 @@ const typeorm_1 = require("typeorm");
 let Boleto = class Boleto {
     Id;
     ContratoId;
-    BankSlipId;
+    NsuCode;
+    NsuDate;
     CovenantCode;
-    OurNumber;
+    BankNumber;
+    ClientNumber;
+    DueDate;
+    IssueDate;
+    NominalValue;
+    DocumentKind;
+    PayerName;
+    PayerDocumentType;
+    PayerDocumentNumber;
+    PayerAddress;
+    PayerNeighborhood;
+    PayerCity;
+    PayerState;
+    PayerZipCode;
+    FinePercentage;
+    FineQuantityDays;
+    InterestPercentage;
+    DeductionValue;
+    WriteOffQuantityDays;
     BarCode;
     DigitableLine;
-    NominalValue;
-    DueDate;
-    PayerName;
-    PayerDocumentNumber;
+    EntryDate;
+    QrCodePix;
+    QrCodeUrl;
     Status;
+    Messages;
     DataCadastro;
-    DataPagamento;
-    PaidValue;
-    NumeroParcela;
+    DataAtualizacao;
     Ativo;
-    FoiPago;
-    QRCodePix;
-    QRCodeUrl;
+    ErrorCode;
+    ErrorMessage;
+    TraceId;
+    NumeroParcela;
 };
 exports.Boleto = Boleto;
 __decorate([
@@ -45,7 +63,11 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ length: 100, nullable: true }),
     __metadata("design:type", String)
-], Boleto.prototype, "BankSlipId", void 0);
+], Boleto.prototype, "NsuCode", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'datetime', nullable: true }),
+    __metadata("design:type", Date)
+], Boleto.prototype, "NsuDate", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 50, nullable: true }),
     __metadata("design:type", String)
@@ -53,7 +75,79 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ length: 100, nullable: true }),
     __metadata("design:type", String)
-], Boleto.prototype, "OurNumber", void 0);
+], Boleto.prototype, "BankNumber", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 100, nullable: true }),
+    __metadata("design:type", String)
+], Boleto.prototype, "ClientNumber", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'datetime' }),
+    __metadata("design:type", Date)
+], Boleto.prototype, "DueDate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'datetime', nullable: true }),
+    __metadata("design:type", Date)
+], Boleto.prototype, "IssueDate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 18, scale: 2 }),
+    __metadata("design:type", Number)
+], Boleto.prototype, "NominalValue", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 100, nullable: true }),
+    __metadata("design:type", String)
+], Boleto.prototype, "DocumentKind", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 200, nullable: true }),
+    __metadata("design:type", String)
+], Boleto.prototype, "PayerName", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 20, nullable: true }),
+    __metadata("design:type", String)
+], Boleto.prototype, "PayerDocumentType", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 20, nullable: true }),
+    __metadata("design:type", String)
+], Boleto.prototype, "PayerDocumentNumber", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 200, nullable: true }),
+    __metadata("design:type", String)
+], Boleto.prototype, "PayerAddress", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 100, nullable: true }),
+    __metadata("design:type", String)
+], Boleto.prototype, "PayerNeighborhood", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 100, nullable: true }),
+    __metadata("design:type", String)
+], Boleto.prototype, "PayerCity", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 10, nullable: true }),
+    __metadata("design:type", String)
+], Boleto.prototype, "PayerState", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 20, nullable: true }),
+    __metadata("design:type", String)
+], Boleto.prototype, "PayerZipCode", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 18, scale: 2, nullable: true }),
+    __metadata("design:type", Number)
+], Boleto.prototype, "FinePercentage", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", Number)
+], Boleto.prototype, "FineQuantityDays", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 18, scale: 2, nullable: true }),
+    __metadata("design:type", Number)
+], Boleto.prototype, "InterestPercentage", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 18, scale: 2, nullable: true }),
+    __metadata("design:type", Number)
+], Boleto.prototype, "DeductionValue", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", Number)
+], Boleto.prototype, "WriteOffQuantityDays", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 100, nullable: true }),
     __metadata("design:type", String)
@@ -63,57 +157,53 @@ __decorate([
     __metadata("design:type", String)
 ], Boleto.prototype, "DigitableLine", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'decimal', precision: 18, scale: 2 }),
-    __metadata("design:type", Number)
-], Boleto.prototype, "NominalValue", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'date' }),
+    (0, typeorm_1.Column)({ type: 'datetime', nullable: true }),
     __metadata("design:type", Date)
-], Boleto.prototype, "DueDate", void 0);
+], Boleto.prototype, "EntryDate", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ length: 200, nullable: true }),
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
     __metadata("design:type", String)
-], Boleto.prototype, "PayerName", void 0);
+], Boleto.prototype, "QrCodePix", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ length: 20, nullable: true }),
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
     __metadata("design:type", String)
-], Boleto.prototype, "PayerDocumentNumber", void 0);
+], Boleto.prototype, "QrCodeUrl", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 50 }),
     __metadata("design:type", String)
 ], Boleto.prototype, "Status", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'datetime', nullable: true }),
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Boleto.prototype, "Messages", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'datetime' }),
     __metadata("design:type", Date)
 ], Boleto.prototype, "DataCadastro", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'datetime', nullable: true }),
     __metadata("design:type", Date)
-], Boleto.prototype, "DataPagamento", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'decimal', precision: 18, scale: 2, nullable: true }),
-    __metadata("design:type", Number)
-], Boleto.prototype, "PaidValue", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", Number)
-], Boleto.prototype, "NumeroParcela", void 0);
+], Boleto.prototype, "DataAtualizacao", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: true }),
     __metadata("design:type", Boolean)
 ], Boleto.prototype, "Ativo", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ length: 100, nullable: true }),
+    __metadata("design:type", String)
+], Boleto.prototype, "ErrorCode", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Boleto.prototype, "ErrorMessage", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 100, nullable: true }),
+    __metadata("design:type", String)
+], Boleto.prototype, "TraceId", void 0);
+__decorate([
     (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", Boolean)
-], Boleto.prototype, "FoiPago", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
-    __metadata("design:type", String)
-], Boleto.prototype, "QRCodePix", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
-    __metadata("design:type", String)
-], Boleto.prototype, "QRCodeUrl", void 0);
+    __metadata("design:type", Number)
+], Boleto.prototype, "NumeroParcela", void 0);
 exports.Boleto = Boleto = __decorate([
     (0, typeorm_1.Entity)('Boletos')
 ], Boleto);

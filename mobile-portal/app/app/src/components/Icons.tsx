@@ -1044,6 +1044,79 @@ export function TrashIcon({ size = 24, color = '#ef4444' }: IconProps) {
   );
 }
 
+// Ícone de Lâmpada/Dica
+export function LightbulbIcon({ size = 24, color = '#d4af37' }: IconProps) {
+  const scale = size / 24;
+
+  return (
+    <View style={[styles.lightbulbContainer, { width: size, height: size }]}>
+      {/* Bulbo */}
+      <View
+        style={[
+          styles.lightbulbBulb,
+          {
+            width: 14 * scale,
+            height: 14 * scale,
+            borderRadius: 7 * scale,
+            backgroundColor: color,
+            top: 1 * scale,
+          },
+        ]}
+      />
+      {/* Brilho */}
+      <View
+        style={[
+          styles.lightbulbGlow,
+          {
+            width: 4 * scale,
+            height: 4 * scale,
+            borderRadius: 2 * scale,
+            backgroundColor: '#fff',
+            opacity: 0.5,
+            top: 4 * scale,
+            left: 7 * scale,
+          },
+        ]}
+      />
+      {/* Base */}
+      <View
+        style={[
+          styles.lightbulbBase,
+          {
+            width: 8 * scale,
+            height: 6 * scale,
+            backgroundColor: color,
+            opacity: 0.8,
+            borderBottomLeftRadius: 2 * scale,
+            borderBottomRightRadius: 2 * scale,
+            bottom: 2 * scale,
+          },
+        ]}
+      >
+        {/* Linhas da base */}
+        <View
+          style={{
+            width: 6 * scale,
+            height: 1 * scale,
+            backgroundColor: '#0a0a0a',
+            opacity: 0.3,
+            marginTop: 1 * scale,
+          }}
+        />
+        <View
+          style={{
+            width: 6 * scale,
+            height: 1 * scale,
+            backgroundColor: '#0a0a0a',
+            opacity: 0.3,
+            marginTop: 1 * scale,
+          }}
+        />
+      </View>
+    </View>
+  );
+}
+
 // Ícone de Relógio/Pendente
 export function ClockIcon({ size = 24, color = '#3b82f6' }: IconProps) {
   const scale = size / 24;
@@ -1111,6 +1184,7 @@ const styles = StyleSheet.create({
   lockContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'transparent',
   },
   lockShackle: {
     position: 'absolute',
@@ -1145,6 +1219,7 @@ const styles = StyleSheet.create({
   userContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'transparent',
   },
   userHead: {
     position: 'absolute',
@@ -1179,6 +1254,7 @@ const styles = StyleSheet.create({
   idContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'transparent',
   },
   idCard: {
     flexDirection: 'row',
@@ -1306,6 +1382,7 @@ const styles = StyleSheet.create({
   alertContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'transparent',
   },
   alertTriangle: {},
   alertExclamation: {
@@ -1401,6 +1478,23 @@ const styles = StyleSheet.create({
   trashLines: {
     flexDirection: 'row',
     marginTop: 2,
+  },
+
+  // Lightbulb Icon
+  lightbulbContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  lightbulbBulb: {
+    position: 'absolute',
+  },
+  lightbulbGlow: {
+    position: 'absolute',
+  },
+  lightbulbBase: {
+    position: 'absolute',
+    alignItems: 'center',
   },
 });
 

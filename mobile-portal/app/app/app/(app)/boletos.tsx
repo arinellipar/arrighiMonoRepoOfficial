@@ -105,6 +105,15 @@ export default function BoletosScreen() {
     }
   };
 
+  const handlePayPix = () => {
+    if (selectedBoleto?.qrCodePix) {
+      Clipboard.setString(selectedBoleto.qrCodePix);
+      alert('Código Pix copiado! Cole no app do seu banco para pagar.');
+    } else {
+      alert('Código Pix não disponível para este boleto.');
+    }
+  };
+
   const FilterButton = ({ type, label, count, icon }: { type: FilterType; label: string; count: number; icon: React.ReactNode }) => {
     const isActive = filter === type;
     return (
@@ -350,14 +359,27 @@ export default function BoletosScreen() {
                     </View>
                   )}
 
+                  {/* PIX QR Code */}
+                  {!selectedBoleto.foiPago && selectedBoleto.status !== 'LIQUIDADO' && selectedBoleto.qrCodePix && (
+                    <View style={styles.pixContainer}>
+                      <Text style={styles.pixLabel}>Código Pix Copia e Cola</Text>
+                      <GlassCard variant="neon">
+                        <Text style={styles.pixCode} numberOfLines={3} ellipsizeMode="middle">
+                          {selectedBoleto.qrCodePix}
+                        </Text>
+                      </GlassCard>
+                    </View>
+                  )}
+
                   {/* Actions */}
                   {!selectedBoleto.foiPago && selectedBoleto.status !== 'LIQUIDADO' && (
                     <View style={styles.modalActions}>
                       <Button
-                        title="Pagar via PIX"
-                        onPress={() => {}}
+                        title={selectedBoleto.qrCodePix ? "Copiar Código PIX" : "PIX não disponível"}
+                        onPress={handlePayPix}
                         variant="neon"
                         size="lg"
+                        disabled={!selectedBoleto.qrCodePix}
                       />
                     </View>
                   )}
@@ -624,6 +646,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     marginTop: 16,
+  },
+  pixContainer: {
+    marginTop: 20,
+  },
+  pixLabel: {
+    fontSize: 14,
+    color: colors.text.muted,
+    marginBottom: 8,
+  },
+  pixCode: {
+    fontSize: 11,
+    color: '#22c55e',
+    fontFamily: 'monospace',
+    letterSpacing: 0.3,
+    lineHeight: 16,
   },
   modalActions: {
     marginTop: 24,

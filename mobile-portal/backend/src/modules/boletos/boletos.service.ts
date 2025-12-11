@@ -104,7 +104,7 @@ export class BoletosService {
         Ativo: true,
         Status: 'LIQUIDADO',
       },
-      order: { DataPagamento: 'DESC' },
+      order: { DataAtualizacao: 'DESC' },
     });
 
     return boletos.map((b) => this.mapBoletoToDto(b));
@@ -155,7 +155,7 @@ export class BoletosService {
       0,
     );
     const totalPago = boletosPagos.reduce(
-      (sum, b) => sum + Number(b.PaidValue || b.NominalValue),
+      (sum, b) => sum + Number(b.NominalValue),
       0,
     );
 
@@ -199,10 +199,12 @@ export class BoletosService {
       (vencimento.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24),
     );
 
+    const foiPago = boleto.Status === 'LIQUIDADO';
+
     let statusDisplay = boleto.Status;
-    if (boleto.FoiPago || boleto.Status === 'LIQUIDADO') {
+    if (foiPago) {
       statusDisplay = 'PAGO';
-    } else if (boleto.Status === 'BAIXADO' && !boleto.FoiPago) {
+    } else if (boleto.Status === 'BAIXADO') {
       statusDisplay = 'EXPIRADO';
     } else if (
       diasParaVencer < 0 &&
@@ -218,8 +220,7 @@ export class BoletosService {
       linhaDigitavel: boleto.DigitableLine,
       valor: boleto.NominalValue,
       dataVencimento: boleto.DueDate,
-      dataPagamento: boleto.DataPagamento,
-      valorPago: boleto.PaidValue,
+      dataCadastro: boleto.DataCadastro,
       status: boleto.Status,
       statusDisplay,
       numeroParcela: boleto.NumeroParcela,
@@ -227,8 +228,9 @@ export class BoletosService {
       vencido:
         diasParaVencer < 0 &&
         !['LIQUIDADO', 'BAIXADO', 'CANCELADO'].includes(boleto.Status),
-      qrCodePix: boleto.QRCodePix,
-      qrCodeUrl: boleto.QRCodeUrl,
+      foiPago,
+      qrCodePix: boleto.QrCodePix,
+      qrCodeUrl: boleto.QrCodeUrl,
     };
   }
 }

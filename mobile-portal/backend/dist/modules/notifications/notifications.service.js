@@ -103,9 +103,9 @@ let NotificationsService = class NotificationsService {
                 ContratoId: (0, typeorm_2.In)(contratoIds),
                 Ativo: true,
                 Status: 'LIQUIDADO',
-                DataPagamento: (0, typeorm_2.Between)(umMesAtras, hoje),
+                DataAtualizacao: (0, typeorm_2.Between)(umMesAtras, hoje),
             },
-            order: { DataPagamento: 'DESC' },
+            order: { DataAtualizacao: 'DESC' },
             take: 5,
         });
         for (const boleto of boletosPagos) {
@@ -113,13 +113,13 @@ let NotificationsService = class NotificationsService {
                 id: `pago-${boleto.Id}`,
                 tipo: 'pagamento_confirmado',
                 titulo: 'Pagamento confirmado',
-                mensagem: `Pagamento de R$ ${Number(boleto.PaidValue || boleto.NominalValue).toFixed(2)} confirmado`,
-                data: boleto.DataPagamento || new Date(),
+                mensagem: `Pagamento de R$ ${Number(boleto.NominalValue).toFixed(2)} confirmado`,
+                data: boleto.DataAtualizacao || new Date(),
                 lida: true,
                 dados: {
                     boletoId: boleto.Id,
-                    valor: boleto.PaidValue || boleto.NominalValue,
-                    dataPagamento: boleto.DataPagamento,
+                    valor: boleto.NominalValue,
+                    dataConfirmacao: boleto.DataAtualizacao,
                 },
             });
         }
