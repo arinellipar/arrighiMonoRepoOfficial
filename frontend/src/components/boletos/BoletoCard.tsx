@@ -56,7 +56,11 @@ export function BoletoCard({
           </h3>
           <p className="text-sm text-gray-600">NSU: {boleto.nsuCode}</p>
         </div>
-        <StatusBadge status={boleto.status} />
+        <StatusBadge
+          status={boleto.status}
+          foiPago={boleto.foiPago}
+          paidValue={boleto.paidValue}
+        />
       </div>
 
       {/* Valor e Vencimento */}

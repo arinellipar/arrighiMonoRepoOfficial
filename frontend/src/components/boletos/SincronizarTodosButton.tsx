@@ -111,7 +111,7 @@ export function SincronizarTodosButton({
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">
+                          <span className="px-2 py-1 bg-amber-100 text-amber-800 rounded text-xs">
                             {item.statusAnterior}
                           </span>
                           <span>→</span>

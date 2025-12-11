@@ -1,0 +1,90 @@
+import { Repository } from 'typeorm';
+import { Boleto } from '../../entities/boleto.entity';
+import { Contrato } from '../../entities/contrato.entity';
+export declare class BoletosService {
+    private boletoRepository;
+    private contratoRepository;
+    constructor(boletoRepository: Repository<Boleto>, contratoRepository: Repository<Contrato>);
+    getBoletosByCliente(clienteId: number): Promise<{
+        id: number;
+        contratoId: number;
+        codigoBarras: string;
+        linhaDigitavel: string;
+        valor: number;
+        dataVencimento: Date;
+        dataPagamento: Date;
+        valorPago: number;
+        status: string;
+        statusDisplay: string;
+        numeroParcela: number;
+        diasParaVencer: number;
+        vencido: boolean;
+        qrCodePix: string;
+        qrCodeUrl: string;
+    }[]>;
+    getBoletoById(clienteId: number, boletoId: number): Promise<{
+        id: number;
+        contratoId: number;
+        codigoBarras: string;
+        linhaDigitavel: string;
+        valor: number;
+        dataVencimento: Date;
+        dataPagamento: Date;
+        valorPago: number;
+        status: string;
+        statusDisplay: string;
+        numeroParcela: number;
+        diasParaVencer: number;
+        vencido: boolean;
+        qrCodePix: string;
+        qrCodeUrl: string;
+    }>;
+    getBoletosAbertos(clienteId: number): Promise<{
+        id: number;
+        contratoId: number;
+        codigoBarras: string;
+        linhaDigitavel: string;
+        valor: number;
+        dataVencimento: Date;
+        dataPagamento: Date;
+        valorPago: number;
+        status: string;
+        statusDisplay: string;
+        numeroParcela: number;
+        diasParaVencer: number;
+        vencido: boolean;
+        qrCodePix: string;
+        qrCodeUrl: string;
+    }[]>;
+    getBoletosPagos(clienteId: number): Promise<{
+        id: number;
+        contratoId: number;
+        codigoBarras: string;
+        linhaDigitavel: string;
+        valor: number;
+        dataVencimento: Date;
+        dataPagamento: Date;
+        valorPago: number;
+        status: string;
+        statusDisplay: string;
+        numeroParcela: number;
+        diasParaVencer: number;
+        vencido: boolean;
+        qrCodePix: string;
+        qrCodeUrl: string;
+    }[]>;
+    getResumo(clienteId: number): Promise<{
+        totalAberto: number;
+        totalPago: number;
+        totalVencido: number;
+        quantidadeAbertos: number;
+        quantidadePagos: number;
+        quantidadeVencidos: number;
+        proximoVencimento: {
+            id: number;
+            valor: number;
+            dataVencimento: Date;
+        } | null;
+    }>;
+    private mapBoletoToDto;
+}

@@ -40,10 +40,10 @@ export const UserStatus: React.FC = () => {
 
   if (!usuario) {
     return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
         <div className="flex items-center">
-          <AlertTriangle className="h-5 w-5 text-yellow-500 mr-2" />
-          <h3 className="text-yellow-800 font-medium">
+          <AlertTriangle className="h-5 w-5 text-amber-500 mr-2" />
+          <h3 className="text-amber-800 font-medium">
             Usuário não encontrado
           </h3>
         </div>
@@ -170,7 +170,7 @@ export const UserGroupBadge: React.FC = () => {
       "Cobrança e Financeiro": "bg-green-100 text-green-800 border-green-200",
       "Cobrança/Financeiro": "bg-green-100 text-green-800 border-green-200",
       "Administrativo de Filial":
-        "bg-yellow-100 text-yellow-800 border-yellow-200",
+        "bg-amber-100 text-amber-800 border-amber-200",
       Usuario: "bg-gray-100 text-gray-800 border-gray-200",
       Usuário: "bg-gray-100 text-gray-800 border-gray-200",
     };

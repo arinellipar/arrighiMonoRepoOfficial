@@ -1,34 +1,36 @@
 // src/hooks/useEstatisticas.ts
-import { useState, useEffect, useCallback } from "react";
+"use client";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { apiClient } from "@/lib/api";
 
 export interface ReceitaData {
-  ReceitaTotal: number;
-  ReceitaEntrada: number;
-  ReceitaParcelas: number;
-  ComissaoTotal: number;
-  ReceitaMesAtual: number;
-  ReceitaAnoAtual: number;
-  CrescimentoMes: number;
-  ValorTotalBoletos: number;
-  ValorBoletosLiquidados: number;
-  ValorBoletosPendentes: number;
-  ValorBoletosVencidos: number;
-  TotalContratos: number;
-  ContratosFechados: number;
-  ContratosMesAtual: number;
-  ContratosAnoAtual: number;
-  BoletosMesAtual: number;
-  BoletosAnoAtual: number;
-  ValorBoletosMesAtual: number;
-  ValorBoletosAnoAtual: number;
-  TaxaConversao: number;
-  ReceitaMediaPorContrato: number;
-  ContratosPorSituacao: {
-    Leed: number;
-    Prospecto: number;
-    Enviado: number;
-    Assinado: number;
+  receitaTotal: number; // Valor dos boletos liquidados (dinheiro que entrou)
+  receitaEntrada: number;
+  receitaParcelas: number;
+  comissaoTotal: number;
+  lucroContratos?: number; // Lucro teórico dos contratos (ValorNegociado - Comissão)
+  receitaMesAtual: number;
+  receitaAnoAtual: number;
+  crescimentoMes: number;
+  valorTotalBoletos: number;
+  valorBoletosLiquidados: number;
+  valorBoletosPendentes: number;
+  valorBoletosVencidos: number;
+  totalContratos: number;
+  contratosFechados: number;
+  contratosMesAtual: number;
+  contratosAnoAtual: number;
+  boletosMesAtual: number;
+  boletosAnoAtual: number;
+  valorBoletosMesAtual: number;
+  valorBoletosAnoAtual: number;
+  taxaConversao: number;
+  receitaMediaPorContrato: number;
+  contratosPorSituacao: {
+    leed: number;
+    prospecto: number;
+    enviado: number;
+    assinado: number;
   };
 }
 
@@ -58,65 +60,33 @@ interface UseEstatisticasState {
 }
 
 export function useEstatisticas() {
-  const [state, setState] = useState<UseEstatisticasState>({
-    receita: null,
-    dashboard: null,
-    loading: false,
-    error: null,
-  });
+  const [receita, setReceita] = useState<ReceitaData | null>(null);
+  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const hasFetched = useRef(false);
 
   const fetchReceita = useCallback(async () => {
-    setState((prev) => ({ ...prev, loading: true, error: null }));
     try {
       console.log("🔧 fetchReceita: Buscando dados de receita...");
-
-      // Debug: verificar dados do usuário
-      const user = localStorage.getItem("user");
-      const isAuthenticated = localStorage.getItem("isAuthenticated");
-      console.log("🔧 fetchReceita: Dados do localStorage:", {
-        user,
-        isAuthenticated,
-      });
-
-      // Teste de autenticação primeiro
-      try {
-        const testResponse = await apiClient.get("/Estatisticas/test");
-        console.log(
-          "🔧 fetchReceita: Teste de autenticação:",
-          testResponse.data
-        );
-      } catch (testError) {
-        console.error(
-          "🔧 fetchReceita: Erro no teste de autenticação:",
-          testError
-        );
-      }
-
       const response = await apiClient.get("/Estatisticas/receita");
 
       if (response.error) {
         throw new Error(response.error);
       }
 
-      setState((prev) => ({
-        ...prev,
-        receita: response.data as ReceitaData,
-        loading: false,
-      }));
+      console.log("📊 fetchReceita: Dados recebidos:", response.data);
+      console.log("📊 fetchReceita: receitaTotal =", (response.data as any)?.receitaTotal);
 
+      setReceita(response.data as ReceitaData);
       console.log("✅ fetchReceita: Dados de receita carregados com sucesso");
-    } catch (error: any) {
-      console.error("❌ fetchReceita: Erro ao buscar receita:", error);
-      setState((prev) => ({
-        ...prev,
-        error: error.message || "Erro ao carregar dados de receita",
-        loading: false,
-      }));
+    } catch (err: any) {
+      console.error("❌ fetchReceita: Erro ao buscar receita:", err);
+      setError(err.message || "Erro ao carregar dados de receita");
     }
   }, []);
 
   const fetchDashboard = useCallback(async () => {
-    setState((prev) => ({ ...prev, loading: true, error: null }));
     try {
       console.log("🔧 fetchDashboard: Buscando dados do dashboard...");
       const response = await apiClient.get("/Estatisticas/dashboard");
@@ -125,39 +95,36 @@ export function useEstatisticas() {
         throw new Error(response.error);
       }
 
-      setState((prev) => ({
-        ...prev,
-        dashboard: response.data as DashboardData,
-        loading: false,
-      }));
-
-      console.log(
-        "✅ fetchDashboard: Dados do dashboard carregados com sucesso"
-      );
-    } catch (error: any) {
-      console.error("❌ fetchDashboard: Erro ao buscar dashboard:", error);
-      setState((prev) => ({
-        ...prev,
-        error: error.message || "Erro ao carregar dados do dashboard",
-        loading: false,
-      }));
+      setDashboard(response.data as DashboardData);
+      console.log("✅ fetchDashboard: Dados do dashboard carregados com sucesso");
+    } catch (err: any) {
+      console.error("❌ fetchDashboard: Erro ao buscar dashboard:", err);
+      setError(err.message || "Erro ao carregar dados do dashboard");
     }
   }, []);
 
   const refreshData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     await Promise.all([fetchReceita(), fetchDashboard()]);
+    setLoading(false);
   }, [fetchReceita, fetchDashboard]);
 
-  // Carregar dados automaticamente
+  // Carregar dados automaticamente na montagem
   useEffect(() => {
-    refreshData();
+    console.log("🚀 useEstatisticas: useEffect executando, hasFetched =", hasFetched.current);
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      console.log("🚀 useEstatisticas: Iniciando fetch de dados...");
+      refreshData();
+    }
   }, [refreshData]);
 
   return {
-    receita: state.receita,
-    dashboard: state.dashboard,
-    loading: state.loading,
-    error: state.error,
+    receita,
+    dashboard,
+    loading,
+    error,
     fetchReceita,
     fetchDashboard,
     refreshData,

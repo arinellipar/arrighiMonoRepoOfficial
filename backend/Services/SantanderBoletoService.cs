@@ -560,6 +560,7 @@ namespace CrmArrighi.Services
                 paymentType = "REGISTRO",
                 finePercentage = boleto.FinePercentage?.ToString("F2"),
                 interestPercentage = boleto.InterestPercentage?.ToString("F2"),
+                writeOffQuantityDays = 30, // Baixa automática após 30 dias sem pagamento
                 messages = boleto.Messages?.Split(';').Where(m => !string.IsNullOrWhiteSpace(m)).ToArray(),
                 // PIX será adicionado futuramente quando implementado no modelo
                 key = _configuration["SantanderAPI:PixKey"] != null ? new
@@ -771,6 +772,23 @@ namespace CrmArrighi.Services
             _logger.LogInformation("📊 Dados do boleto - Status: {Status}, Valor Pago: {PaidValue}, Valor Nominal: {NominalValue}",
                 billData.status, billData.paidValue, billData.nominalValue);
 
+            // Determinar se foi realmente pago
+            var statusUpper = billData.status?.ToUpper() ?? "";
+            var paidValue = billData.paidValue ?? 0;
+            var foiPago = statusUpper == "LIQUIDADO" || 
+                         statusUpper == "LIQUIDADO PARCIALMENTE" || 
+                         statusUpper == "LIQUIDADO PARCIAL" ||
+                         (statusUpper == "BAIXADO" && paidValue > 0); // BAIXADO com valor pago = PIX
+
+            // Descrição dinâmica para BAIXADO
+            var statusDescription = statusUpper == "BAIXADO" 
+                ? (paidValue > 0 
+                    ? "Boleto pago via PIX" 
+                    : "Boleto baixado (expirado ou baixa manual - NÃO PAGO)")
+                : ObterDescricaoStatus(billData.status);
+
+            _logger.LogInformation("📊 Status: {Status}, PaidValue: {PaidValue}, FoiPago: {FoiPago}", statusUpper, paidValue, foiPago);
+
             var response = new BoletoStatusResponseDTO
             {
                 // Informações básicas
@@ -781,8 +799,9 @@ namespace CrmArrighi.Services
                 NsuDate = billData.nsuDate,
 
                 // Status
-                Status = billData.status?.ToUpper(), // ✅ Converter para maiúsculo (API retorna "Liquidado", queremos "LIQUIDADO")
-                StatusDescription = ObterDescricaoStatus(billData.status),
+                Status = statusUpper,
+                StatusDescription = statusDescription,
+                FoiPago = foiPago,
 
                 // Datas
                 DueDate = billData.dueDate,
@@ -861,12 +880,13 @@ namespace CrmArrighi.Services
             return statusNormalizado switch
             {
                 "ATIVO" => "Boleto em aberto (vencido ou a vencer)",
-                "BAIXADO" => "Boleto baixado (pagamento via PIX ou baixa manual)",
-                "LIQUIDADO" => "Boleto liquidado (pagamento via linha digitável/código de barras)",
+                "BAIXADO" => "Boleto baixado (verificar paidValue para saber se foi pago via PIX ou baixa automática)",
+                "LIQUIDADO" => "Boleto liquidado (pago via linha digitável/código de barras)",
                 "LIQUIDADO PARCIALMENTE" => "Boleto com pagamento parcial",
                 "LIQUIDADO PARCIAL" => "Boleto com pagamento parcial",
                 "CANCELADO" => "Boleto cancelado",
                 "REGISTRADO" => "Boleto registrado, aguardando pagamento",
+                "PAGO" => "Boleto pago",
                 _ => status
             };
         }

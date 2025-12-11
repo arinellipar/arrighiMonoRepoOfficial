@@ -17,7 +17,8 @@ import { userService } from "@/services/user.service";
 import { useAuthCheck } from "@/hooks/useAuthCheck";
 
 interface User {
-  id: number;
+  id: number; // Normalizado de usuarioId
+  usuarioId?: number; // Campo original do backend (para compatibilidade)
   login: string;
   email: string;
   grupoAcesso: string;
@@ -91,8 +92,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return "";
     };
 
-    // Enviar heartbeat a cada 5 minutos
-    heartbeatInterval.current = setInterval(async () => {
+    // Enviar heartbeat imediatamente e a cada 2 minutos (mais frequente para melhor detecção)
+    const sendHeartbeat = async () => {
       try {
         const paginaAtual = getCurrentPage();
         await apiClient.put(`/SessaoAtiva/atualizar/${userId}`, {
@@ -112,7 +113,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           stopHeartbeat();
         }
       }
-    }, 5 * 60 * 1000); // 5 minutos
+    };
+
+    // Enviar heartbeat imediatamente
+    sendHeartbeat();
+
+    // Continuar enviando a cada 2 minutos
+    heartbeatInterval.current = setInterval(sendHeartbeat, 2 * 60 * 1000); // 2 minutos
   };
 
   // Função para parar heartbeat
@@ -163,7 +170,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        setUser(userData);
+        // Normalizar: garantir que id esteja definido (pode vir como usuarioId do backend)
+        const normalizedUser = {
+          ...userData,
+          id: userData.id || userData.usuarioId,
+        };
+        setUser(normalizedUser);
       }
     } catch (error) {
       console.error("Erro ao verificar autenticação:", error);
@@ -242,8 +254,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userData = response.data as any;
         const token = userData.token;
 
-        setUser(userData);
-        localStorage.setItem("user", JSON.stringify(userData));
+        // Normalizar: garantir que id esteja definido (pode vir como usuarioId do backend)
+        const normalizedUser = {
+          ...userData,
+          id: userData.id || userData.usuarioId,
+        };
+
+        setUser(normalizedUser);
+        localStorage.setItem("user", JSON.stringify(normalizedUser));
         localStorage.setItem("isAuthenticated", "true");
 
         // Salvar token se fornecido pelo backend

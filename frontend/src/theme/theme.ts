@@ -13,7 +13,7 @@ const theme = createTheme({
             contrastText: "#ffffff",
         },
         secondary: {
-            main: "#eab308", // Tailwind gold-500
+            main: "#eab308", // Tailwind amber-500
             light: "#facc15",
             dark: "#ca8a04",
             contrastText: "#000000",

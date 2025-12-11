@@ -37,9 +37,17 @@ namespace CrmArrighi.Services
             var hoje = DateTime.UtcNow.Date;
             var inicioMes = new DateTime(hoje.Year, hoje.Month, 1);
             var fimMes = inicioMes.AddMonths(1).AddDays(-1);
+            var inicioMesPassado = inicioMes.AddMonths(-1);
+            var fimMesPassado = inicioMes.AddDays(-1);
             var inicioProximoMes = inicioMes.AddMonths(1);
             var fimProximoMes = inicioProximoMes.AddMonths(1).AddDays(-1);
             var inicioTrimestre = inicioMes.AddMonths(3);
+
+            // Receita realizada no mês passado (boletos liquidados)
+            var receitaMesPassado = await _context.Boletos
+                .Where(b => b.Status == "LIQUIDADO" &&
+                       b.DueDate >= inicioMesPassado && b.DueDate <= fimMesPassado)
+                .SumAsync(b => b.NominalValue);
 
             // Boletos a vencer este mês
             var boletosEsteMes = await _context.Boletos
@@ -93,6 +101,7 @@ namespace CrmArrighi.Services
 
             return new ForecastResumoDTO
             {
+                ReceitaMesPassado = receitaMesPassado,
                 ReceitaEsperadaMesAtual = boletosEsteMes.Sum(b => b.NominalValue),
                 ReceitaEsperadaProximoMes = boletosProximoMes.Sum(b => b.NominalValue),
                 ReceitaEsperadaTrimestre = boletosTrimestre.Sum(b => b.NominalValue),
@@ -310,6 +319,7 @@ namespace CrmArrighi.Services
 
     public class ForecastResumoDTO
     {
+        public decimal ReceitaMesPassado { get; set; }
         public decimal ReceitaEsperadaMesAtual { get; set; }
         public decimal ReceitaEsperadaProximoMes { get; set; }
         public decimal ReceitaEsperadaTrimestre { get; set; }

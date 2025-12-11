@@ -1,56 +1,88 @@
 interface StatusBadgeProps {
   status: string;
   statusDescription?: string;
+  foiPago?: boolean;
+  paidValue?: number;
   size?: "sm" | "md" | "lg";
 }
 
 export function StatusBadge({
   status,
   statusDescription,
+  foiPago,
+  paidValue,
   size = "md",
 }: StatusBadgeProps) {
-  const getStatusConfig = (status: string) => {
-    switch (status.toUpperCase()) {
-      case "LIQUIDADO":
-        return {
-          color: "bg-green-500/20 text-green-400 border-green-500/30",
-          text: "Pago",
-        };
-      case "BAIXADO":
+  const getStatusConfig = (status: string, foiPago?: boolean, paidValue?: number) => {
+    // Primeiro, verificar se foi pago usando foiPago ou paidValue
+    const isPago = foiPago ?? (status === "LIQUIDADO" || (status === "BAIXADO" && (paidValue ?? 0) > 0));
+
+    // Se foi pago
+    if (isPago) {
+      if (status.toUpperCase() === "BAIXADO") {
         return {
           color: "bg-green-500/20 text-green-400 border-green-500/30",
           text: "Pago (PIX)",
+          icon: "💳",
+        };
+      }
+      return {
+        color: "bg-green-500/20 text-green-400 border-green-500/30",
+        text: "Pago",
+        icon: "✓",
+      };
+    }
+
+    // Se não foi pago, verificar o status
+    switch (status.toUpperCase()) {
+      case "BAIXADO":
+        // BAIXADO sem pagamento = Expirado
+        return {
+          color: "bg-red-500/20 text-red-400 border-red-500/30",
+          text: "Expirado",
+          icon: "⚠️",
         };
       case "ATIVO":
       case "REGISTRADO":
         return {
           color: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-          text: "Ativo",
+          text: "Aguardando",
+          icon: "⏳",
         };
       case "VENCIDO":
         return {
-          color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+          color: "bg-amber-500/20 text-amber-400 border-amber-500/30",
           text: "Vencido",
+          icon: "⚠️",
         };
       case "CANCELADO":
         return {
           color: "bg-neutral-700 text-neutral-300 border-neutral-600",
           text: "Cancelado",
+          icon: "✕",
         };
       case "PENDENTE":
         return {
           color: "bg-neutral-700 text-neutral-300 border-neutral-600",
           text: "Pendente",
+          icon: "⏸",
+        };
+      case "ERRO":
+        return {
+          color: "bg-pink-500/20 text-pink-400 border-pink-500/30",
+          text: "Erro",
+          icon: "❌",
         };
       default:
         return {
           color: "bg-neutral-700 text-neutral-300 border-neutral-600",
           text: status,
+          icon: null,
         };
     }
   };
 
-  const config = getStatusConfig(status);
+  const config = getStatusConfig(status, foiPago, paidValue);
 
   const sizeClasses = {
     sm: "px-2 py-0.5 text-xs",

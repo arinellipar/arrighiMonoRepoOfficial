@@ -115,8 +115,8 @@ export default function PortalClienteLoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 flex items-center justify-center p-4">
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gold-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gold-600/10 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-600/10 rounded-full blur-3xl animate-pulse delay-1000" />
       </div>
 
       <motion.div
@@ -133,11 +133,11 @@ export default function PortalClienteLoginPage() {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.3 }}
-              className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-gold-500 to-gold-600 rounded-2xl shadow-lg shadow-gold-500/30 mb-4"
+              className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl shadow-lg shadow-amber-500/30 mb-4"
             >
               <Shield className="w-10 h-10 text-neutral-950" />
             </motion.div>
-            <h1 className="text-2xl font-bold text-gradient-gold mb-2">
+            <h1 className="text-2xl font-bold text-gradient-amber mb-2">
               Portal do Cliente
             </h1>
             <p className="text-neutral-400 text-sm">
@@ -151,8 +151,8 @@ export default function PortalClienteLoginPage() {
               {/* Informativo */}
               <div className="bg-neutral-800/50 rounded-xl p-4 border border-neutral-700/50">
                 <p className="text-sm text-neutral-300 text-center">
-                  Digite seu <span className="text-gold-400 font-semibold">CPF</span> ou{" "}
-                  <span className="text-gold-400 font-semibold">CNPJ</span> para acessar
+                  Digite seu <span className="text-amber-400 font-semibold">CPF</span> ou{" "}
+                  <span className="text-amber-400 font-semibold">CNPJ</span> para acessar
                 </p>
               </div>
 
@@ -164,9 +164,9 @@ export default function PortalClienteLoginPage() {
                 <div className="relative">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
                     {tipoDoc === "CNPJ" ? (
-                      <Building2 className="w-5 h-5 text-gold-500" />
+                      <Building2 className="w-5 h-5 text-amber-500" />
                     ) : (
-                      <User className="w-5 h-5 text-gold-500" />
+                      <User className="w-5 h-5 text-amber-500" />
                     )}
                   </div>
                   <input
@@ -182,7 +182,7 @@ export default function PortalClienteLoginPage() {
                         ? "border-red-500/50 focus:ring-red-500/50"
                         : tipoDoc
                         ? "border-green-500/50 focus:ring-green-500/50"
-                        : "border-neutral-700 focus:ring-gold-500/50"
+                        : "border-neutral-700 focus:ring-amber-500/50"
                     )}
                   />
                   {tipoDoc && (
@@ -219,7 +219,7 @@ export default function PortalClienteLoginPage() {
                 </label>
                 <div className="relative">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <Lock className="w-5 h-5 text-gold-500" />
+                    <Lock className="w-5 h-5 text-amber-500" />
                   </div>
                   <input
                     type={showSenha ? "text" : "password"}
@@ -233,7 +233,7 @@ export default function PortalClienteLoginPage() {
                       "w-full pl-12 pr-12 py-4 bg-neutral-800/50 border rounded-xl text-neutral-100 placeholder:text-neutral-500 focus:outline-none focus:ring-2 transition-all text-lg",
                       error
                         ? "border-red-500/50 focus:ring-red-500/50"
-                        : "border-neutral-700 focus:ring-gold-500/50"
+                        : "border-neutral-700 focus:ring-amber-500/50"
                     )}
                   />
                   <button
@@ -274,7 +274,7 @@ export default function PortalClienteLoginPage() {
                 className={cn(
                   "w-full flex items-center justify-center gap-3 py-4 rounded-xl text-lg font-semibold transition-all",
                   tipoDoc && senha && !isLoading
-                    ? "bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-neutral-950 shadow-lg shadow-gold-500/30"
+                    ? "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-neutral-950 shadow-lg shadow-amber-500/30"
                     : "bg-neutral-800 text-neutral-500 cursor-not-allowed"
                 )}
               >
@@ -296,7 +296,7 @@ export default function PortalClienteLoginPage() {
             <div className="mt-6 pt-6 border-t border-neutral-800">
               <button
                 onClick={() => setShowHelp(!showHelp)}
-                className="w-full flex items-center justify-center gap-2 text-sm text-neutral-400 hover:text-gold-400 transition-colors"
+                className="w-full flex items-center justify-center gap-2 text-sm text-neutral-400 hover:text-amber-400 transition-colors"
               >
                 <HelpCircle className="w-4 h-4" />
                 {showHelp ? "Ocultar ajuda" : "Precisa de ajuda?"}
@@ -315,11 +315,11 @@ export default function PortalClienteLoginPage() {
                         Para acessar o portal, utilize o CPF ou CNPJ cadastrado em seu contrato com a Arrighi Advogados.
                       </p>
                       <div className="flex items-center gap-2 text-xs text-neutral-300">
-                        <Phone className="w-3.5 h-3.5 text-gold-500" />
+                        <Phone className="w-3.5 h-3.5 text-amber-500" />
                         <span>(11) 3000-0000</span>
                       </div>
                       <div className="flex items-center gap-2 text-xs text-neutral-300">
-                        <Mail className="w-3.5 h-3.5 text-gold-500" />
+                        <Mail className="w-3.5 h-3.5 text-amber-500" />
                         <span>contato@arrighiadvogados.com.br</span>
                       </div>
                     </div>

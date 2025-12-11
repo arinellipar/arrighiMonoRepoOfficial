@@ -32,7 +32,7 @@ import {
   CreatePessoaFisicaDTO,
   UpdatePessoaFisicaDTO,
 } from "@/types/api";
-import { cn, truncateText } from "@/lib/utils";
+import { cn, truncateText, formatCPFDisplay } from "@/lib/utils";
 import { useForm } from "@/contexts/FormContext";
 import { TableSizeToggle } from "@/components/TableSizeToggle";
 import { PermissionWrapper } from "@/components/permissions";
@@ -133,7 +133,7 @@ function AdvogadoBadge({ isCompact = false }: { isCompact?: boolean }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full font-semibold bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-md border border-yellow-500/30",
+        "inline-flex items-center gap-1 rounded-full font-semibold bg-gradient-to-r from-amber-400 to-amber-500 text-white shadow-md border border-amber-500/30",
         isCompact
           ? "px-2 py-0.5 text-[9px] sm:text-[10px]"
           : "px-2.5 py-1 text-[10px] sm:text-xs"
@@ -154,7 +154,7 @@ function isAdvogado(email: string | undefined): boolean {
 function LoadingSpinner() {
   return (
     <div className="flex items-center justify-center py-12">
-      <Loader2 className="w-8 h-8 animate-spin text-gold-400" />
+      <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
     </div>
   );
 }
@@ -395,13 +395,13 @@ export default function PessoaFisicaPage() {
           >
             <div className="flex flex-col md:flex-row gap-2 sm:gap-3 lg:gap-4 w-full">
               <div className="flex-1 relative">
-                <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gold-500 w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+                <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-amber-500 w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
                 <input
                   type="text"
                   placeholder="Buscar por nome, CPF ou email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-7 sm:pl-8 lg:pl-10 pr-3 sm:pr-4 py-1.5 sm:py-2 lg:py-3 bg-neutral-800/50 border border-neutral-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all duration-200 text-[11px] sm:text-xs lg:text-sm"
+                  className="w-full pl-7 sm:pl-8 lg:pl-10 pr-3 sm:pr-4 py-1.5 sm:py-2 lg:py-3 bg-neutral-800/50 border border-neutral-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 text-[11px] sm:text-xs lg:text-sm"
                 />
                 {selectedPersonId && (
                   <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
@@ -716,8 +716,9 @@ export default function PessoaFisicaPage() {
                                     ? "text-[9px] sm:text-[10px] py-1 sm:py-1.5"
                                     : "text-[10px] sm:text-xs lg:text-sm"
                                 }`}
+                                style={{ textDecoration: 'none' }}
                               >
-                                {pessoa.cpf}
+                                <span style={{ textDecoration: 'none' }}>{formatCPFDisplay(pessoa.cpf)}</span>
                               </td>
                               <td
                                 className={`px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 whitespace-nowrap hidden sm:table-cell ${
@@ -783,14 +784,14 @@ export default function PessoaFisicaPage() {
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="btn-mobile px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-neutral-300 bg-neutral-800 border border-neutral-700 rounded-lg hover:bg-neutral-700 hover:border-gold-500/50 transition-colors duration-200"
+                        className="btn-mobile px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-neutral-300 bg-neutral-800 border border-neutral-700 rounded-lg hover:bg-neutral-700 hover:border-amber-500/50 transition-colors duration-200"
                       >
                         Anterior
                       </motion.button>
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="btn-mobile px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white bg-gold-500 border border-transparent rounded-lg hover:bg-gold-600 transition-colors duration-200"
+                        className="btn-mobile px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white bg-amber-500 border border-transparent rounded-lg hover:bg-amber-600 transition-colors duration-200"
                       >
                         Próximo
                       </motion.button>
@@ -881,7 +882,7 @@ export default function PessoaFisicaPage() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => clearError()}
-                        className="px-4 py-2 bg-gold-500 hover:bg-gold-600 text-white rounded-lg font-medium transition-colors duration-200"
+                        className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition-colors duration-200"
                       >
                         Corrigir dados
                       </motion.button>

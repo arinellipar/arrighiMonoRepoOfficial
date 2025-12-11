@@ -26,7 +26,7 @@ import {
   PessoaFisica,
   PessoaJuridica,
 } from "@/types/api";
-import { cn } from "@/lib/utils";
+import { cn, formatDocumentoDisplay } from "@/lib/utils";
 import { usePessoasFisicas } from "@/hooks/usePessoasFisicas";
 import { usePessoasJuridicas } from "@/hooks/usePessoasJuridicas";
 import { useFiliais } from "@/hooks/useFiliais";
@@ -543,8 +543,8 @@ export default function ClienteForm({
                       clienteEncontrado.pessoaJuridica?.razaoSocial}
                   </p>
                   <p>
-                    {clienteEncontrado.pessoaFisica?.cpf ||
-                      clienteEncontrado.pessoaJuridica?.cnpj}
+                    {formatDocumentoDisplay(clienteEncontrado.pessoaFisica?.cpf ||
+                      clienteEncontrado.pessoaJuridica?.cnpj)}
                   </p>
                   <p>Status: {clienteEncontrado.status}</p>
                   {clienteEncontrado.filial && (

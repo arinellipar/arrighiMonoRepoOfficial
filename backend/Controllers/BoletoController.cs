@@ -236,6 +236,104 @@ namespace CrmArrighi.Controllers
             }
         }
 
+        // PUT: api/Boleto/sincronizar-todos-forcado
+        // Endpoint especial para sincronizar TODOS os boletos, incluindo BAIXADO e LIQUIDADO
+        [HttpPut("sincronizar-todos-forcado")]
+        public async Task<ActionResult<object>> SincronizarTodosBoletosForced()
+        {
+            try
+            {
+                _logger.LogInformation("🔄 Iniciando sincronização FORÇADA de TODOS os boletos");
+
+                // Buscar TODOS os boletos ativos (incluindo BAIXADO e LIQUIDADO)
+                var boletos = await _context.Boletos
+                    .Where(b => b.Ativo)
+                    .ToListAsync();
+
+                _logger.LogInformation("📊 Encontrados {Total} boletos para sincronizar (TODOS)", boletos.Count);
+
+                var beneficiaryCode = _configuration["SantanderAPI:CovenantCode"] ?? "0596794";
+
+                int sucessoCount = 0;
+                int erroCount = 0;
+                var atualizadosList = new List<object>();
+                var errosList = new List<object>();
+
+                foreach (var boleto in boletos)
+                {
+                    try
+                    {
+                        var statusAnterior = boleto.Status;
+                        var paidValueAnterior = 0m; // Para comparação
+
+                        // Consultar status na API Santander
+                        var statusResponse = await _santanderService.ConsultarStatusPorNossoNumeroAsync(beneficiaryCode, boleto.BankNumber);
+
+                        // Atualizar no banco
+                        await AtualizarStatusBoletoNoBanco(boleto, statusResponse);
+
+                        sucessoCount++;
+
+                        // Log detalhado para BAIXADO
+                        if (boleto.Status == "BAIXADO")
+                        {
+                            var foiPago = statusResponse.PaidValue.HasValue && statusResponse.PaidValue > 0;
+                            _logger.LogInformation("📋 Boleto {Id} BAIXADO - PaidValue: {PaidValue}, FoiPago: {FoiPago}",
+                                boleto.Id, statusResponse.PaidValue, foiPago);
+                        }
+
+                        atualizadosList.Add(new
+                        {
+                            BoletoId = boleto.Id,
+                            NsuCode = boleto.NsuCode,
+                            StatusAnterior = statusAnterior,
+                            StatusNovo = boleto.Status,
+                            PaidValue = statusResponse.PaidValue,
+                            FoiPago = statusResponse.FoiPago
+                        });
+
+                        _logger.LogInformation("✅ Boleto {Id} sincronizado: {Anterior} → {Novo}, PaidValue: {PaidValue}",
+                            boleto.Id, statusAnterior, boleto.Status, statusResponse.PaidValue);
+                    }
+                    catch (Exception ex)
+                    {
+                        erroCount++;
+                        errosList.Add(new
+                        {
+                            BoletoId = boleto.Id,
+                            NsuCode = boleto.NsuCode,
+                            Erro = ex.Message
+                        });
+
+                        _logger.LogError(ex, "❌ Erro ao sincronizar boleto {Id}", boleto.Id);
+                    }
+                }
+
+                var resultado = new
+                {
+                    Total = boletos.Count,
+                    Sucesso = sucessoCount,
+                    Erros = erroCount,
+                    Atualizados = atualizadosList,
+                    Erros_Lista = errosList
+                };
+
+                _logger.LogInformation("✅ Sincronização FORÇADA concluída. Total: {Total}, Sucesso: {Sucesso}, Erros: {Erros}",
+                    boletos.Count, sucessoCount, erroCount);
+
+                return Ok(resultado);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Erro ao sincronizar todos os boletos (forçado)");
+                return StatusCode(500, new
+                {
+                    mensagem = "Erro ao sincronizar boletos",
+                    detalhes = ex.Message
+                });
+            }
+        }
+
         // PUT: api/Boleto/sincronizar-todos
         [HttpPut("sincronizar-todos")]
         public async Task<ActionResult<object>> SincronizarTodosBoletos()
@@ -1432,9 +1530,16 @@ namespace CrmArrighi.Controllers
                 // Log especial para mudanças importantes
                 if (statusAnterior != boleto.Status)
                 {
-                    if (boleto.Status == "LIQUIDADO" || boleto.Status == "BAIXADO")
+                    if (boleto.Status == "LIQUIDADO")
                     {
-                        _logger.LogInformation("🎉 BOLETO PAGO! ID: {BoletoId}, Status: {Status}, NSU: {NsuCode}",
+                        _logger.LogInformation("🎉 BOLETO PAGO (linha digitável/código de barras)! ID: {BoletoId}, Status: {Status}, NSU: {NsuCode}",
+                            boleto.Id, boleto.Status, boleto.NsuCode);
+                    }
+                    else if (boleto.Status == "BAIXADO")
+                    {
+                        // BAIXADO pode ser PIX (pago) ou expirado (não pago)
+                        // Verificar pelo statusResponse.FoiPago ou statusResponse.PaidValue se disponível
+                        _logger.LogInformation("📋 BOLETO BAIXADO! ID: {BoletoId}, Status: {Status}, NSU: {NsuCode} (verificar paidValue para saber se foi pago via PIX)",
                             boleto.Id, boleto.Status, boleto.NsuCode);
                     }
                     else if (boleto.Status == "CANCELADO")
@@ -1627,6 +1732,762 @@ namespace CrmArrighi.Controllers
             {
                 _logger.LogError(ex, $"❌ GetMapasFaturamento: Erro completo: {ex.Message}");
                 return StatusCode(500, new { erro = "Erro interno do servidor", detalhes = ex.Message });
+            }
+        }
+
+        #endregion
+
+        #region Geração em Lote de Boletos
+
+        /// <summary>
+        /// Preview da geração em lote - mostra quais boletos seriam gerados
+        /// </summary>
+        [HttpGet("gerar-lote/preview")]
+        public async Task<ActionResult<PreviewGeracaoLoteDTO>> GetPreviewGeracaoLote()
+        {
+            try
+            {
+                _logger.LogInformation("📋 Iniciando preview de geração em lote de boletos");
+
+                var hoje = DateTime.Today;
+                var limiteVencimento = hoje.AddDays(7); // Janela de 7 dias
+
+                // Buscar contratos ativos com dados de pagamento
+                var contratosQuery = await _context.Contratos
+                    .Include(c => c.Cliente)
+                        .ThenInclude(cl => cl.PessoaFisica)
+                    .Include(c => c.Cliente)
+                        .ThenInclude(cl => cl.PessoaJuridica)
+                    .Include(c => c.Cliente)
+                        .ThenInclude(cl => cl.Filial)
+                    .Where(c => c.Ativo &&
+                                c.Situacao != null &&
+                                c.Situacao.ToLower() == "cliente" &&
+                                c.PrimeiroVencimento != null &&
+                                c.ValorParcela != null &&
+                                c.ValorParcela > 0)
+                    .ToListAsync();
+
+                _logger.LogInformation($"📊 Encontrados {contratosQuery.Count} contratos ativos com dados de pagamento");
+
+                var contratosParaGerar = new List<ContratoParaGerarDTO>();
+
+                foreach (var contrato in contratosQuery)
+                {
+                    var resultado = await CalcularProximaParcelaAsync(contrato, hoje, limiteVencimento);
+
+                    if (resultado != null)
+                    {
+                        contratosParaGerar.Add(resultado);
+                    }
+                }
+
+                var preview = new PreviewGeracaoLoteDTO
+                {
+                    TotalContratosAtivos = contratosQuery.Count,
+                    ContratosParaGerar = contratosParaGerar.Count,
+                    ValorTotal = contratosParaGerar.Sum(c => c.Valor),
+                    Contratos = contratosParaGerar.OrderBy(c => c.DataVencimento).ToList()
+                };
+
+                _logger.LogInformation($"✅ Preview concluído: {preview.ContratosParaGerar} boletos serão gerados (R$ {preview.ValorTotal:N2})");
+
+                return Ok(preview);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Erro ao gerar preview de geração em lote");
+                return StatusCode(500, new { erro = "Erro ao gerar preview", detalhes = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Diagnóstico detalhado - mostra por que cada contrato não está gerando boleto
+        /// </summary>
+        [HttpGet("gerar-lote/diagnostico")]
+        public async Task<ActionResult> GetDiagnosticoGeracaoLote()
+        {
+            try
+            {
+                _logger.LogInformation("🔍 Iniciando diagnóstico de geração em lote");
+
+                var hoje = DateTime.Today;
+                var limiteVencimento = hoje.AddDays(7);
+                var diagnosticos = new List<object>();
+
+                // Buscar TODOS os contratos ativos (sem filtros de situação/pagamento)
+                var todosContratos = await _context.Contratos
+                    .Include(c => c.Cliente)
+                        .ThenInclude(cl => cl.PessoaFisica)
+                    .Include(c => c.Cliente)
+                        .ThenInclude(cl => cl.PessoaJuridica)
+                    .Where(c => c.Ativo)
+                    .ToListAsync();
+
+                _logger.LogInformation($"📊 Total de contratos ativos: {todosContratos.Count}");
+
+                foreach (var contrato in todosContratos.Take(50)) // Limitar a 50 para não sobrecarregar
+                {
+                    var clienteNome = contrato.Cliente?.PessoaFisica?.Nome ??
+                                     contrato.Cliente?.PessoaJuridica?.RazaoSocial ?? "N/A";
+
+                    var motivos = new List<string>();
+                    var info = new Dictionary<string, object?>
+                    {
+                        ["contratoId"] = contrato.Id,
+                        ["clienteNome"] = clienteNome,
+                        ["situacao"] = contrato.Situacao,
+                        ["primeiroVencimento"] = contrato.PrimeiroVencimento?.ToString("dd/MM/yyyy"),
+                        ["valorParcela"] = contrato.ValorParcela,
+                        ["numeroParcelas"] = contrato.NumeroParcelas
+                    };
+
+                    // Verificar filtros
+                    if (string.IsNullOrEmpty(contrato.Situacao))
+                    {
+                        motivos.Add("❌ Situação não definida");
+                    }
+                    else if (contrato.Situacao.ToLower() != "cliente")
+                    {
+                        motivos.Add($"❌ Situação não é 'cliente' (atual: '{contrato.Situacao}')");
+                    }
+
+                    if (contrato.PrimeiroVencimento == null)
+                    {
+                        motivos.Add("❌ Primeiro vencimento não definido");
+                    }
+
+                    if (contrato.ValorParcela == null || contrato.ValorParcela <= 0)
+                    {
+                        motivos.Add($"❌ Valor da parcela inválido (atual: {contrato.ValorParcela})");
+                    }
+
+                    // Se passou nos filtros básicos, verificar janela de vencimento
+                    if (motivos.Count == 0 && contrato.PrimeiroVencimento != null && contrato.ValorParcela > 0)
+                    {
+                        var primeiroVencimento = contrato.PrimeiroVencimento.Value;
+                        var totalParcelas = contrato.NumeroParcelas ?? 0;
+                        var isContratoCorrente = totalParcelas == 0;
+
+                        int proximaParcela;
+                        DateTime dataVencimento;
+
+                        if (primeiroVencimento.Date >= hoje.Date)
+                        {
+                            proximaParcela = 1;
+                            dataVencimento = primeiroVencimento;
+                        }
+                        else
+                        {
+                            // Calcular a data de vencimento do mês atual
+                            var diaVencimento = primeiroVencimento.Day;
+                            var ultimoDiaMesAtual = DateTime.DaysInMonth(hoje.Year, hoje.Month);
+
+                            // Ajustar se o dia não existe no mês atual
+                            if (diaVencimento > ultimoDiaMesAtual)
+                            {
+                                diaVencimento = ultimoDiaMesAtual;
+                            }
+
+                            var vencimentoMesAtual = new DateTime(hoje.Year, hoje.Month, diaVencimento);
+
+                            // Se o vencimento deste mês ainda não passou, usar ele
+                            if (vencimentoMesAtual.Date >= hoje.Date)
+                            {
+                                dataVencimento = vencimentoMesAtual;
+                            }
+                            else
+                            {
+                                // Se já passou, usar o próximo mês
+                                var proximoMes = hoje.AddMonths(1);
+                                var ultimoDiaProximoMes = DateTime.DaysInMonth(proximoMes.Year, proximoMes.Month);
+                                diaVencimento = primeiroVencimento.Day;
+                                if (diaVencimento > ultimoDiaProximoMes)
+                                {
+                                    diaVencimento = ultimoDiaProximoMes;
+                                }
+                                dataVencimento = new DateTime(proximoMes.Year, proximoMes.Month, diaVencimento);
+                            }
+
+                            // Calcular qual parcela seria esta baseado na diferença de meses
+                            var mesesDesdeInicio = ((dataVencimento.Year - primeiroVencimento.Year) * 12)
+                                                 + (dataVencimento.Month - primeiroVencimento.Month);
+                            proximaParcela = mesesDesdeInicio + 1;
+
+                            if (proximaParcela < 1) proximaParcela = 1;
+                        }
+
+                        info["proximaParcela"] = proximaParcela;
+                        info["dataVencimentoCalculada"] = dataVencimento.ToString("dd/MM/yyyy");
+
+                        // Verificar se parcelas finalizadas
+                        if (!isContratoCorrente && proximaParcela > totalParcelas)
+                        {
+                            motivos.Add($"❌ Todas as {totalParcelas} parcelas já finalizadas");
+                        }
+                        else
+                        {
+                            var diasAteVencimento = (dataVencimento - hoje).Days;
+                            info["diasAteVencimento"] = diasAteVencimento;
+
+                            if (diasAteVencimento <= 0)
+                            {
+                                motivos.Add($"❌ Vencimento já passou ({diasAteVencimento} dias)");
+                            }
+                            else if (diasAteVencimento > 7)
+                            {
+                                motivos.Add($"❌ Fora da janela de 7 dias ({diasAteVencimento} dias até vencimento)");
+                            }
+                            else
+                            {
+                                // Verificar se já existe boleto
+                                var boletoExistente = await _context.Boletos
+                                    .AnyAsync(b => b.ContratoId == contrato.Id &&
+                                                  b.NumeroParcela == proximaParcela &&
+                                                  b.Ativo);
+
+                                if (boletoExistente)
+                                {
+                                    motivos.Add($"❌ Boleto da parcela {proximaParcela} já existe");
+                                }
+                                else
+                                {
+                                    var boletoMesmoVencimento = await _context.Boletos
+                                        .AnyAsync(b => b.ContratoId == contrato.Id &&
+                                                      b.DueDate.Date == dataVencimento.Date &&
+                                                      b.Ativo);
+
+                                    if (boletoMesmoVencimento)
+                                    {
+                                        motivos.Add($"❌ Boleto com vencimento {dataVencimento:dd/MM/yyyy} já existe");
+                                    }
+                                    else
+                                    {
+                                        motivos.Add("✅ ELEGÍVEL PARA GERAÇÃO");
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    info["motivos"] = motivos;
+                    info["podeGerar"] = motivos.Any(m => m.StartsWith("✅"));
+
+                    diagnosticos.Add(info);
+                }
+
+                // Estatísticas
+                var elegiveis = diagnosticos.Count(d => ((List<string>)((dynamic)d)["motivos"]).Any(m => m.StartsWith("✅")));
+                var porSituacao = diagnosticos.Count(d => ((List<string>)((dynamic)d)["motivos"]).Any(m => m.Contains("Situação")));
+                var porVencimento = diagnosticos.Count(d => ((List<string>)((dynamic)d)["motivos"]).Any(m => m.Contains("vencimento não definido")));
+                var porValor = diagnosticos.Count(d => ((List<string>)((dynamic)d)["motivos"]).Any(m => m.Contains("Valor da parcela")));
+                var foraDaJanela = diagnosticos.Count(d => ((List<string>)((dynamic)d)["motivos"]).Any(m => m.Contains("Fora da janela")));
+                var jaExiste = diagnosticos.Count(d => ((List<string>)((dynamic)d)["motivos"]).Any(m => m.Contains("já existe")));
+
+                return Ok(new
+                {
+                    dataAnalise = hoje.ToString("dd/MM/yyyy"),
+                    janelaVencimento = $"{hoje:dd/MM/yyyy} até {limiteVencimento:dd/MM/yyyy}",
+                    totalContratosAnalisados = diagnosticos.Count,
+                    estatisticas = new
+                    {
+                        elegiveis,
+                        bloqueadosPorSituacao = porSituacao,
+                        bloqueadosPorVencimentoNaoDefinido = porVencimento,
+                        bloqueadosPorValorInvalido = porValor,
+                        bloqueadosPorForaDaJanela = foraDaJanela,
+                        bloqueadosPorBoletoJaExiste = jaExiste
+                    },
+                    contratos = diagnosticos
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Erro no diagnóstico de geração em lote");
+                return StatusCode(500, new { erro = "Erro no diagnóstico", detalhes = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Executa a geração em lote de boletos
+        /// </summary>
+        [HttpPost("gerar-lote")]
+        public async Task<ActionResult<ResultadoGeracaoLoteDTO>> PostGerarLote()
+        {
+            var inicio = DateTime.Now;
+            var boletosGerados = new List<BoletoGeradoDTO>();
+            var erros = new List<ErroGeracaoDTO>();
+
+            try
+            {
+                _logger.LogInformation("🚀 Iniciando geração em lote de boletos");
+
+                // Obter usuário logado
+                var usuarioIdHeader = Request.Headers["X-Usuario-Id"].FirstOrDefault();
+                if (!int.TryParse(usuarioIdHeader, out int usuarioId))
+                {
+                    return Unauthorized("Usuário não identificado na requisição.");
+                }
+
+                var hoje = DateTime.Today;
+                var limiteVencimento = hoje.AddDays(7);
+
+                // Buscar contratos ativos com dados de pagamento
+                var contratos = await _context.Contratos
+                    .Include(c => c.Cliente)
+                        .ThenInclude(cl => cl.PessoaFisica)
+                            .ThenInclude(pf => pf.Endereco)
+                    .Include(c => c.Cliente)
+                        .ThenInclude(cl => cl.PessoaJuridica)
+                            .ThenInclude(pj => pj.Endereco)
+                    .Include(c => c.Cliente)
+                        .ThenInclude(cl => cl.Filial)
+                    .Where(c => c.Ativo &&
+                                c.Situacao != null &&
+                                c.Situacao.ToLower() == "cliente" &&
+                                c.PrimeiroVencimento != null &&
+                                c.ValorParcela != null &&
+                                c.ValorParcela > 0)
+                    .ToListAsync();
+
+                _logger.LogInformation($"📊 Processando {contratos.Count} contratos ativos");
+
+                foreach (var contrato in contratos)
+                {
+                    try
+                    {
+                        var parcelaInfo = await CalcularProximaParcelaAsync(contrato, hoje, limiteVencimento);
+
+                        if (parcelaInfo == null)
+                        {
+                            continue; // Não está na janela de geração ou já existe boleto
+                        }
+
+                        _logger.LogInformation($"📝 Gerando boleto para contrato #{contrato.Id} - Parcela {parcelaInfo.NumeroParcela}/{parcelaInfo.TotalParcelas}");
+
+                        // Gerar NSU Code único
+                        var nsuCode = await _santanderService.GerarProximoNsuCodeAsync();
+                        var nsuDate = DateTime.Today;
+
+                        // Criar DTO para geração
+                        var createDto = new CreateBoletoDTO
+                        {
+                            ContratoId = contrato.Id,
+                            DueDate = parcelaInfo.DataVencimento,
+                            NominalValue = parcelaInfo.Valor
+                        };
+
+                        // Criar boleto
+                        var boleto = await CriarBoletoFromDTO(createDto, contrato, nsuCode, nsuDate);
+                        boleto.NumeroParcela = parcelaInfo.NumeroParcela;
+
+                        // Registrar na API Santander
+                        try
+                        {
+                            var santanderResponse = await _santanderService.RegistrarBoletoAsync(boleto);
+                            AtualizarBoletoComResposta(boleto, santanderResponse);
+                            boleto.Status = "REGISTRADO";
+
+                            _logger.LogInformation($"✅ Boleto registrado no Santander para contrato #{contrato.Id}");
+                        }
+                        catch (Exception apiEx)
+                        {
+                            _logger.LogError(apiEx, $"❌ Erro na API Santander para contrato #{contrato.Id}");
+                            boleto.Status = "ERRO";
+                            boleto.ErrorMessage = apiEx.Message;
+                            boleto.ErrorCode = "API_ERROR";
+
+                            erros.Add(new ErroGeracaoDTO
+                            {
+                                ContratoId = contrato.Id,
+                                ClienteNome = parcelaInfo.ClienteNome,
+                                Erro = $"Erro API Santander: {apiEx.Message}"
+                            });
+
+                            // Salvar boleto com erro no banco para rastreamento
+                            _context.Boletos.Add(boleto);
+                            await _context.SaveChangesAsync();
+
+                            continue;
+                        }
+
+                        // Salvar boleto no banco
+                        _context.Boletos.Add(boleto);
+                        await _context.SaveChangesAsync();
+
+                        boletosGerados.Add(new BoletoGeradoDTO
+                        {
+                            BoletoId = boleto.Id,
+                            ContratoId = contrato.Id,
+                            ClienteNome = parcelaInfo.ClienteNome,
+                            NumeroParcela = parcelaInfo.NumeroParcela,
+                            TotalParcelas = parcelaInfo.TotalParcelas,
+                            DataVencimento = parcelaInfo.DataVencimento,
+                            Valor = parcelaInfo.Valor,
+                            NsuCode = boleto.NsuCode,
+                            Status = boleto.Status
+                        });
+
+                        _logger.LogInformation($"✅ Boleto ID {boleto.Id} salvo para contrato #{contrato.Id}");
+
+                        // Verificar se é a última parcela e todas estão pagas
+                        await VerificarQuitacaoContratoAsync(contrato);
+                    }
+                    catch (Exception contratoEx)
+                    {
+                        var clienteNome = contrato.Cliente?.PessoaFisica?.Nome ??
+                                         contrato.Cliente?.PessoaJuridica?.RazaoSocial ?? "N/A";
+
+                        _logger.LogError(contratoEx, $"❌ Erro ao processar contrato #{contrato.Id}");
+
+                        erros.Add(new ErroGeracaoDTO
+                        {
+                            ContratoId = contrato.Id,
+                            ClienteNome = clienteNome,
+                            Erro = contratoEx.Message
+                        });
+                    }
+                }
+
+                var fim = DateTime.Now;
+                var duracao = (int)(fim - inicio).TotalSeconds;
+
+                // Determinar status geral
+                string statusGeral;
+                if (erros.Count == 0 && boletosGerados.Count > 0)
+                    statusGeral = "SUCESSO";
+                else if (erros.Count > 0 && boletosGerados.Count > 0)
+                    statusGeral = "PARCIAL";
+                else if (boletosGerados.Count == 0 && erros.Count == 0)
+                    statusGeral = "NENHUM"; // Nada para gerar
+                else
+                    statusGeral = "ERRO";
+
+                // Salvar log de execução
+                var log = new LogGeracaoBoleto
+                {
+                    DataExecucao = inicio,
+                    UsuarioId = usuarioId,
+                    TotalContratosProcessados = contratos.Count,
+                    TotalBoletosGerados = boletosGerados.Count,
+                    TotalErros = erros.Count,
+                    ValorTotalGerado = boletosGerados.Sum(b => b.Valor),
+                    DuracaoSegundos = duracao,
+                    Status = statusGeral,
+                    DataFinalizacao = fim,
+                    Detalhes = JsonSerializer.Serialize(new
+                    {
+                        BoletosGerados = boletosGerados,
+                        Erros = erros
+                    })
+                };
+
+                _context.LogsGeracaoBoletos.Add(log);
+                await _context.SaveChangesAsync();
+
+                var resultado = new ResultadoGeracaoLoteDTO
+                {
+                    Iniciado = inicio,
+                    Finalizado = fim,
+                    DuracaoSegundos = duracao,
+                    TotalProcessados = contratos.Count,
+                    TotalSucesso = boletosGerados.Count,
+                    TotalErros = erros.Count,
+                    ValorTotalGerado = boletosGerados.Sum(b => b.Valor),
+                    Status = statusGeral,
+                    BoletosGerados = boletosGerados,
+                    Erros = erros,
+                    LogId = log.Id
+                };
+
+                _logger.LogInformation($"✅ Geração em lote concluída. Status: {statusGeral}, Gerados: {boletosGerados.Count}, Erros: {erros.Count}");
+
+                return Ok(resultado);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Erro crítico na geração em lote");
+                return StatusCode(500, new { erro = "Erro na geração em lote", detalhes = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Lista histórico de logs de geração em lote
+        /// </summary>
+        [HttpGet("logs-geracao")]
+        public async Task<ActionResult<IEnumerable<LogGeracaoListDTO>>> GetLogsGeracao(
+            [FromQuery] int pagina = 1,
+            [FromQuery] int tamanhoPagina = 20)
+        {
+            try
+            {
+                var logs = await _context.LogsGeracaoBoletos
+                    .Include(l => l.Usuario)
+                    .OrderByDescending(l => l.DataExecucao)
+                    .Skip((pagina - 1) * tamanhoPagina)
+                    .Take(tamanhoPagina)
+                    .Select(l => new LogGeracaoListDTO
+                    {
+                        Id = l.Id,
+                        DataExecucao = l.DataExecucao,
+                        UsuarioNome = l.Usuario.Login,
+                        TotalContratosProcessados = l.TotalContratosProcessados,
+                        TotalBoletosGerados = l.TotalBoletosGerados,
+                        TotalErros = l.TotalErros,
+                        ValorTotalGerado = l.ValorTotalGerado,
+                        DuracaoSegundos = l.DuracaoSegundos,
+                        Status = l.Status
+                    })
+                    .ToListAsync();
+
+                var total = await _context.LogsGeracaoBoletos.CountAsync();
+
+                return Ok(new
+                {
+                    Dados = logs,
+                    Pagina = pagina,
+                    TamanhoPagina = tamanhoPagina,
+                    TotalRegistros = total,
+                    TotalPaginas = (int)Math.Ceiling((double)total / tamanhoPagina)
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Erro ao buscar logs de geração");
+                return StatusCode(500, new { erro = "Erro ao buscar logs", detalhes = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Busca detalhes de um log de geração específico
+        /// </summary>
+        [HttpGet("logs-geracao/{id}")]
+        public async Task<ActionResult<LogGeracaoBoleto>> GetLogGeracao(int id)
+        {
+            try
+            {
+                var log = await _context.LogsGeracaoBoletos
+                    .Include(l => l.Usuario)
+                    .FirstOrDefaultAsync(l => l.Id == id);
+
+                if (log == null)
+                {
+                    return NotFound($"Log de geração com ID {id} não encontrado");
+                }
+
+                return Ok(new
+                {
+                    log.Id,
+                    log.DataExecucao,
+                    UsuarioNome = log.Usuario?.Login ?? "N/A",
+                    log.TotalContratosProcessados,
+                    log.TotalBoletosGerados,
+                    log.TotalErros,
+                    log.ValorTotalGerado,
+                    log.DuracaoSegundos,
+                    log.Status,
+                    log.DataFinalizacao,
+                    Detalhes = !string.IsNullOrEmpty(log.Detalhes)
+                        ? JsonSerializer.Deserialize<object>(log.Detalhes)
+                        : null
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Erro ao buscar log de geração ID: {Id}", id);
+                return StatusCode(500, new { erro = "Erro ao buscar log", detalhes = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Calcula qual é a próxima parcela a ser gerada para um contrato
+        /// </summary>
+        private async Task<ContratoParaGerarDTO?> CalcularProximaParcelaAsync(
+            Contrato contrato, DateTime hoje, DateTime limiteVencimento)
+        {
+            if (contrato.PrimeiroVencimento == null || contrato.ValorParcela == null)
+            {
+                return null;
+            }
+
+            var primeiroVencimento = contrato.PrimeiroVencimento.Value;
+            var totalParcelas = contrato.NumeroParcelas ?? 0; // 0 = contrato corrente (sem fim)
+            var valorParcela = contrato.ValorParcela.Value;
+            var isContratoCorrente = totalParcelas == 0; // Contrato corrente: cobrança mensal sem fim
+
+            int proximaParcela;
+            DateTime dataVencimento;
+
+            // CASO 1: Primeiro vencimento ainda não passou (contrato novo)
+            if (primeiroVencimento.Date >= hoje.Date)
+            {
+                proximaParcela = 1;
+                dataVencimento = primeiroVencimento;
+                _logger.LogDebug($"Contrato #{contrato.Id}: Contrato novo, primeiro vencimento em {primeiroVencimento:dd/MM/yyyy}");
+            }
+            // CASO 2: Primeiro vencimento já passou (contrato importado ou em andamento)
+            else
+            {
+                // Calcular a data de vencimento do mês atual
+                var diaVencimento = primeiroVencimento.Day;
+                var ultimoDiaMesAtual = DateTime.DaysInMonth(hoje.Year, hoje.Month);
+
+                // Ajustar se o dia não existe no mês atual
+                if (diaVencimento > ultimoDiaMesAtual)
+                {
+                    diaVencimento = ultimoDiaMesAtual;
+                }
+
+                var vencimentoMesAtual = new DateTime(hoje.Year, hoje.Month, diaVencimento);
+
+                // Se o vencimento deste mês ainda não passou, usar ele
+                if (vencimentoMesAtual.Date >= hoje.Date)
+                {
+                    dataVencimento = vencimentoMesAtual;
+                }
+                else
+                {
+                    // Se já passou, usar o próximo mês
+                    var proximoMes = hoje.AddMonths(1);
+                    var ultimoDiaProximoMes = DateTime.DaysInMonth(proximoMes.Year, proximoMes.Month);
+                    diaVencimento = primeiroVencimento.Day;
+                    if (diaVencimento > ultimoDiaProximoMes)
+                    {
+                        diaVencimento = ultimoDiaProximoMes;
+                    }
+                    dataVencimento = new DateTime(proximoMes.Year, proximoMes.Month, diaVencimento);
+                }
+
+                // Calcular qual parcela seria esta baseado na diferença de meses
+                var mesesDesdeInicio = ((dataVencimento.Year - primeiroVencimento.Year) * 12)
+                                     + (dataVencimento.Month - primeiroVencimento.Month);
+                proximaParcela = mesesDesdeInicio + 1;
+
+                // Garantir que a parcela seja pelo menos 1
+                if (proximaParcela < 1)
+                {
+                    proximaParcela = 1;
+                }
+
+                _logger.LogDebug($"Contrato #{contrato.Id}: Vencimento calculado {dataVencimento:dd/MM/yyyy}, Parcela {proximaParcela}");
+            }
+
+            // Verificar se ainda tem parcelas disponíveis (apenas para contratos com parcelas definidas)
+            if (!isContratoCorrente && proximaParcela > totalParcelas)
+            {
+                _logger.LogInformation($"Contrato #{contrato.Id}: Todas as {totalParcelas} parcelas finalizadas. Atualizando para QUITADO.");
+
+                // Atualizar o contrato para "quitado"
+                contrato.Situacao = "quitado";
+                contrato.DataAtualizacao = DateTime.Now;
+                await _context.SaveChangesAsync();
+
+                return null;
+            }
+
+            // Ajustar se o dia não existe no mês (ex: 31 de fevereiro → último dia)
+            var ultimoDiaMes = DateTime.DaysInMonth(dataVencimento.Year, dataVencimento.Month);
+            if (primeiroVencimento.Day > ultimoDiaMes)
+            {
+                dataVencimento = new DateTime(dataVencimento.Year, dataVencimento.Month, ultimoDiaMes);
+            }
+
+            // Calcular dias até o vencimento
+            var diasAteVencimento = (dataVencimento - hoje).Days;
+
+            // Verificar se está na janela de 7 dias (> 0 e <= 7)
+            if (diasAteVencimento <= 0 || diasAteVencimento > 7)
+            {
+                _logger.LogDebug($"Contrato #{contrato.Id}: Parcela {proximaParcela} fora da janela ({diasAteVencimento} dias)");
+                return null;
+            }
+
+            // Verificar se já existe boleto para esta parcela
+            var boletoExistente = await _context.Boletos
+                .AnyAsync(b => b.ContratoId == contrato.Id &&
+                              b.NumeroParcela == proximaParcela &&
+                              b.Ativo);
+
+            if (boletoExistente)
+            {
+                _logger.LogDebug($"Contrato #{contrato.Id}: Boleto da parcela {proximaParcela} já existe");
+                return null;
+            }
+
+            // Também verificar por data de vencimento (para boletos sem NumeroParcela)
+            var boletoMesmoVencimento = await _context.Boletos
+                .AnyAsync(b => b.ContratoId == contrato.Id &&
+                              b.DueDate.Date == dataVencimento.Date &&
+                              b.Ativo);
+
+            if (boletoMesmoVencimento)
+            {
+                _logger.LogDebug($"Contrato #{contrato.Id}: Boleto com vencimento {dataVencimento:dd/MM/yyyy} já existe");
+                return null;
+            }
+
+            // Dados do cliente
+            var clienteNome = contrato.Cliente?.PessoaFisica?.Nome ??
+                             contrato.Cliente?.PessoaJuridica?.RazaoSocial ?? "N/A";
+
+            var clienteDoc = contrato.Cliente?.PessoaFisica?.Cpf ??
+                            contrato.Cliente?.PessoaJuridica?.Cnpj ?? "N/A";
+
+            return new ContratoParaGerarDTO
+            {
+                ContratoId = contrato.Id,
+                ClienteId = contrato.ClienteId,
+                ClienteNome = clienteNome,
+                ClienteDocumento = clienteDoc,
+                NumeroPasta = contrato.NumeroPasta ?? "",
+                NumeroParcela = proximaParcela,
+                TotalParcelas = totalParcelas,
+                ParcelaDescricao = isContratoCorrente ? $"{proximaParcela}/∞ (corrente)" : $"{proximaParcela}/{totalParcelas}",
+                DataVencimento = dataVencimento,
+                Valor = valorParcela,
+                DiasAteVencimento = diasAteVencimento,
+                FilialNome = contrato.Cliente?.Filial?.Nome
+            };
+        }
+
+        /// <summary>
+        /// Verifica se todas as parcelas do contrato foram pagas e atualiza status para "quitado"
+        /// </summary>
+        private async Task VerificarQuitacaoContratoAsync(Contrato contrato)
+        {
+            try
+            {
+                if (contrato.NumeroParcelas == null)
+                    return;
+
+                var totalParcelas = contrato.NumeroParcelas.Value;
+
+                // Contar boletos LIQUIDADOS do contrato
+                var boletosLiquidados = await _context.Boletos
+                    .CountAsync(b => b.ContratoId == contrato.Id &&
+                                    b.Status == "LIQUIDADO" &&
+                                    b.Ativo);
+
+                _logger.LogDebug($"Contrato #{contrato.Id}: {boletosLiquidados}/{totalParcelas} parcelas liquidadas");
+
+                // Se todas as parcelas foram liquidadas, atualizar status do cliente para "quitado"
+                if (boletosLiquidados >= totalParcelas)
+                {
+                    var cliente = await _context.Clientes.FindAsync(contrato.ClienteId);
+                    if (cliente != null && cliente.Status != "quitado")
+                    {
+                        cliente.Status = "quitado";
+                        cliente.DataAtualizacao = DateTime.Now;
+                        await _context.SaveChangesAsync();
+
+                        _logger.LogInformation($"🎉 Cliente #{cliente.Id} atualizado para status 'quitado' - Contrato #{contrato.Id} quitado!");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ Erro ao verificar quitação do contrato #{contrato.Id}");
+                // Não propagar exceção para não afetar o fluxo principal
             }
         }
 

@@ -240,7 +240,7 @@ export default function DashboardFinanceiroPage() {
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent">
                   Dashboard Financeiro
                 </h1>
-                <Sparkles className="w-6 h-6 text-yellow-500 animate-pulse" />
+                <Sparkles className="w-6 h-6 text-amber-500 animate-pulse" />
               </div>
               <p className="text-gray-600 ml-14">
                 Visão geral dos boletos e movimentações financeiras em tempo

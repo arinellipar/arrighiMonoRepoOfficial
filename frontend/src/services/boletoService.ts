@@ -30,6 +30,7 @@ export interface RegistryInfo {
 export interface BoletoStatus {
   status: string;
   statusDescription: string;
+  foiPago?: boolean; // Indica se o boleto foi efetivamente pago
   beneficiaryCode?: string;
   bankNumber?: string;
   clientNumber?: string;

@@ -222,17 +222,17 @@ export function RiscoInadimplenciaModal({
                       <p className="text-xs text-red-600">clientes</p>
                     </div>
 
-                    <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-4 border border-yellow-200">
+                    <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-4 border border-amber-200">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-2xl">🟡</span>
-                        <span className="text-sm font-medium text-yellow-800">
+                        <span className="text-sm font-medium text-amber-800">
                           Médio Risco
                         </span>
                       </div>
-                      <p className="text-3xl font-bold text-yellow-700">
+                      <p className="text-3xl font-bold text-amber-700">
                         {resumo.clientesMedioRisco}
                       </p>
-                      <p className="text-xs text-yellow-600">clientes</p>
+                      <p className="text-xs text-amber-600">clientes</p>
                     </div>
 
                     <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
@@ -311,7 +311,7 @@ export function RiscoInadimplenciaModal({
                           cliente.nivelRisco === "Alto"
                             ? "border-red-200 bg-red-50 hover:border-red-400"
                             : cliente.nivelRisco === "Médio"
-                            ? "border-yellow-200 bg-yellow-50 hover:border-yellow-400"
+                            ? "border-amber-200 bg-amber-50 hover:border-amber-400"
                             : "border-green-200 bg-green-50 hover:border-green-400"
                         }`}
                         onClick={() =>

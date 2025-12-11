@@ -16,7 +16,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { Cliente, HistoricoConsultor } from "@/types/api";
-import { cn } from "@/lib/utils";
+import { cn, formatCPFDisplay, formatCNPJDisplay } from "@/lib/utils";
 
 interface ClienteDetalhesProps {
   cliente: Cliente;
@@ -66,7 +66,7 @@ export default function ClienteDetalhes({
       );
     } else {
       return (
-        <div className="flex items-center space-x-1 text-yellow-600">
+        <div className="flex items-center space-x-1 text-amber-600">
           <Clock className="w-4 h-4" />
           <span className="text-sm font-medium">
             {cliente.status || "Não definido"}
@@ -183,14 +183,14 @@ export default function ClienteDetalhes({
                     <div className="flex items-center space-x-3">
                       <FileText className="w-4 h-4 text-secondary-400" />
                       <span className="text-sm text-secondary-600">
-                        CPF: {cliente.pessoaFisica?.cpf}
+                        CPF: {formatCPFDisplay(cliente.pessoaFisica?.cpf)}
                       </span>
                     </div>
                   ) : (
                     <div className="flex items-center space-x-3">
                       <FileText className="w-4 h-4 text-secondary-400" />
                       <span className="text-sm text-secondary-600">
-                        CNPJ: {cliente.pessoaJuridica?.cnpj}
+                        CNPJ: {formatCNPJDisplay(cliente.pessoaJuridica?.cnpj)}
                       </span>
                     </div>
                   )}

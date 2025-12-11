@@ -87,18 +87,25 @@ export function useSessoesAtivas(incluirInativos: boolean = false) {
       );
 
       if (response.data && Array.isArray(response.data)) {
+        console.log("📊 useSessoesAtivas: Dados recebidos:", response.data);
         setSessoes(response.data);
 
         if (incluirInativos && endpoint === historicoEndpoint) {
           // Contar usuários online e total
-          const online = response.data.filter((s) => s.estaOnline).length;
+          const online = response.data.filter((s) => s.estaOnline === true).length;
+          console.log(`📊 useSessoesAtivas: ${online} online de ${response.data.length} total (histórico)`);
           setCountOnline(online);
           setCount(response.data.length);
         } else {
-          setCount(response.data.length);
-          setCountOnline(response.data.filter((s) => s.estaOnline).length);
+          // Endpoint base: todas as sessões retornadas são ativas/online
+          const totalSessoes = response.data.length;
+          console.log(`📊 useSessoesAtivas: ${totalSessoes} sessões ativas (endpoint base)`);
+          setCount(totalSessoes);
+          // No endpoint base, todas são online por definição
+          setCountOnline(totalSessoes);
         }
       } else {
+        console.warn("⚠️ useSessoesAtivas: Resposta inválida ou vazia");
         setSessoes([]);
         setCount(0);
         setCountOnline(0);
@@ -151,7 +158,7 @@ export function useSessoesAtivas(incluirInativos: boolean = false) {
 
     fetchSessoes();
 
-    // Atualizar a cada 30 segundos
+    // Atualizar a cada 15 segundos para melhor responsividade
     const interval = setInterval(() => {
       if (isAdmin) {
         fetchSessoes();
@@ -159,7 +166,7 @@ export function useSessoesAtivas(incluirInativos: boolean = false) {
           fetchCount();
         }
       }
-    }, 30000); // 30 segundos
+    }, 15000); // 15 segundos
 
     return () => clearInterval(interval);
   }, [countError, incluirInativos, isAdmin, permissoes?.grupo]);

@@ -104,7 +104,7 @@ function ResetSenhaContent() {
                 Sua senha foi redefinida. Você será redirecionado para o login em instantes...
               </p>
               <div className="flex justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gold-500"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
               </div>
             </div>
           </div>
@@ -123,10 +123,10 @@ function ResetSenhaContent() {
         <div className="bg-neutral-900/95 backdrop-blur-xl border border-neutral-700/50 rounded-2xl shadow-2xl p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-gold-500 to-gold-600 rounded-full flex items-center justify-center mb-4">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center mb-4">
               <KeyRound className="w-8 h-8 text-neutral-900" />
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent mb-2">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent mb-2">
               Redefinir Senha
             </h1>
             <p className="text-neutral-400">
@@ -159,7 +159,7 @@ function ResetSenhaContent() {
                   type={showPassword ? "text" : "password"}
                   value={novaSenha}
                   onChange={(e) => setNovaSenha(e.target.value)}
-                  className="w-full pl-12 pr-12 py-3 bg-neutral-900/95 border border-neutral-700/30 rounded-xl text-neutral-100 font-medium placeholder:text-neutral-500 focus:outline-none focus:border-gold-500/50 focus:ring-2 focus:ring-gold-500/20 transition"
+                  className="w-full pl-12 pr-12 py-3 bg-neutral-900/95 border border-neutral-700/30 rounded-xl text-neutral-100 font-medium placeholder:text-neutral-500 focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition"
                   placeholder="Digite sua nova senha"
                   disabled={loading || !token}
                   minLength={6}
@@ -168,7 +168,7 @@ function ResetSenhaContent() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-gold-400 transition"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-amber-400 transition"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -193,7 +193,7 @@ function ResetSenhaContent() {
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmarSenha}
                   onChange={(e) => setConfirmarSenha(e.target.value)}
-                  className="w-full pl-12 pr-12 py-3 bg-neutral-900/95 border border-neutral-700/30 rounded-xl text-neutral-100 font-medium placeholder:text-neutral-500 focus:outline-none focus:border-gold-500/50 focus:ring-2 focus:ring-gold-500/20 transition"
+                  className="w-full pl-12 pr-12 py-3 bg-neutral-900/95 border border-neutral-700/30 rounded-xl text-neutral-100 font-medium placeholder:text-neutral-500 focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition"
                   placeholder="Confirme sua nova senha"
                   disabled={loading || !token}
                   minLength={6}
@@ -202,7 +202,7 @@ function ResetSenhaContent() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-gold-400 transition"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-amber-400 transition"
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -217,7 +217,7 @@ function ResetSenhaContent() {
             <button
               type="submit"
               disabled={loading || !token}
-              className="w-full py-3 px-6 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-neutral-900 font-bold rounded-xl shadow-lg shadow-gold-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 px-6 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-neutral-900 font-bold rounded-xl shadow-lg shadow-amber-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -234,7 +234,7 @@ function ResetSenhaContent() {
           <div className="mt-6 text-center">
             <button
               onClick={() => router.push("/login")}
-              className="text-sm text-neutral-400 hover:text-gold-400 transition"
+              className="text-sm text-neutral-400 hover:text-amber-400 transition"
             >
               Voltar para o login
             </button>
@@ -250,7 +250,7 @@ export default function ResetSenhaPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
         </div>
       }
     >

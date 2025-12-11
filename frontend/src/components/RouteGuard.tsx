@@ -50,7 +50,7 @@ export default function RouteGuard({ children }: RouteGuardProps) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-gold-500/20 border-t-gold-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-neutral-300 font-medium">Verificando acesso...</p>
         </div>
       </div>
@@ -67,7 +67,7 @@ export default function RouteGuard({ children }: RouteGuardProps) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-gold-500/20 border-t-gold-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-neutral-300 font-medium">
             Carregando permissões...
           </p>
@@ -104,7 +104,7 @@ export default function RouteGuard({ children }: RouteGuardProps) {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => router.push("/dashboard")}
-              className="w-full px-4 py-2 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-neutral-950 rounded-lg font-medium transition-colors shadow-lg shadow-gold-500/20"
+              className="w-full px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-neutral-950 rounded-lg font-medium transition-colors shadow-lg shadow-amber-500/20"
             >
               Ir para Dashboard
             </motion.button>

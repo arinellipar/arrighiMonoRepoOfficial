@@ -173,7 +173,7 @@ export const ValidGroupGuard: React.FC<ValidGroupGuardProps> = ({
     if (showError) {
       return (
         <div className="flex flex-col items-center justify-center p-8 text-center">
-          <Shield className="h-16 w-16 text-yellow-500 mb-4" />
+          <Shield className="h-16 w-16 text-amber-500 mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
             Grupo de Acesso Necessário
           </h2>
@@ -236,7 +236,7 @@ export const GroupInfo: React.FC = () => {
             </span>
           )}
           {characteristics.isReadOnly && (
-            <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+            <span className="px-2 py-1 bg-amber-100 text-amber-800 text-xs rounded-full">
               Somente Leitura
             </span>
           )}

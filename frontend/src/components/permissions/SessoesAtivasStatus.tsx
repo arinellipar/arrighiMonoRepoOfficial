@@ -49,7 +49,7 @@ export const SessoesAtivasStatus: React.FC = () => {
       <span className="text-sm">
         {count} sessão{count !== 1 ? "ões" : ""} ativa{count !== 1 ? "s" : ""}
         {countError && (
-          <span className="text-yellow-600 ml-1" title="Contagem aproximada">
+          <span className="text-amber-600 ml-1" title="Contagem aproximada">
             *
           </span>
         )}
@@ -71,12 +71,12 @@ export const SessoesAtivasList: React.FC = () => {
 
   if (!isAdmin) {
     return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
         <div className="flex items-center">
-          <Shield className="h-5 w-5 text-yellow-600 mr-2" />
-          <h3 className="text-yellow-800 font-medium">Acesso Restrito</h3>
+          <Shield className="h-5 w-5 text-amber-600 mr-2" />
+          <h3 className="text-amber-800 font-medium">Acesso Restrito</h3>
         </div>
-        <p className="text-yellow-700 text-sm mt-2">
+        <p className="text-amber-700 text-sm mt-2">
           Apenas administradores podem visualizar sessões ativas.
         </p>
       </div>
@@ -115,7 +115,7 @@ export const SessoesAtivasList: React.FC = () => {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900">Sessões Ativas</h3>
         {countError && (
-          <span className="text-yellow-600 text-sm" title="Contagem aproximada">
+          <span className="text-amber-600 text-sm" title="Contagem aproximada">
             Contagem aproximada
           </span>
         )}

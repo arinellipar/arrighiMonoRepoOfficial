@@ -107,11 +107,11 @@ function Sidebar({
       {/* Logo */}
       <div className="p-6 border-b border-neutral-800">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-br from-gold-500 to-gold-600 rounded-xl shadow-lg shadow-gold-500/20">
+          <div className="p-2 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-lg shadow-amber-500/20">
             <Shield className="w-6 h-6 text-neutral-950" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-gradient-gold">Portal do Cliente</h1>
+            <h1 className="text-lg font-bold text-gradient-amber">Portal do Cliente</h1>
             <p className="text-xs text-neutral-500">CRM Judiciário</p>
           </div>
         </div>
@@ -121,7 +121,7 @@ function Sidebar({
       {cliente && (
         <div className="px-4 py-3 border-b border-neutral-800">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-gold-500 to-gold-600 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center flex-shrink-0">
               {cliente.tipoPessoa === "Juridica" ? (
                 <Building2 className="w-5 h-5 text-neutral-950" />
               ) : (
@@ -149,7 +149,7 @@ function Sidebar({
             className={cn(
               "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
               activeTab === item.id
-                ? "bg-gradient-to-r from-gold-500/20 to-gold-600/10 text-gold-400 border border-gold-500/30"
+                ? "bg-gradient-to-r from-amber-500/20 to-amber-600/10 text-amber-400 border border-amber-500/30"
                 : "text-neutral-400 hover:bg-neutral-800/50 hover:text-neutral-200"
             )}
           >
@@ -211,7 +211,7 @@ function DashboardTab({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-gold-500/30 transition-all"
+          className="bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-amber-500/30 transition-all"
         >
           <div className="flex items-center gap-4">
             <div className="p-3 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl border border-blue-500/30">
@@ -228,7 +228,7 @@ function DashboardTab({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-gold-500/30 transition-all"
+          className="bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-amber-500/30 transition-all"
         >
           <div className="flex items-center gap-4">
             <div className="p-3 bg-gradient-to-br from-green-500/20 to-green-600/20 rounded-xl border border-green-500/30">
@@ -245,11 +245,11 @@ function DashboardTab({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-gold-500/30 transition-all"
+          className="bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-amber-500/30 transition-all"
         >
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-br from-gold-500/20 to-gold-600/20 rounded-xl border border-gold-500/30">
-              <DollarSign className="w-6 h-6 text-gold-400" />
+            <div className="p-3 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-xl border border-amber-500/30">
+              <DollarSign className="w-6 h-6 text-amber-400" />
             </div>
             <div>
               <p className="text-sm text-neutral-400">Valor Total</p>
@@ -264,7 +264,7 @@ function DashboardTab({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-gold-500/30 transition-all"
+          className="bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-amber-500/30 transition-all"
         >
           <div className="flex items-center gap-4">
             <div className="p-3 bg-gradient-to-br from-purple-500/20 to-purple-600/20 rounded-xl border border-purple-500/30">
@@ -291,7 +291,7 @@ function DashboardTab({
         >
           <div className="p-4 border-b border-neutral-800">
             <h3 className="text-lg font-semibold text-neutral-100 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-gold-500" />
+              <Calendar className="w-5 h-5 text-amber-500" />
               Próximos Pagamentos
             </h3>
           </div>
@@ -315,7 +315,7 @@ function DashboardTab({
                       </p>
                     </div>
                   </div>
-                  <button className="px-3 py-1.5 bg-gold-500 hover:bg-gold-600 text-neutral-950 text-xs font-medium rounded-lg transition-colors">
+                  <button className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-neutral-950 text-xs font-medium rounded-lg transition-colors">
                     Pagar
                   </button>
                 </div>
@@ -337,7 +337,7 @@ function DashboardTab({
         >
           <div className="p-4 border-b border-neutral-800">
             <h3 className="text-lg font-semibold text-neutral-100 flex items-center gap-2">
-              <FileText className="w-5 h-5 text-gold-500" />
+              <FileText className="w-5 h-5 text-amber-500" />
               Meus Contratos
             </h3>
           </div>
@@ -345,7 +345,7 @@ function DashboardTab({
             {contratos.map((contrato) => (
               <div
                 key={contrato.id}
-                className="flex items-center justify-between p-3 bg-neutral-800/50 rounded-lg border border-neutral-700/50 hover:border-gold-500/30 transition-all cursor-pointer"
+                className="flex items-center justify-between p-3 bg-neutral-800/50 rounded-lg border border-neutral-700/50 hover:border-amber-500/30 transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-blue-500/20 rounded-lg">
@@ -387,7 +387,7 @@ function DashboardTab({
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-neutral-400">Total pago</span>
-            <span className="text-gold-400 font-medium">
+            <span className="text-amber-400 font-medium">
               {Math.round((valorPago / valorTotal) * 100)}%
             </span>
           </div>
@@ -396,7 +396,7 @@ function DashboardTab({
               initial={{ width: 0 }}
               animate={{ width: `${(valorPago / valorTotal) * 100}%` }}
               transition={{ delay: 0.8, duration: 1 }}
-              className="h-full bg-gradient-to-r from-gold-500 to-gold-600 rounded-full"
+              className="h-full bg-gradient-to-r from-amber-500 to-amber-600 rounded-full"
             />
           </div>
           <div className="flex justify-between text-xs text-neutral-500">
@@ -423,7 +423,7 @@ function ContratosTab({ contratos }: { contratos: ContratoPortal[] }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gradient-gold">Meus Contratos</h2>
+        <h2 className="text-2xl font-bold text-gradient-amber">Meus Contratos</h2>
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
@@ -432,7 +432,7 @@ function ContratosTab({ contratos }: { contratos: ContratoPortal[] }) {
               placeholder="Buscar contrato..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500"
+              className="pl-10 pr-4 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
             />
           </div>
         </div>
@@ -457,13 +457,13 @@ function ContratosTab({ contratos }: { contratos: ContratoPortal[] }) {
             key={contrato.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-neutral-900/95 backdrop-blur-xl rounded-xl border border-neutral-800 hover:border-gold-500/30 transition-all overflow-hidden"
+            className="bg-neutral-900/95 backdrop-blur-xl rounded-xl border border-neutral-800 hover:border-amber-500/30 transition-all overflow-hidden"
           >
             <div className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-gradient-to-br from-gold-500/20 to-gold-600/20 rounded-xl border border-gold-500/30">
-                    <FileText className="w-6 h-6 text-gold-400" />
+                  <div className="p-3 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-xl border border-amber-500/30">
+                    <FileText className="w-6 h-6 text-amber-400" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-neutral-100">
@@ -499,13 +499,13 @@ function ContratosTab({ contratos }: { contratos: ContratoPortal[] }) {
               <div className="mt-6 pt-4 border-t border-neutral-800">
                 <div className="flex justify-between text-sm mb-2">
                   <span className="text-neutral-400">Progresso do Pagamento</span>
-                  <span className="text-gold-400 font-medium">
+                  <span className="text-amber-400 font-medium">
                     {Math.round((contrato.valorPago / contrato.valorTotal) * 100)}%
                   </span>
                 </div>
                 <div className="h-2 bg-neutral-800 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-gold-500 to-gold-600 rounded-full transition-all"
+                    className="h-full bg-gradient-to-r from-amber-500 to-amber-600 rounded-full transition-all"
                     style={{ width: `${(contrato.valorPago / contrato.valorTotal) * 100}%` }}
                   />
                 </div>
@@ -517,7 +517,7 @@ function ContratosTab({ contratos }: { contratos: ContratoPortal[] }) {
 
               {/* Ações */}
               <div className="flex items-center gap-2 mt-4">
-                <button className="flex items-center gap-2 px-4 py-2 bg-gold-500 hover:bg-gold-600 text-neutral-950 rounded-lg text-sm font-medium transition-colors">
+                <button className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-neutral-950 rounded-lg text-sm font-medium transition-colors">
                   <Eye className="w-4 h-4" />
                   Ver Detalhes
                 </button>
@@ -553,7 +553,7 @@ function PagamentosTab({ pagamentos }: { pagamentos: PagamentoPortal[] }) {
       case "pago":
         return { label: "Pago", color: "bg-green-500/20 text-green-400 border-green-500/30", icon: CheckCircle };
       case "pendente":
-        return { label: "Pendente", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30", icon: Clock };
+        return { label: "Pendente", color: "bg-amber-500/20 text-amber-400 border-amber-500/30", icon: Clock };
       case "vencido":
         return { label: "Vencido", color: "bg-red-500/20 text-red-400 border-red-500/30", icon: AlertTriangle };
       default:
@@ -564,7 +564,7 @@ function PagamentosTab({ pagamentos }: { pagamentos: PagamentoPortal[] }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gradient-gold">Meus Pagamentos</h2>
+        <h2 className="text-2xl font-bold text-gradient-amber">Meus Pagamentos</h2>
         <div className="flex items-center gap-2">
           {["todos", "pendente", "pago", "vencido"].map((f) => (
             <button
@@ -573,7 +573,7 @@ function PagamentosTab({ pagamentos }: { pagamentos: PagamentoPortal[] }) {
               className={cn(
                 "px-4 py-2 rounded-lg text-sm font-medium transition-all",
                 filtro === f
-                  ? "bg-gold-500 text-neutral-950"
+                  ? "bg-amber-500 text-neutral-950"
                   : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
               )}
             >
@@ -593,7 +593,7 @@ function PagamentosTab({ pagamentos }: { pagamentos: PagamentoPortal[] }) {
         </div>
         <div className="bg-neutral-900/95 backdrop-blur-xl p-4 rounded-xl border border-neutral-800">
           <p className="text-sm text-neutral-400">Pendente</p>
-          <p className="text-2xl font-bold text-yellow-400">
+          <p className="text-2xl font-bold text-amber-400">
             {pagamentos.filter(p => p.status === "pendente").reduce((acc, p) => acc + p.valor, 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
           </p>
         </div>
@@ -621,7 +621,7 @@ function PagamentosTab({ pagamentos }: { pagamentos: PagamentoPortal[] }) {
           <table className="w-full">
             <thead className="bg-neutral-800/50">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gold-500 uppercase tracking-wider">Valor</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-amber-500 uppercase tracking-wider">Valor</th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">Contrato</th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">Vencimento</th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">Pagamento</th>
@@ -666,7 +666,7 @@ function PagamentosTab({ pagamentos }: { pagamentos: PagamentoPortal[] }) {
                             href={pagamentoComLink.linkBoleto}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1 px-3 py-1.5 bg-gold-500 hover:bg-gold-600 text-neutral-950 text-xs font-medium rounded-lg transition-colors"
+                            className="flex items-center gap-1 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-neutral-950 text-xs font-medium rounded-lg transition-colors"
                           >
                             <ExternalLink className="w-3 h-3" />
                             Ver Boleto
@@ -699,7 +699,7 @@ function DocumentosTab({ documentos }: { documentos: DocumentoPortal[] }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gradient-gold">Meus Documentos</h2>
+        <h2 className="text-2xl font-bold text-gradient-amber">Meus Documentos</h2>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
           <input
@@ -707,7 +707,7 @@ function DocumentosTab({ documentos }: { documentos: DocumentoPortal[] }) {
             placeholder="Buscar documento..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500"
+            className="pl-10 pr-4 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
         </div>
       </div>
@@ -718,14 +718,14 @@ function DocumentosTab({ documentos }: { documentos: DocumentoPortal[] }) {
             key={doc.id}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-neutral-900/95 backdrop-blur-xl p-4 rounded-xl border border-neutral-800 hover:border-gold-500/30 transition-all group cursor-pointer"
+            className="bg-neutral-900/95 backdrop-blur-xl p-4 rounded-xl border border-neutral-800 hover:border-amber-500/30 transition-all group cursor-pointer"
           >
             <div className="flex items-start gap-3">
               <div className="p-3 bg-red-500/20 rounded-lg">
                 <FileDown className="w-6 h-6 text-red-400" />
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-medium text-neutral-100 truncate group-hover:text-gold-400 transition-colors">
+                <h4 className="text-sm font-medium text-neutral-100 truncate group-hover:text-amber-400 transition-colors">
                   {doc.nome}
                 </h4>
                 <p className="text-xs text-neutral-500 mt-1">
@@ -737,7 +737,7 @@ function DocumentosTab({ documentos }: { documentos: DocumentoPortal[] }) {
               </div>
             </div>
             <div className="flex items-center gap-2 mt-4">
-              <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gold-500 hover:bg-gold-600 text-neutral-950 text-xs font-medium rounded-lg transition-colors">
+              <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-amber-500 hover:bg-amber-600 text-neutral-950 text-xs font-medium rounded-lg transition-colors">
                 <Download className="w-3 h-3" />
                 Baixar
               </button>
@@ -775,7 +775,7 @@ function MensagensTab({ mensagens: initialMensagens }: { mensagens: MensagemChat
   return (
     <div className="flex flex-col h-[calc(100vh-200px)]">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gradient-gold">Mensagens</h2>
+        <h2 className="text-2xl font-bold text-gradient-amber">Mensagens</h2>
         <span className="px-3 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full">
           Consultor Online
         </span>
@@ -798,7 +798,7 @@ function MensagensTab({ mensagens: initialMensagens }: { mensagens: MensagemChat
                 className={cn(
                   "max-w-[70%] px-4 py-3 rounded-2xl",
                   msg.remetente === "cliente"
-                    ? "bg-gold-500 text-neutral-950 rounded-br-sm"
+                    ? "bg-amber-500 text-neutral-950 rounded-br-sm"
                     : "bg-neutral-800 text-neutral-100 rounded-bl-sm"
                 )}
               >
@@ -826,12 +826,12 @@ function MensagensTab({ mensagens: initialMensagens }: { mensagens: MensagemChat
               onChange={(e) => setNovaMensagem(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleEnviar()}
               placeholder="Digite sua mensagem..."
-              className="flex-1 px-4 py-3 bg-neutral-800/50 border border-neutral-700 rounded-xl text-sm text-neutral-100 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500"
+              className="flex-1 px-4 py-3 bg-neutral-800/50 border border-neutral-700 rounded-xl text-sm text-neutral-100 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
             />
             <button
               onClick={handleEnviar}
               disabled={!novaMensagem.trim()}
-              className="p-3 bg-gold-500 hover:bg-gold-600 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-950 rounded-xl transition-colors"
+              className="p-3 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-950 rounded-xl transition-colors"
             >
               <Send className="w-5 h-5" />
             </button>
@@ -879,14 +879,14 @@ function PerfilTab({ cliente }: { cliente: ClienteAutenticado }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gradient-gold">Meu Perfil</h2>
+        <h2 className="text-2xl font-bold text-gradient-amber">Meu Perfil</h2>
         <button
           onClick={() => setEditando(!editando)}
           className={cn(
             "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
             editando
               ? "bg-green-500 hover:bg-green-600 text-white"
-              : "bg-gold-500 hover:bg-gold-600 text-neutral-950"
+              : "bg-amber-500 hover:bg-amber-600 text-neutral-950"
           )}
         >
           {editando ? (
@@ -907,7 +907,7 @@ function PerfilTab({ cliente }: { cliente: ClienteAutenticado }) {
         {/* Foto e Info Básica */}
         <div className="bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800">
           <div className="flex flex-col items-center text-center">
-            <div className="w-24 h-24 bg-gradient-to-br from-gold-500 to-gold-600 rounded-full flex items-center justify-center mb-4">
+            <div className="w-24 h-24 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center mb-4">
               {cliente.tipoPessoa === "Juridica" ? (
                 <Building2 className="w-12 h-12 text-neutral-950" />
               ) : (
@@ -916,16 +916,16 @@ function PerfilTab({ cliente }: { cliente: ClienteAutenticado }) {
             </div>
             <h3 className="text-xl font-bold text-neutral-100">{dados.nome}</h3>
             <p className="text-sm text-neutral-400">Cliente desde {getDataCadastro()}</p>
-            <span className="mt-2 px-3 py-1 bg-gold-500/20 text-gold-400 text-xs rounded-full border border-gold-500/30">
+            <span className="mt-2 px-3 py-1 bg-amber-500/20 text-amber-400 text-xs rounded-full border border-amber-500/30">
               {cliente.tipoPessoa === "Juridica" ? "Pessoa Jurídica" : "Pessoa Física"}
             </span>
             <div className="mt-4 w-full space-y-2">
               <div className="flex items-center gap-2 text-sm text-neutral-300">
-                <Mail className="w-4 h-4 text-gold-500" />
+                <Mail className="w-4 h-4 text-amber-500" />
                 <span className="truncate">{dados.email || "Não informado"}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-neutral-300">
-                <Phone className="w-4 h-4 text-gold-500" />
+                <Phone className="w-4 h-4 text-amber-500" />
                 <span>{dados.telefone || "Não informado"}</span>
               </div>
             </div>
@@ -945,7 +945,7 @@ function PerfilTab({ cliente }: { cliente: ClienteAutenticado }) {
                 value={dados.nome}
                 onChange={(e) => setDados({ ...dados, nome: e.target.value })}
                 disabled={!editando}
-                className="w-full px-4 py-2.5 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-gold-500"
+                className="w-full px-4 py-2.5 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
             <div>
@@ -966,7 +966,7 @@ function PerfilTab({ cliente }: { cliente: ClienteAutenticado }) {
                 value={dados.email}
                 onChange={(e) => setDados({ ...dados, email: e.target.value })}
                 disabled={!editando}
-                className="w-full px-4 py-2.5 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-gold-500"
+                className="w-full px-4 py-2.5 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
             <div>
@@ -976,7 +976,7 @@ function PerfilTab({ cliente }: { cliente: ClienteAutenticado }) {
                 value={dados.telefone}
                 onChange={(e) => setDados({ ...dados, telefone: e.target.value })}
                 disabled={!editando}
-                className="w-full px-4 py-2.5 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-gold-500"
+                className="w-full px-4 py-2.5 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
             <div className="md:col-span-2">
@@ -986,7 +986,7 @@ function PerfilTab({ cliente }: { cliente: ClienteAutenticado }) {
                 value={dados.endereco}
                 onChange={(e) => setDados({ ...dados, endereco: e.target.value })}
                 disabled={!editando}
-                className="w-full px-4 py-2.5 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-gold-500"
+                className="w-full px-4 py-2.5 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
           </div>
@@ -1055,7 +1055,7 @@ export default function PortalClientePage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-gold-500 mx-auto mb-4" />
+          <Loader2 className="w-8 h-8 animate-spin text-amber-500 mx-auto mb-4" />
           <p className="text-neutral-400">Carregando...</p>
         </div>
       </div>
@@ -1066,7 +1066,7 @@ export default function PortalClientePage() {
   if (!isAuthenticated || !cliente) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-gold-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
       </div>
     );
   }
@@ -1082,7 +1082,7 @@ export default function PortalClientePage() {
       return (
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin text-gold-500 mx-auto mb-4" />
+            <Loader2 className="w-8 h-8 animate-spin text-amber-500 mx-auto mb-4" />
             <p className="text-neutral-400">Carregando seus dados...</p>
           </div>
         </div>
@@ -1099,7 +1099,7 @@ export default function PortalClientePage() {
             <p className="text-neutral-400 mb-4">{dataError}</p>
             <button
               onClick={refetch}
-              className="flex items-center gap-2 px-4 py-2 bg-gold-500 hover:bg-gold-600 text-neutral-950 rounded-lg font-medium transition-colors mx-auto"
+              className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-neutral-950 rounded-lg font-medium transition-colors mx-auto"
             >
               <RefreshCw className="w-4 h-4" />
               Tentar novamente
@@ -1168,7 +1168,7 @@ export default function PortalClientePage() {
               <button className="p-2 hover:bg-neutral-800 rounded-lg transition-colors">
                 <HelpCircle className="w-5 h-5 text-neutral-400" />
               </button>
-              <div className="w-10 h-10 bg-gradient-to-br from-gold-500 to-gold-600 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center">
                 {cliente.tipoPessoa === "Juridica" ? (
                   <Building2 className="w-5 h-5 text-neutral-950" />
                 ) : (

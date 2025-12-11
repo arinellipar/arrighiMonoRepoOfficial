@@ -106,7 +106,7 @@ export function BoletoDetailsModal({
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="sticky top-0 bg-gradient-to-r from-gold-500 to-gold-600 text-neutral-950 p-6 rounded-t-2xl flex justify-between items-center">
+          <div className="sticky top-0 bg-gradient-to-r from-amber-500 to-amber-600 text-neutral-950 p-6 rounded-t-2xl flex justify-between items-center">
             <h2 className="text-2xl font-bold">
               Detalhes do Boleto #{boletoId}
             </h2>
@@ -159,6 +159,8 @@ export function BoletoDetailsModal({
                       <StatusBadge
                         status={status.status}
                         statusDescription={status.statusDescription}
+                        foiPago={status.foiPago}
+                        paidValue={status.paidValue}
                         size="lg"
                       />
                       <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
@@ -357,7 +359,7 @@ function CopyableValue({
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${
             isCopied
               ? "bg-emerald-600/20 text-emerald-300 border border-emerald-400/40"
-              : "bg-gradient-to-r from-gold-500 to-gold-600 text-neutral-950 shadow-gold-500/30"
+              : "bg-gradient-to-r from-amber-500 to-amber-600 text-neutral-950 shadow-amber-500/30"
           }`}
         >
           {isCopied ? (

@@ -85,9 +85,27 @@ export default function BoletosPage() {
     }
   };
 
+  // Função auxiliar para verificar se o boleto foi pago
+  const verificarSeFoiPago = (boleto: Boleto): boolean => {
+    if (boleto.foiPago !== undefined) {
+      return boleto.foiPago;
+    }
+    if (boleto.status === "LIQUIDADO") {
+      return true;
+    }
+    if (
+      boleto.status === "BAIXADO" &&
+      boleto.paidValue &&
+      boleto.paidValue > 0
+    ) {
+      return true;
+    }
+    return false;
+  };
+
   const handleDelete = async (boleto: Boleto) => {
-    // Não permitir deletar boletos pagos (LIQUIDADO ou BAIXADO)
-    if (boleto.status === "LIQUIDADO" || boleto.status === "BAIXADO") return;
+    // Não permitir deletar boletos pagos
+    if (verificarSeFoiPago(boleto)) return;
 
     if (!confirm(`Deseja realmente cancelar o boleto #${boleto.id}?`)) {
       return;
@@ -115,12 +133,9 @@ export default function BoletosPage() {
   };
 
   const handleDownloadPdf = async (boleto: Boleto) => {
-    // Permitir download para boletos REGISTRADOS, ATIVO e VENCIDO (não pagos)
-    if (
-      boleto.status === "LIQUIDADO" ||
-      boleto.status === "BAIXADO" ||
-      boleto.status === "CANCELADO"
-    ) {
+    // Permitir download apenas para boletos não pagos e não cancelados
+    const isPago = verificarSeFoiPago(boleto);
+    if (isPago || boleto.status === "CANCELADO") {
       alert(
         "⚠️ Apenas boletos não pagos podem ter o PDF baixado.\n\nBoletos pagos ou cancelados não estão mais disponíveis na API do Santander."
       );
@@ -314,13 +329,8 @@ export default function BoletosPage() {
   // Verificar se boleto está vencido
   // Não considerar vencidos os boletos que já foram pagos ou cancelados
   const isVencido = (boleto: Boleto): boolean => {
-    // Se o boleto já foi pago (LIQUIDADO ou BAIXADO) ou cancelado, não está vencido
-    // LIQUIDADO = Pago, BAIXADO = Pago (PIX), CANCELADO = Cancelado
-    if (
-      boleto.status === "LIQUIDADO" ||
-      boleto.status === "BAIXADO" ||
-      boleto.status === "CANCELADO"
-    ) {
+    // Se o boleto já foi pago ou cancelado, não está vencido
+    if (verificarSeFoiPago(boleto) || boleto.status === "CANCELADO") {
       return false;
     }
 
@@ -330,19 +340,23 @@ export default function BoletosPage() {
     return vencimento < hoje;
   };
 
+  // Verificar se boleto está expirado (BAIXADO sem pagamento)
+  const isExpirado = (boleto: Boleto): boolean => {
+    return boleto.status === "BAIXADO" && !verificarSeFoiPago(boleto);
+  };
+
   // Estatísticas rápidas
   const stats = {
     total: boletos.length,
     totalValue: boletos.reduce((sum, b) => sum + b.nominalValue, 0),
     pendentes: boletos.filter((b) => b.status === "PENDENTE").length,
     registrados: boletos.filter((b) => b.status === "REGISTRADO").length,
-    // Liquidados: inclui boletos pagos (LIQUIDADO) e pagos com PIX (BAIXADO)
-    liquidados: boletos.filter(
-      (b) => b.status === "LIQUIDADO" || b.status === "BAIXADO"
-    ).length,
-    // Vencidos: apenas boletos não pagos e não cancelados que estão vencidos
-    // Não contar boletos LIQUIDADO (Pago), BAIXADO (Pago com PIX) ou CANCELADO como vencidos
-    vencidos: boletos.filter((b) => isVencido(b)).length,
+    // Pagos: apenas boletos que realmente foram pagos (usando foiPago ou paidValue)
+    pagos: boletos.filter((b) => verificarSeFoiPago(b)).length,
+    // Expirados: boletos BAIXADO que não foram pagos
+    expirados: boletos.filter((b) => isExpirado(b)).length,
+    // Vencidos: apenas boletos não pagos, não expirados e não cancelados que estão vencidos
+    vencidos: boletos.filter((b) => isVencido(b) && !isExpirado(b)).length,
   };
 
   const StatusIcon = ({ status }: { status: BoletoStatus }) => {
@@ -374,8 +388,8 @@ export default function BoletosPage() {
             className="text-center"
           >
             <div className="relative">
-              <RefreshCw className="w-12 h-12 animate-spin text-gold-400 mx-auto" />
-              <div className="absolute inset-0 blur-xl bg-gold-500/30 animate-pulse" />
+              <RefreshCw className="w-12 h-12 animate-spin text-amber-400 mx-auto" />
+              <div className="absolute inset-0 blur-xl bg-amber-500/30 animate-pulse" />
             </div>
             <p className="mt-4 text-neutral-400 font-medium">
               Carregando boletos...
@@ -398,13 +412,13 @@ export default function BoletosPage() {
           >
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <div className="p-3 bg-gradient-to-br from-gold-500 to-gold-600 rounded-xl shadow-lg shadow-gold-500/30">
+                <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-lg shadow-amber-500/30">
                   <Receipt className="w-8 h-8 text-neutral-950" />
                 </div>
-                <h1 className="text-4xl font-bold text-gradient-gold">
+                <h1 className="text-4xl font-bold text-gradient-amber">
                   Boletos
                 </h1>
-                <Sparkles className="w-6 h-6 text-gold-400 animate-pulse" />
+                <Sparkles className="w-6 h-6 text-amber-400 animate-pulse" />
               </div>
               <p className="text-neutral-400 ml-14">
                 Gerencie todos os boletos bancários do sistema
@@ -418,7 +432,7 @@ export default function BoletosPage() {
                 className="group flex items-center gap-2 px-4 py-2.5 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
               >
                 <RefreshCw
-                  className={`w-5 h-5 text-neutral-300 group-hover:text-gold-400 transition-colors ${
+                  className={`w-5 h-5 text-neutral-300 group-hover:text-amber-400 transition-colors ${
                     loading ? "animate-spin" : ""
                   }`}
                 />
@@ -445,7 +459,7 @@ export default function BoletosPage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowNewBoletoModal(true)}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-neutral-950 rounded-xl font-medium shadow-lg shadow-gold-500/20 hover:shadow-gold-500/30 transition-all duration-300"
+                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-neutral-950 rounded-xl font-medium shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 transition-all duration-300"
               >
                 <Plus className="w-5 h-5" />
                 Novo Boleto
@@ -482,7 +496,7 @@ export default function BoletosPage() {
               },
               {
                 label: "Pagos",
-                value: stats.liquidados,
+                value: stats.pagos,
                 icon: CheckCircle,
                 isWide: false,
               },
@@ -499,13 +513,13 @@ export default function BoletosPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
                 className={cn(
-                  "bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-gold-500/30 hover:shadow-lg hover:shadow-gold-500/10 transition-all",
+                  "bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/10 transition-all",
                   stat.isWide && "md:col-span-2 lg:col-span-2"
                 )}
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 rounded-2xl bg-gradient-to-r from-gold-500/20 to-gold-600/20 border border-gold-500/30">
-                    <stat.icon className="w-6 h-6 text-gold-400" />
+                  <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/20 to-amber-600/20 border border-amber-500/30">
+                    <stat.icon className="w-6 h-6 text-amber-400" />
                   </div>
                 </div>
                 <p className="text-neutral-400 text-sm mb-1">{stat.label}</p>
@@ -537,7 +551,7 @@ export default function BoletosPage() {
                   placeholder="Buscar por ID, NSU, cliente ou contrato..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-neutral-800/50 border border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all duration-200 text-neutral-100 placeholder-neutral-500"
+                  className="w-full pl-12 pr-4 py-3 bg-neutral-800/50 border border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 text-neutral-100 placeholder-neutral-500"
                 />
               </div>
 
@@ -556,7 +570,7 @@ export default function BoletosPage() {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as any)}
-                    className="px-3 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-500 text-neutral-200"
+                    className="px-3 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-neutral-200"
                   >
                     <option value="date">Data</option>
                     <option value="value">Valor</option>
@@ -570,7 +584,7 @@ export default function BoletosPage() {
                     onClick={() => setViewMode("grid")}
                     className={`p-2 rounded ${
                       viewMode === "grid"
-                        ? "bg-gold-500 shadow-lg shadow-gold-500/20"
+                        ? "bg-amber-500 shadow-lg shadow-amber-500/20"
                         : ""
                     } transition-all duration-200`}
                   >
@@ -594,7 +608,7 @@ export default function BoletosPage() {
                     onClick={() => setViewMode("list")}
                     className={`p-2 rounded ${
                       viewMode === "list"
-                        ? "bg-gold-500 shadow-lg shadow-gold-500/20"
+                        ? "bg-amber-500 shadow-lg shadow-amber-500/20"
                         : ""
                     } transition-all duration-200`}
                   >
@@ -738,7 +752,12 @@ export default function BoletosPage() {
                             </h3>
                           </div>
                           <div className="flex flex-col items-end gap-1">
-                            <StatusBadge status={boleto.status} />
+                            <StatusBadge
+                              status={boleto.status}
+                              foiPago={boleto.foiPago}
+                              paidValue={boleto.paidValue}
+                              statusDescription={boleto.statusDescription}
+                            />
                             {isVencido(boleto) && (
                               <span className="text-xs font-bold text-red-400">
                                 {formatarTempoAtraso(
@@ -853,8 +872,8 @@ export default function BoletosPage() {
                               </button>
                             </>
                           )}
-                          {boleto.status !== "LIQUIDADO" &&
-                            boleto.status !== "BAIXADO" && (
+                          {!verificarSeFoiPago(boleto) &&
+                            boleto.status !== "CANCELADO" && (
                               <button
                                 onClick={() => handleDelete(boleto)}
                                 disabled={deletingId === boleto.id}
@@ -932,7 +951,12 @@ export default function BoletosPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex flex-col gap-1">
-                            <StatusBadge status={boleto.status} />
+                            <StatusBadge
+                              status={boleto.status}
+                              foiPago={boleto.foiPago}
+                              paidValue={boleto.paidValue}
+                              statusDescription={boleto.statusDescription}
+                            />
                             {isVencido(boleto) && (
                               <span className="text-xs font-bold text-red-400">
                                 {formatarTempoAtraso(
@@ -967,7 +991,7 @@ export default function BoletosPage() {
                           <div className="flex items-center justify-center gap-1">
                             <button
                               onClick={() => handleViewDetails(boleto)}
-                              className="p-1.5 hover:bg-gold-500/20 text-gold-400 rounded transition-colors"
+                              className="p-1.5 hover:bg-amber-500/20 text-amber-400 rounded transition-colors"
                               title="Ver detalhes"
                             >
                               <Eye className="w-4 h-4" />
@@ -1008,8 +1032,8 @@ export default function BoletosPage() {
                                 </button>
                               </>
                             )}
-                            {boleto.status !== "LIQUIDADO" &&
-                              boleto.status !== "BAIXADO" && (
+                            {!verificarSeFoiPago(boleto) &&
+                              boleto.status !== "CANCELADO" && (
                                 <button
                                   onClick={() => handleDelete(boleto)}
                                   disabled={deletingId === boleto.id}

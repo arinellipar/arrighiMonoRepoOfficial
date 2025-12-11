@@ -106,6 +106,9 @@ namespace CrmArrighi.Models
         [StringLength(1000, ErrorMessage = "Mensagens devem ter no máximo 1000 caracteres")]
         public string? Messages { get; set; }
 
+        // Número da parcela (ex: 1, 2, 3... para rastrear qual parcela do contrato)
+        public int? NumeroParcela { get; set; }
+
         // Campos de controle
         public DateTime DataCadastro { get; set; } = DateTime.Now;
         public DateTime? DataAtualizacao { get; set; }

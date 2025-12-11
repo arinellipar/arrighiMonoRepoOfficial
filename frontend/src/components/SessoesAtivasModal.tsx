@@ -48,7 +48,7 @@ export function SessoesAtivasModal({
       case "consultor":
         return "bg-green-100 text-green-800 border-green-200";
       case "vendedor":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return "bg-amber-100 text-amber-800 border-amber-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
@@ -77,17 +77,37 @@ export function SessoesAtivasModal({
     return tempo || "0m";
   };
 
+  // Função para parsear data do backend (pode vir em UTC ou já em Brasília)
+  const parseBackendDate = (data: string | null): Date | null => {
+    if (!data) return null;
+
+    try {
+      // Se a data não termina com Z, assumir que já está em horário local (Brasília)
+      // O backend usa TimeZoneHelper.ConvertToBrasiliaTime
+      if (!data.endsWith("Z") && !data.includes("+") && !data.includes("-", 10)) {
+        // Adicionar indicador de timezone de Brasília (UTC-3)
+        return new Date(data);
+      }
+      return new Date(data);
+    } catch {
+      return null;
+    }
+  };
+
   const formatDataHora = (data: string | null) => {
     if (!data) return "Nunca acessou";
 
     try {
-      const date = new Date(data);
+      const date = parseBackendDate(data);
+      if (!date || isNaN(date.getTime())) return "Data inválida";
+
       return new Intl.DateTimeFormat("pt-BR", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
         hour: "2-digit",
         minute: "2-digit",
+        timeZone: "America/Sao_Paulo",
       }).format(date);
     } catch {
       return "Data inválida";
@@ -97,10 +117,17 @@ export function SessoesAtivasModal({
   const formatUltimaAtividade = (data: string | null) => {
     if (!data) return "Nunca";
 
+    const date = parseBackendDate(data);
+    if (!date || isNaN(date.getTime())) return "Data inválida";
+
     const agora = new Date();
-    const ultimaAtividade = new Date(data);
-    const diffMs = agora.getTime() - ultimaAtividade.getTime();
+    const diffMs = agora.getTime() - date.getTime();
     const diffMin = Math.floor(diffMs / (1000 * 60));
+
+    // Se a diferença for negativa (data no futuro), pode ser problema de timezone
+    if (diffMin < 0) {
+      return "Agora";
+    }
 
     if (diffMin < 1) return "Agora";
     if (diffMin < 60) return `${diffMin}m atrás`;
@@ -320,13 +347,13 @@ export function SessoesAtivasModal({
                                 {estaOnline ? (
                                   <>
                                     {/* Página Atual */}
-                                    <div className="flex items-center gap-2 text-blue-700 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200 col-span-full sm:col-span-2 lg:col-span-1">
-                                      <MapPin className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                                    <div className="flex items-center gap-2 bg-purple-900/30 px-3 py-2 rounded-lg border-2 border-purple-500 col-span-full sm:col-span-2 lg:col-span-1">
+                                      <MapPin className="w-5 h-5 flex-shrink-0 animate-pulse" style={{ color: '#a855f7' }} />
                                       <div className="flex-1 min-w-0">
-                                        <span className="font-semibold text-blue-900 block">
+                                        <span className="font-bold block text-xs uppercase tracking-wide" style={{ color: '#c084fc' }}>
                                           Página Atual:
                                         </span>
-                                        <span className="truncate block text-blue-700" title={sessao.paginaAtual || "Não informado"}>
+                                        <span className="truncate block font-bold text-lg" style={{ color: '#a855f7' }} title={sessao.paginaAtual || "Não informado"}>
                                           {sessao.paginaAtual || "Não informado"}
                                         </span>
                                       </div>

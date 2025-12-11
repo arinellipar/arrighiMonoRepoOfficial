@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Search, ChevronDown, Plus, Minus } from "lucide-react";
+import { formatDocumentoDisplay } from "@/lib/utils";
 
 interface ContratoCompleto {
   id: number;
@@ -111,8 +112,8 @@ export function NovoBoletoModal({
       "Cliente não identificado";
 
     const clienteDocumento =
-      c.cliente?.pessoaFisica?.cpf ||
-      c.cliente?.pessoaJuridica?.cnpj ||
+      formatDocumentoDisplay(c.cliente?.pessoaFisica?.cpf ||
+      c.cliente?.pessoaJuridica?.cnpj) ||
       "Sem documento";
 
     // Calcular valor total do contrato

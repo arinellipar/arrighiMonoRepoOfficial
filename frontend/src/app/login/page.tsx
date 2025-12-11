@@ -123,8 +123,8 @@ export default function LoginPage() {
       {/* Background Effects */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(212,175,55,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(212,175,55,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gold-500/10 rounded-full blur-3xl opacity-30 animate-pulse" style={{ animationDuration: '4s' }} />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gold-600/10 rounded-full blur-3xl opacity-20 animate-pulse" style={{ animationDuration: '6s', animationDelay: '2s' }} />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl opacity-30 animate-pulse" style={{ animationDuration: '4s' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-600/10 rounded-full blur-3xl opacity-20 animate-pulse" style={{ animationDuration: '6s', animationDelay: '2s' }} />
       </div>
 
       <div className="w-full max-w-md relative z-10">
@@ -138,12 +138,12 @@ export default function LoginPage() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: "spring" }}
-            className="w-20 h-20 bg-gradient-to-br from-gold-500 to-gold-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-gold-500/30"
+            className="w-20 h-20 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-amber-500/30"
           >
             <Building2 className="w-10 h-10 text-neutral-950" />
           </motion.div>
 
-          <h1 className="text-4xl font-bold text-gradient-gold mb-2">
+          <h1 className="text-4xl font-bold text-gradient-amber mb-2">
             CRM ARRIGHI
           </h1>
 
@@ -165,9 +165,9 @@ export default function LoginPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.3, type: "spring" }}
-              className="w-16 h-16 bg-gold-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-gold-500/30"
+              className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/30"
             >
-              <LogIn className="w-8 h-8 text-gold-400" />
+              <LogIn className="w-8 h-8 text-amber-400" />
             </motion.div>
 
             <h2 className="text-2xl font-bold text-neutral-50 mb-2">
@@ -215,7 +215,7 @@ export default function LoginPage() {
                     "placeholder:text-neutral-500",
                     errors.cpf
                       ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/20"
-                      : "border-neutral-700 focus:border-gold-500 focus:ring-gold-500/20 hover:border-neutral-600"
+                      : "border-neutral-700 focus:border-amber-500 focus:ring-amber-500/20 hover:border-neutral-600"
                   )}
                 />
               </div>
@@ -250,13 +250,13 @@ export default function LoginPage() {
                     "placeholder:text-neutral-500",
                     errors.senha
                       ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/20"
-                      : "border-neutral-700 focus:border-gold-500 focus:ring-gold-500/20 hover:border-neutral-600"
+                      : "border-neutral-700 focus:border-amber-500 focus:ring-amber-500/20 hover:border-neutral-600"
                   )}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-gold-400 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-amber-400 transition-colors"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -286,10 +286,10 @@ export default function LoginPage() {
                 whileTap={{ scale: 0.98 }}
                 className={cn(
                   "w-full h-12 rounded-xl font-medium transition-all duration-300",
-                  "focus:outline-none focus:ring-4 focus:ring-gold-500/20",
+                  "focus:outline-none focus:ring-4 focus:ring-amber-500/20",
                   loading
                     ? "bg-neutral-700 cursor-not-allowed text-neutral-500"
-                    : "bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-neutral-950 shadow-lg shadow-gold-500/20 hover:shadow-gold-500/30"
+                    : "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-neutral-950 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30"
                 )}
               >
                 {loading ? (
@@ -314,7 +314,7 @@ export default function LoginPage() {
             </p>
             <Link
               href="/cadastro"
-              className="inline-flex items-center gap-2 text-gold-400 hover:text-gold-300 font-medium transition-colors"
+              className="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 font-medium transition-colors"
             >
               <UserPlus className="w-4 h-4" />
               Criar conta
@@ -330,7 +330,7 @@ export default function LoginPage() {
           className="text-center mt-8"
         >
           <div className="flex items-center justify-center gap-2 text-neutral-400 text-sm">
-            <Shield className="w-4 h-4 text-gold-400" />
+            <Shield className="w-4 h-4 text-amber-400" />
             Sistema seguro e protegido
           </div>
           <p className="text-neutral-500 text-xs mt-2">

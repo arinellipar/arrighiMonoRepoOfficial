@@ -28,6 +28,7 @@ import ClienteForm from "@/components/forms/ClienteForm";
 import { Tooltip } from "@/components";
 import { useClientes } from "@/hooks/useClientes";
 import { Cliente, CreateClienteDTO, UpdateClienteDTO } from "@/types/api";
+import { formatCPFDisplay, formatCNPJDisplay, formatDocumentoDisplay } from "@/lib/utils";
 import { cn, truncateText } from "@/lib/utils";
 import { useForm } from "@/contexts/FormContext";
 import { PermissionWrapper } from "@/components/permissions";
@@ -78,9 +79,9 @@ function StatusClienteBadge({
       label: "Inativo",
     },
     prospecto: {
-      bg: "bg-yellow-500/20",
-      text: "text-yellow-400",
-      border: "border-yellow-500/30",
+      bg: "bg-amber-500/20",
+      text: "text-amber-400",
+      border: "border-amber-500/30",
       icon: Clock,
       label: "Prospecto",
     },
@@ -372,7 +373,7 @@ export default function ClientesPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleOpenForm}
-              className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-neutral-950 rounded-xl font-medium shadow-lg shadow-gold-500/20 transition-all duration-200"
+              className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-neutral-950 rounded-xl font-medium shadow-lg shadow-amber-500/20 transition-all duration-200"
             >
               <Plus className="w-5 h-5" />
               <span>Novo Cliente</span>
@@ -392,7 +393,7 @@ export default function ClientesPage() {
                 className={cn(
                   "flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-xl font-medium transition-all duration-200",
                   selectedTab === "todos"
-                    ? "bg-gold-500/20 text-gold-400 border border-gold-500/30 shadow-lg shadow-gold-500/10"
+                    ? "bg-amber-500/20 text-amber-400 border border-amber-500/30 shadow-lg shadow-amber-500/10"
                     : "text-neutral-400 hover:bg-neutral-800/50 border border-transparent"
                 )}
               >
@@ -404,7 +405,7 @@ export default function ClientesPage() {
                 className={cn(
                   "flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-xl font-medium transition-all duration-200",
                   selectedTab === "fisica"
-                    ? "bg-gold-500/20 text-gold-400 border border-gold-500/30 shadow-lg shadow-gold-500/10"
+                    ? "bg-amber-500/20 text-amber-400 border border-amber-500/30 shadow-lg shadow-amber-500/10"
                     : "text-neutral-400 hover:bg-neutral-800/50 border border-transparent"
                 )}
               >
@@ -416,7 +417,7 @@ export default function ClientesPage() {
                 className={cn(
                   "flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-xl font-medium transition-all duration-200",
                   selectedTab === "juridica"
-                    ? "bg-gold-500/20 text-gold-400 border border-gold-500/30 shadow-lg shadow-gold-500/10"
+                    ? "bg-amber-500/20 text-amber-400 border border-amber-500/30 shadow-lg shadow-amber-500/10"
                     : "text-neutral-400 hover:bg-neutral-800/50 border border-transparent"
                 )}
               >
@@ -441,11 +442,11 @@ export default function ClientesPage() {
                   placeholder="Buscar por nome, CPF/CNPJ ou email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-neutral-800/50 border border-neutral-700 text-neutral-100 placeholder-neutral-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all duration-200"
+                  className="w-full pl-10 pr-4 py-3 bg-neutral-800/50 border border-neutral-700 text-neutral-100 placeholder-neutral-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200"
                 />
                 {selectedClienteId && (
                   <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                    <div className="bg-gold-500 text-neutral-950 rounded-full w-5 h-5 flex items-center justify-center">
+                    <div className="bg-amber-500 text-neutral-950 rounded-full w-5 h-5 flex items-center justify-center">
                       <span className="text-xs font-bold">✓</span>
                     </div>
                   </div>
@@ -455,7 +456,7 @@ export default function ClientesPage() {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-4 py-3 bg-neutral-800/50 border border-neutral-700 text-neutral-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all duration-200"
+                className="px-4 py-3 bg-neutral-800/50 border border-neutral-700 text-neutral-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200"
               >
                 <option value="">Todos os status</option>
                 <option value="ativo">Ativo</option>
@@ -467,7 +468,7 @@ export default function ClientesPage() {
               <select
                 value={filterSegmento}
                 onChange={(e) => setFilterSegmento(e.target.value)}
-                className="px-4 py-3 bg-neutral-800/50 border border-neutral-700 text-neutral-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all duration-200"
+                className="px-4 py-3 bg-neutral-800/50 border border-neutral-700 text-neutral-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200"
               >
                 <option value="">Todos os segmentos</option>
                 {segmentos.map((seg: string | undefined) => (
@@ -619,7 +620,7 @@ export default function ClientesPage() {
                     className={cn(
                       "p-2 rounded-lg transition-colors border",
                       viewMode === "list"
-                        ? "bg-gold-500/20 text-gold-400 border-gold-500/30"
+                        ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
                         : "text-neutral-400 hover:text-neutral-300 border-neutral-700 hover:bg-neutral-800/50"
                     )}
                   >
@@ -642,7 +643,7 @@ export default function ClientesPage() {
                     className={cn(
                       "p-2 rounded-lg transition-colors border",
                       viewMode === "grid"
-                        ? "bg-gold-500/20 text-gold-400 border-gold-500/30"
+                        ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
                         : "text-neutral-400 hover:text-neutral-300 border-neutral-700 hover:bg-neutral-800/50"
                     )}
                   >
@@ -768,7 +769,7 @@ export default function ClientesPage() {
                               />
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-600">
-                              {cliente.cpf || cliente.cnpj}
+                              {formatDocumentoDisplay(cliente.cpf || cliente.cnpj)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm text-secondary-900">
@@ -811,9 +812,9 @@ export default function ClientesPage() {
                       onClick={() => handleSelectCliente(cliente.id)}
                       className={cn(
                         "bg-neutral-900/95 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-neutral-800 cursor-pointer transition-all duration-200",
-                        "hover:border-gold-500/30 hover:shadow-xl hover:shadow-gold-500/10",
+                        "hover:border-amber-500/30 hover:shadow-xl hover:shadow-amber-500/10",
                         selectedClienteId === cliente.id
-                          ? "border-gold-500/50 bg-gold-500/10 shadow-gold-500/20"
+                          ? "border-amber-500/50 bg-amber-500/10 shadow-amber-500/20"
                           : ""
                       )}
                     >
@@ -872,12 +873,12 @@ export default function ClientesPage() {
                           {cliente.tipo === "fisica" ? (
                             <>
                               <FileText className="w-4 h-4 mr-2 text-neutral-400" />
-                              <span>CPF: {cliente.cpf}</span>
+                              <span>CPF: {formatCPFDisplay(cliente.cpf)}</span>
                             </>
                           ) : (
                             <>
                               <Building2 className="w-4 h-4 mr-2 text-neutral-400" />
-                              <span>CNPJ: {cliente.cnpj}</span>
+                              <span>CNPJ: {formatCNPJDisplay(cliente.cnpj)}</span>
                             </>
                           )}
                         </div>

@@ -19,10 +19,10 @@ export const AuthDebug: React.FC = () => {
   }
 
   return (
-    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
       <div className="flex items-center mb-3">
-        <AlertTriangle className="h-5 w-5 text-yellow-600 mr-2" />
-        <h3 className="text-yellow-800 font-medium">Debug de Autenticação</h3>
+        <AlertTriangle className="h-5 w-5 text-amber-600 mr-2" />
+        <h3 className="text-amber-800 font-medium">Debug de Autenticação</h3>
       </div>
 
       <div className="space-y-2 text-sm">
@@ -140,7 +140,7 @@ export const AuthStatus: React.FC = () => {
 
   if (!userId) {
     return (
-      <div className="flex items-center text-yellow-600">
+      <div className="flex items-center text-amber-600">
         <AlertTriangle className="h-4 w-4 mr-2" />
         <span className="text-sm">ID do usuário não encontrado</span>
       </div>

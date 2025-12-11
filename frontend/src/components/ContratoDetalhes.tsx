@@ -38,7 +38,7 @@ import {
   SituacaoContrato,
 } from "@/types/api";
 import { useContratos } from "@/hooks/useContratos";
-import { cn } from "@/lib/utils";
+import { cn, formatDocumentoDisplay } from "@/lib/utils";
 import { format, parseISO, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -304,7 +304,7 @@ export default function ContratoDetalhes({
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={onMudarSituacao}
-                      className="flex items-center gap-2 px-3 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg text-sm font-medium transition-colors"
+                      className="flex items-center gap-2 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-medium transition-colors"
                     >
                       <RefreshCcw className="w-4 h-4" />
                       Mudar Situação
@@ -359,8 +359,8 @@ export default function ContratoDetalhes({
                     <div>
                       <p className="text-sm text-neutral-600">Documento</p>
                       <p className="font-medium text-neutral-900">
-                        {cliente?.pessoaFisica?.cpf ||
-                          cliente?.pessoaJuridica?.cnpj ||
+                        {formatDocumentoDisplay(cliente?.pessoaFisica?.cpf ||
+                          cliente?.pessoaJuridica?.cnpj) ||
                           "Não informado"}
                       </p>
                     </div>

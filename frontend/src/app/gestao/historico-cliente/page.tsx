@@ -8,7 +8,7 @@ import { PermissionWrapper } from "@/components/permissions";
 import { useClientes } from "@/hooks/useClientes";
 import { HistoricoClienteModal } from "@/components/historico/HistoricoClienteModal";
 import type { Cliente } from "@/types/api";
-import { cn } from "@/lib/utils";
+import { cn, formatDocumentoDisplay } from "@/lib/utils";
 
 export default function HistoricoClientePage() {
   const { clientes, loading, fetchClientes } = useClientes();
@@ -54,7 +54,7 @@ export default function HistoricoClientePage() {
     const statusConfig: Record<string, { bg: string; text: string }> = {
       ativo: { bg: "bg-green-100", text: "text-green-800" },
       inativo: { bg: "bg-red-100", text: "text-red-800" },
-      prospecto: { bg: "bg-yellow-100", text: "text-yellow-800" },
+      prospecto: { bg: "bg-amber-100", text: "text-amber-800" },
       arquivado: { bg: "bg-gray-100", text: "text-gray-800" },
     };
 
@@ -219,7 +219,7 @@ export default function HistoricoClientePage() {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-600">
-                              {cliente.cpf || cliente.cnpj || "N/A"}
+                              {formatDocumentoDisplay(cliente.cpf || cliente.cnpj) || "N/A"}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-600">
                               {cliente.email || "N/A"}

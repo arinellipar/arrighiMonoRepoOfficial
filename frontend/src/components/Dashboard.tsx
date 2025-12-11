@@ -286,6 +286,12 @@ export default function ModernDashboard() {
     ).length;
   }, [clientes]);
 
+  // Debug: verificar dados de receita
+  useEffect(() => {
+    console.log("🔍 Dashboard: receita object =", receita);
+    console.log("🔍 Dashboard: receita?.receitaTotal =", receita?.receitaTotal);
+  }, [receita]);
+
   // Dados reais calculados - Memoizados para performance
   const stats = useMemo(
     () => ({
@@ -294,20 +300,20 @@ export default function ModernDashboard() {
         0,
         clientesAtivos - Math.floor(clientesAtivos * 0.9)
       ), // Estimativa de novos clientes
-      revenue: receita?.ReceitaTotal || 0,
-      revenueGrowth: receita?.CrescimentoMes || 0,
+      revenue: receita?.receitaTotal || 0,
+      revenueGrowth: receita?.crescimentoMes || 0,
       // Sessões ativas apenas para administradores
       activeSessions: isAdmin ? sessoesOnline : 0,
-      conversionRate: receita?.TaxaConversao || 0,
+      conversionRate: receita?.taxaConversao || 0,
       totalOrders: dashboard?.Contratos?.TotalContratos || 0,
-      orderGrowth: receita?.ContratosMesAtual || 0,
+      orderGrowth: receita?.contratosMesAtual || 0,
       // Novos campos baseados em dados reais
-      receitaMesAtual: receita?.ReceitaMesAtual || 0,
-      receitaAnoAtual: receita?.ReceitaAnoAtual || 0,
-      contratosFechados: receita?.ContratosFechados || 0,
-      valorBoletosLiquidados: receita?.ValorBoletosLiquidados || 0,
-      valorBoletosPendentes: receita?.ValorBoletosPendentes || 0,
-      comissaoTotal: receita?.ComissaoTotal || 0,
+      receitaMesAtual: receita?.receitaMesAtual || 0,
+      receitaAnoAtual: receita?.receitaAnoAtual || 0,
+      contratosFechados: receita?.contratosFechados || 0,
+      valorBoletosLiquidados: receita?.valorBoletosLiquidados || 0,
+      valorBoletosPendentes: receita?.valorBoletosPendentes || 0,
+      comissaoTotal: receita?.comissaoTotal || 0,
     }),
     [clientesAtivos, sessoesOnline, receita, dashboard, isAdmin]
   );
@@ -356,19 +362,19 @@ export default function ModernDashboard() {
 
           {/* Glow Effects */}
           <div
-            className="absolute top-0 left-1/4 w-96 h-96 bg-gold-500/10
+            className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/10
                        rounded-full blur-3xl opacity-30 animate-pulse"
             style={{ animationDuration: "4s" }}
           />
           <div
-            className="absolute bottom-0 right-1/4 w-96 h-96 bg-gold-600/10
+            className="absolute bottom-0 right-1/4 w-96 h-96 bg-amber-600/10
                        rounded-full blur-3xl opacity-20 animate-pulse"
             style={{ animationDuration: "6s", animationDelay: "2s" }}
           />
 
           {/* Accent Lines */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
         </div>
 
         {/* Sidebar */}
@@ -388,14 +394,14 @@ export default function ModernDashboard() {
                     className="flex items-center space-x-3"
                   >
                     <div
-                      className="w-12 h-12 bg-gradient-to-br from-gold-500 to-gold-600
-                                    rounded-2xl flex items-center justify-center shadow-lg shadow-gold-500/20
-                                    border border-gold-500/20"
+                      className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600
+                                    rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/20
+                                    border border-amber-500/20"
                     >
                       <Sparkles className="w-7 h-7 text-neutral-950" />
                     </div>
                     <div>
-                      <h1 className="text-xl font-bold text-gradient-gold">
+                      <h1 className="text-xl font-bold text-gradient-amber">
                         CRM Judiciário
                       </h1>
                       <p className="text-xs text-neutral-400">
@@ -423,14 +429,14 @@ export default function ModernDashboard() {
                                   transition-all duration-300 group
                                   ${
                                     item.active
-                                      ? "bg-gradient-to-r from-gold-500/20 to-gold-600/20 border border-gold-500/30"
+                                      ? "bg-gradient-to-r from-amber-500/20 to-amber-600/20 border border-amber-500/30"
                                       : "hover:bg-neutral-800/50"
                                   }`}
                       >
                         <div className="flex items-center space-x-3">
                           <item.icon
                             className={`w-5 h-5 ${
-                              item.active ? "text-gold-400" : "text-neutral-400"
+                              item.active ? "text-amber-400" : "text-neutral-400"
                             }`}
                           />
                           <span
@@ -453,9 +459,9 @@ export default function ModernDashboard() {
                 <div className="absolute bottom-6 left-6 right-6">
                   <motion.div
                     whileHover={{ scale: 1.02 }}
-                    className="flex items-center space-x-3 p-3 bg-neutral-800/50 rounded-2xl border border-gold-500/20"
+                    className="flex items-center space-x-3 p-3 bg-neutral-800/50 rounded-2xl border border-amber-500/20"
                   >
-                    <div className="w-10 h-10 bg-gradient-to-br from-gold-400 to-gold-600 rounded-full flex items-center justify-center shadow-lg shadow-gold-500/20">
+                    <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center shadow-lg shadow-amber-500/20">
                       <span className="text-neutral-950 font-bold text-sm">
                         {user?.nome ? user.nome.charAt(0).toUpperCase() : "U"}
                       </span>
@@ -468,7 +474,7 @@ export default function ModernDashboard() {
                         {user?.email || "usuario@email.com"}
                       </p>
                     </div>
-                    <LogOut className="w-5 h-5 text-neutral-400 hover:text-gold-400 transition-colors" />
+                    <LogOut className="w-5 h-5 text-neutral-400 hover:text-amber-400 transition-colors" />
                   </motion.div>
                 </div>
               </GlassCard>
@@ -520,7 +526,7 @@ export default function ModernDashboard() {
                     className={`w-5 h-5 text-neutral-300
                                         ${
                                           refreshing
-                                            ? "animate-spin text-gold-400"
+                                            ? "animate-spin text-amber-400"
                                             : ""
                                         }`}
                   />
@@ -546,7 +552,7 @@ export default function ModernDashboard() {
               transition={{ duration: 0.5 }}
             >
               <h1 className="text-4xl md:text-5xl font-bold mb-2">
-                <span className="text-gradient-gold">
+                <span className="text-gradient-amber">
                   Bem-vindo de volta! 👋
                 </span>
               </h1>
@@ -676,9 +682,9 @@ export default function ModernDashboard() {
               >
                 <div className="flex items-start justify-between mb-4">
                   <div
-                    className={`p-3 rounded-2xl bg-gradient-to-r from-gold-500/20 to-gold-600/20 border border-gold-500/30`}
+                    className={`p-3 rounded-2xl bg-gradient-to-r from-amber-500/20 to-amber-600/20 border border-amber-500/30`}
                   >
-                    <stat.icon className="w-6 h-6 text-gold-400" />
+                    <stat.icon className="w-6 h-6 text-amber-400" />
                   </div>
                   <motion.div
                     whileHover={{ scale: 1.05 }}
@@ -703,7 +709,7 @@ export default function ModernDashboard() {
                 <p className="text-neutral-400 text-sm mb-1">{stat.title}</p>
                 <p className="text-3xl font-bold text-neutral-50">
                   {stat.loading ? (
-                    <span className="animate-pulse text-gold-400">...</span>
+                    <span className="animate-pulse text-amber-400">...</span>
                   ) : (
                     <AnimatedStat
                       value={stat.value}
@@ -742,7 +748,7 @@ export default function ModernDashboard() {
                         className={`px-4 py-2 rounded-xl text-sm font-medium transition-all
                                     ${
                                       selectedPeriod === period
-                                        ? "bg-gradient-to-r from-gold-500 to-gold-600 text-neutral-950 shadow-lg shadow-gold-500/20"
+                                        ? "bg-gradient-to-r from-amber-500 to-amber-600 text-neutral-950 shadow-lg shadow-amber-500/20"
                                         : "bg-neutral-800/50 text-neutral-400 hover:bg-neutral-800 border border-neutral-700"
                                     }`}
                       >
@@ -761,14 +767,14 @@ export default function ModernDashboard() {
                       animate={{ height: `${item.value}%`, opacity: 1 }}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
                       whileHover={{ scaleY: 1.05 }}
-                      className="relative flex-1 mx-1 bg-gradient-to-t from-gold-600 to-gold-400
-                                 rounded-t-2xl cursor-pointer group shadow-lg shadow-gold-500/20"
+                      className="relative flex-1 mx-1 bg-gradient-to-t from-amber-600 to-amber-400
+                                 rounded-t-2xl cursor-pointer group shadow-lg shadow-amber-500/20"
                     >
                       <motion.div
                         initial={{ opacity: 0 }}
                         whileHover={{ opacity: 1 }}
                         className="absolute -top-8 left-1/2 transform -translate-x-1/2
-                                   bg-neutral-800 text-gold-400 text-xs px-2 py-1 rounded-lg border border-gold-500/30"
+                                   bg-neutral-800 text-amber-400 text-xs px-2 py-1 rounded-lg border border-amber-500/30"
                       >
                         {item.value}%
                       </motion.div>
@@ -894,7 +900,7 @@ export default function ModernDashboard() {
                                           atividade.tipo === "success"
                                             ? "bg-green-100"
                                             : atividade.tipo === "warning"
-                                            ? "bg-yellow-100"
+                                            ? "bg-amber-100"
                                             : atividade.tipo === "error"
                                             ? "bg-red-100"
                                             : "bg-blue-100"
@@ -904,7 +910,7 @@ export default function ModernDashboard() {
                             <CheckCircle className="w-5 h-5 text-green-600" />
                           )}
                           {atividade.tipo === "warning" && (
-                            <AlertCircle className="w-5 h-5 text-yellow-600" />
+                            <AlertCircle className="w-5 h-5 text-amber-600" />
                           )}
                           {atividade.tipo === "error" && (
                             <XCircle className="w-5 h-5 text-red-600" />

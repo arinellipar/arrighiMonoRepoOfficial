@@ -25,7 +25,7 @@ import { Tooltip } from "@/components";
 import { usePessoaJuridica } from "@/hooks/usePessoaJuridica";
 import { usePessoaFisica } from "@/hooks/usePessoaFisica";
 import { PessoaJuridica, ResponsavelTecnicoOption } from "@/types/api";
-import { cn, truncateText } from "@/lib/utils";
+import { cn, truncateText, formatCNPJDisplay } from "@/lib/utils";
 import Link from "next/link";
 import { useForm } from "@/contexts/FormContext";
 import { TableSizeToggle } from "@/components/TableSizeToggle";
@@ -71,7 +71,7 @@ function StatusBadge({
 function LoadingSpinner() {
   return (
     <div className="flex items-center justify-center py-12">
-      <Loader2 className="w-8 h-8 animate-spin text-gold-400" />
+      <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
     </div>
   );
 }
@@ -356,11 +356,11 @@ export default function PessoaJuridicaPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-yellow-50 border border-yellow-200 rounded-xl p-4"
+              className="bg-amber-50 border border-amber-200 rounded-xl p-4"
             >
               <div className="flex items-center space-x-3">
-                <AlertCircle className="w-5 h-5 text-yellow-600" />
-                <p className="text-yellow-800">
+                <AlertCircle className="w-5 h-5 text-amber-600" />
+                <p className="text-amber-800">
                   <strong>Atenção:</strong> É necessário ter pelo menos uma
                   pessoa física cadastrada para ser responsável técnico antes de
                   criar pessoas jurídicas.{" "}
@@ -384,13 +384,13 @@ export default function PessoaJuridicaPage() {
           >
             <div className="flex flex-col md:flex-row gap-2 sm:gap-3 lg:gap-4 w-full">
               <div className="flex-1 relative">
-                <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gold-500 w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+                <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-amber-500 w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
                 <input
                   type="text"
                   placeholder="Buscar por razão social, CNPJ ou email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-7 sm:pl-8 lg:pl-10 pr-3 sm:pr-4 py-1.5 sm:py-2 lg:py-3 bg-neutral-800/50 border border-neutral-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all duration-200 text-[11px] sm:text-xs lg:text-sm"
+                  className="w-full pl-7 sm:pl-8 lg:pl-10 pr-3 sm:pr-4 py-1.5 sm:py-2 lg:py-3 bg-neutral-800/50 border border-neutral-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 text-[11px] sm:text-xs lg:text-sm"
                 />
                 {selectedCompanyId && (
                   <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
@@ -406,7 +406,7 @@ export default function PessoaJuridicaPage() {
                   whileTap={{ scale: 0.98 }}
                   onClick={handleViewCompany}
                   disabled={!selectedCompanyId}
-                  className="btn-mobile flex items-center justify-center space-x-1 sm:space-x-2 px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 lg:py-3 bg-secondary-100 hover:bg-secondary-200 disabled:bg-neutral-800/50 disabled:text-gold-500 text-neutral-200 rounded-lg sm:rounded-xl font-medium transition-all duration-200 text-[11px] sm:text-xs lg:text-sm"
+                  className="btn-mobile flex items-center justify-center space-x-1 sm:space-x-2 px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 lg:py-3 bg-secondary-100 hover:bg-secondary-200 disabled:bg-neutral-800/50 disabled:text-amber-500 text-neutral-200 rounded-lg sm:rounded-xl font-medium transition-all duration-200 text-[11px] sm:text-xs lg:text-sm"
                   title="Visualizar empresa selecionada"
                 >
                   <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
@@ -417,7 +417,7 @@ export default function PessoaJuridicaPage() {
                   whileTap={{ scale: 0.98 }}
                   onClick={handleEditSelected}
                   disabled={!selectedCompanyId}
-                  className="btn-mobile flex items-center justify-center space-x-1 sm:space-x-2 px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 lg:py-3 bg-accent-100 hover:bg-accent-200 disabled:bg-neutral-800/50 disabled:text-gold-500 text-accent-700 rounded-lg sm:rounded-xl font-medium transition-all duration-200 text-[11px] sm:text-xs lg:text-sm"
+                  className="btn-mobile flex items-center justify-center space-x-1 sm:space-x-2 px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 lg:py-3 bg-accent-100 hover:bg-accent-200 disabled:bg-neutral-800/50 disabled:text-amber-500 text-accent-700 rounded-lg sm:rounded-xl font-medium transition-all duration-200 text-[11px] sm:text-xs lg:text-sm"
                   title="Editar empresa selecionada"
                 >
                   <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
@@ -428,7 +428,7 @@ export default function PessoaJuridicaPage() {
                   whileTap={{ scale: 0.98 }}
                   onClick={handleDeleteSelected}
                   disabled={!selectedCompanyId}
-                  className="btn-mobile flex items-center justify-center space-x-1 sm:space-x-2 px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 lg:py-3 bg-red-100 hover:bg-red-200 disabled:bg-neutral-800/50 disabled:text-gold-500 text-red-700 rounded-lg sm:rounded-xl font-medium transition-all duration-200 text-[11px] sm:text-xs lg:text-sm"
+                  className="btn-mobile flex items-center justify-center space-x-1 sm:space-x-2 px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 lg:py-3 bg-red-100 hover:bg-red-200 disabled:bg-neutral-800/50 disabled:text-amber-500 text-red-700 rounded-lg sm:rounded-xl font-medium transition-all duration-200 text-[11px] sm:text-xs lg:text-sm"
                   title="Excluir empresa selecionada"
                 >
                   <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
@@ -684,8 +684,9 @@ export default function PessoaJuridicaPage() {
                                     ? "text-[9px] sm:text-[10px] py-1 sm:py-1.5"
                                     : "text-[10px] sm:text-xs lg:text-sm"
                                 }`}
+                                style={{ textDecoration: 'none' }}
                               >
-                                {pessoa.cnpj}
+                                <span style={{ textDecoration: 'none' }}>{formatCNPJDisplay(pessoa.cnpj)}</span>
                               </td>
                               <td
                                 className={`px-6 sm:px-7 lg:px-8 pr-0 sm:pr-0 lg:pr-0 py-2 sm:py-2.5 lg:py-3 whitespace-nowrap hidden sm:table-cell ${
@@ -766,14 +767,14 @@ export default function PessoaJuridicaPage() {
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="btn-mobile px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-neutral-300 bg-neutral-800 border border-neutral-700 rounded-lg hover:bg-neutral-700 hover:border-gold-500/50 transition-colors duration-200"
+                        className="btn-mobile px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-neutral-300 bg-neutral-800 border border-neutral-700 rounded-lg hover:bg-neutral-700 hover:border-amber-500/50 transition-colors duration-200"
                       >
                         Anterior
                       </motion.button>
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="btn-mobile px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white bg-gold-500 border border-transparent rounded-lg hover:bg-gold-600 transition-colors duration-200"
+                        className="btn-mobile px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white bg-amber-500 border border-transparent rounded-lg hover:bg-amber-600 transition-colors duration-200"
                       >
                         Próximo
                       </motion.button>

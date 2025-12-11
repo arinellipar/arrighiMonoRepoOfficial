@@ -39,7 +39,7 @@ function StatusBadge({
   const statusConfig = {
     ativo: { bg: "bg-green-100", text: "text-green-800", label: "Ativo" },
     inativo: { bg: "bg-red-100", text: "text-red-800", label: "Inativo" },
-    ferias: { bg: "bg-yellow-100", text: "text-yellow-800", label: "Férias" },
+    ferias: { bg: "bg-amber-100", text: "text-amber-800", label: "Férias" },
     licenca: { bg: "bg-gray-100", text: "text-gray-800", label: "Licença" },
   };
 
@@ -68,7 +68,7 @@ function EspecialidadeBadge({ especialidade }: { especialidade: string }) {
 
 function AdvogadoBadge() {
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-md">
+    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r from-amber-400 to-amber-500 text-white shadow-md">
       <Award className="w-3 h-3" />
       Advogado
     </span>
@@ -82,7 +82,7 @@ function isAdvogado(email: string | undefined): boolean {
 function LoadingSpinner() {
   return (
     <div className="flex items-center justify-center py-12">
-      <Loader2 className="w-8 h-8 animate-spin text-gold-400" />
+      <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
     </div>
   );
 }
@@ -303,13 +303,13 @@ export default function ConsultoresPage() {
         >
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gold-500 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-500 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Buscar por nome, CPF ou email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-neutral-800/50 border border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all duration-200"
+                className="w-full pl-10 pr-4 py-3 bg-neutral-800/50 border border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200"
               />
               {selectedConsultorId && (
                 <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
@@ -323,7 +323,7 @@ export default function ConsultoresPage() {
             <select
               value={filterEspecialidade}
               onChange={(e) => setFilterEspecialidade(e.target.value)}
-              className="px-4 py-3 bg-neutral-800/50 border border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all duration-200"
+              className="px-4 py-3 bg-neutral-800/50 border border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200"
             >
               <option value="">Todas as especialidades</option>
               {especialidades.map((esp: string) => (
@@ -336,7 +336,7 @@ export default function ConsultoresPage() {
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-4 py-3 bg-neutral-800/50 border border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all duration-200"
+              className="px-4 py-3 bg-neutral-800/50 border border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200"
             >
               <option value="">Todos os status</option>
               <option value="ativo">Ativo</option>
@@ -351,7 +351,7 @@ export default function ConsultoresPage() {
                 whileTap={{ scale: 0.98 }}
                 onClick={handleViewConsultor}
                 disabled={!selectedConsultorId}
-                className="flex items-center justify-center space-x-2 px-4 py-3 bg-secondary-100 hover:bg-secondary-200 disabled:bg-neutral-800/50 disabled:text-gold-500 text-neutral-200 rounded-xl font-medium transition-all duration-200"
+                className="flex items-center justify-center space-x-2 px-4 py-3 bg-secondary-100 hover:bg-secondary-200 disabled:bg-neutral-800/50 disabled:text-amber-500 text-neutral-200 rounded-xl font-medium transition-all duration-200"
                 title="Visualizar consultor selecionado"
               >
                 <Eye className="w-4 h-4" />
@@ -362,7 +362,7 @@ export default function ConsultoresPage() {
                 whileTap={{ scale: 0.98 }}
                 onClick={handleEditSelected}
                 disabled={!selectedConsultorId}
-                className="flex items-center justify-center space-x-2 px-4 py-3 bg-accent-100 hover:bg-accent-200 disabled:bg-neutral-800/50 disabled:text-gold-500 text-accent-700 rounded-xl font-medium transition-all duration-200"
+                className="flex items-center justify-center space-x-2 px-4 py-3 bg-accent-100 hover:bg-accent-200 disabled:bg-neutral-800/50 disabled:text-amber-500 text-accent-700 rounded-xl font-medium transition-all duration-200"
                 title="Editar consultor selecionado"
               >
                 <Edit className="w-4 h-4" />
@@ -373,7 +373,7 @@ export default function ConsultoresPage() {
                 whileTap={{ scale: 0.98 }}
                 onClick={handleDeleteSelected}
                 disabled={!selectedConsultorId}
-                className="flex items-center justify-center space-x-2 px-4 py-3 bg-red-100 hover:bg-red-200 disabled:bg-neutral-800/50 disabled:text-gold-500 text-red-700 rounded-xl font-medium transition-all duration-200"
+                className="flex items-center justify-center space-x-2 px-4 py-3 bg-red-100 hover:bg-red-200 disabled:bg-neutral-800/50 disabled:text-amber-500 text-red-700 rounded-xl font-medium transition-all duration-200"
                 title="Excluir consultor selecionado"
               >
                 <Trash2 className="w-4 h-4" />
@@ -477,8 +477,8 @@ export default function ConsultoresPage() {
                   className={cn(
                     "p-2 rounded-lg transition-colors",
                     viewMode === "list"
-                      ? "bg-gold-500/20 text-gold-400"
-                      : "text-gold-500 hover:text-neutral-300"
+                      ? "bg-amber-500/20 text-amber-400"
+                      : "text-amber-500 hover:text-neutral-300"
                   )}
                 >
                   <svg
@@ -500,8 +500,8 @@ export default function ConsultoresPage() {
                   className={cn(
                     "p-2 rounded-lg transition-colors",
                     viewMode === "grid"
-                      ? "bg-gold-500/20 text-gold-400"
-                      : "text-gold-500 hover:text-neutral-300"
+                      ? "bg-amber-500/20 text-amber-400"
+                      : "text-amber-500 hover:text-neutral-300"
                   )}
                 >
                   <svg
@@ -652,7 +652,7 @@ export default function ConsultoresPage() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-50">
                             <div className="flex items-center">
-                              <FileText className="w-4 h-4 mr-1 text-gold-500" />
+                              <FileText className="w-4 h-4 mr-1 text-amber-500" />
                               {consultor.casosAtivos || 0}
                             </div>
                           </td>

@@ -125,11 +125,12 @@ namespace CrmArrighi.Controllers
 
                 var resultado = new
                 {
-                    // Receita geral
-                    ReceitaTotal = receitaContratos?.ReceitaTotal ?? 0,
+                    // Receita geral - BASEADA NOS BOLETOS LIQUIDADOS (dinheiro que efetivamente entrou)
+                    ReceitaTotal = receitaBoletos?.ValorBoletosLiquidados ?? 0,
                     ReceitaEntrada = receitaContratos?.ReceitaEntrada ?? 0,
                     ReceitaParcelas = receitaContratos?.ReceitaParcelas ?? 0,
                     ComissaoTotal = receitaContratos?.ComissaoTotal ?? 0,
+                    LucroContratos = receitaContratos?.ReceitaTotal ?? 0, // Lucro teórico dos contratos
 
                     // Receita por período
                     ReceitaMesAtual = receitaContratos?.ReceitaMesAtual ?? 0,
@@ -172,7 +173,7 @@ namespace CrmArrighi.Controllers
                     }
                 };
 
-                _logger.LogInformation($"💰 Receita (LUCRO) calculada: Total={resultado.ReceitaTotal:C2}, Mês Atual={resultado.ReceitaMesAtual:C2}, Ano={resultado.ReceitaAnoAtual:C2}");
+                _logger.LogInformation($"💰 Receita Total (Boletos Liquidados): {resultado.ReceitaTotal:C2}, Lucro Contratos: {resultado.LucroContratos:C2}");
 
                 return Ok(resultado);
             }
@@ -275,16 +276,16 @@ namespace CrmArrighi.Controllers
                 var hoje = DateTime.Today;
                 var inicioMes = new DateTime(hoje.Year, hoje.Month, 1);
 
-                // Estatísticas gerais (LUCRO = ValorNegociado - Comissao)
-                var stats = await _context.Contratos
+                // Estatísticas gerais de contratos
+                var statsContratos = await _context.Contratos
                     .Where(c => c.Ativo)
                     .GroupBy(c => 1)
                     .Select(g => new
                     {
                         TotalContratos = g.Count(),
                         ContratosMesAtual = g.Count(c => c.DataCadastro >= inicioMes),
-                        ReceitaTotal = g.Sum(c => (c.ValorNegociado ?? 0) - (c.Comissao ?? 0)),
-                        ReceitaMesAtual = g.Where(c => c.DataCadastro >= inicioMes && c.DataCadastro < inicioMes.AddMonths(1))
+                        LucroContratos = g.Sum(c => (c.ValorNegociado ?? 0) - (c.Comissao ?? 0)),
+                        LucroMesAtual = g.Where(c => c.DataCadastro >= inicioMes && c.DataCadastro < inicioMes.AddMonths(1))
                                           .Sum(c => (c.ValorNegociado ?? 0) - (c.Comissao ?? 0)),
                         ContratosFechados = g.Count(c => c.Situacao == "Contrato Assinado" && c.DataFechamentoContrato.HasValue),
                         ContratosPendentes = g.Count(c => c.Situacao != "Contrato Assinado" && c.Situacao != "Sem Interesse")
@@ -306,7 +307,15 @@ namespace CrmArrighi.Controllers
 
                 var resultado = new
                 {
-                    Contratos = stats ?? new { TotalContratos = 0, ContratosMesAtual = 0, ReceitaTotal = 0m, ReceitaMesAtual = 0m, ContratosFechados = 0, ContratosPendentes = 0 },
+                    Contratos = new {
+                        TotalContratos = statsContratos?.TotalContratos ?? 0,
+                        ContratosMesAtual = statsContratos?.ContratosMesAtual ?? 0,
+                        ReceitaTotal = boletosStats?.ValorLiquidado ?? 0m, // Receita = Boletos Liquidados
+                        ReceitaMesAtual = boletosStats?.ValorLiquidado ?? 0m, // TODO: filtrar por mês
+                        LucroContratos = statsContratos?.LucroContratos ?? 0m,
+                        ContratosFechados = statsContratos?.ContratosFechados ?? 0,
+                        ContratosPendentes = statsContratos?.ContratosPendentes ?? 0
+                    },
                     Boletos = boletosStats ?? new { TotalBoletos = 0, BoletosLiquidados = 0, ValorLiquidado = 0m, ValorPendente = 0m },
                     DataAtualizacao = DateTime.UtcNow
                 };

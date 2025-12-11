@@ -29,6 +29,7 @@ namespace CrmArrighi.Data
         public DbSet<SessaoAtiva> SessoesAtivas { get; set; }
         public DbSet<PasswordReset> PasswordResets { get; set; }
         public DbSet<LogAtividade> LogsAtividades { get; set; }
+        public DbSet<LogGeracaoBoleto> LogsGeracaoBoletos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -295,6 +296,20 @@ namespace CrmArrighi.Data
             modelBuilder.Entity<PasswordReset>()
                 .HasIndex(pr => pr.Token)
                 .IsUnique();
+
+            // Configurações para LogGeracaoBoleto
+            modelBuilder.Entity<LogGeracaoBoleto>()
+                .HasOne(l => l.Usuario)
+                .WithMany()
+                .HasForeignKey(l => l.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<LogGeracaoBoleto>()
+                .Property(l => l.ValorTotalGerado)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<LogGeracaoBoleto>()
+                .HasIndex(l => l.DataExecucao);
         }
     }
 }

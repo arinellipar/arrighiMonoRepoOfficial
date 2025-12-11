@@ -29,7 +29,10 @@ import {
   CreditCard,
   Settings,
   Brain,
+  Download,
+  FileX,
 } from "lucide-react";
+import { formatDocumentoDisplay } from "@/lib/utils";
 import MainLayout from "@/components/MainLayout";
 import ContratoForm from "@/components/forms/ContratoForm";
 import ContratoDetalhes from "@/components/ContratoDetalhes";
@@ -721,6 +724,108 @@ export default function ContratosPage() {
     setShowBoletoDetails(true);
   };
 
+  // Função para baixar o PDF anexado ao contrato do Azure Blob Storage
+  const handleDownloadContratoPDF = async (contrato: Contrato) => {
+    if (!contrato || !contrato.id) {
+      alert("Erro: Contrato inválido");
+      return;
+    }
+
+    // Verificar se o contrato tem um documento anexado
+    if (!contrato.anexoDocumento) {
+      alert("Este contrato não possui documento PDF anexado.");
+      return;
+    }
+
+    try {
+      // Importar dinamicamente para evitar problemas de SSR
+      const { getApiUrl } = await import("@/../env.config");
+      const apiUrl = getApiUrl();
+
+      // Obter dados do usuário para autenticação via header X-Usuario-Id
+      const userStr = localStorage.getItem("user");
+      let usuarioId: string | null = null;
+
+      if (userStr) {
+        try {
+          const userData = JSON.parse(userStr);
+          usuarioId = userData.usuarioId?.toString() || userData.UsuarioId?.toString() || userData.id?.toString();
+        } catch (e) {
+          console.error("Erro ao fazer parse do usuário:", e);
+        }
+      }
+
+      console.log("🔧 Download PDF - UsuarioId encontrado:", usuarioId || "Não");
+      console.log("🔧 Download PDF - URL:", `${apiUrl}/Contrato/${contrato.id}/pdf`);
+
+      if (!usuarioId) {
+        alert("Sessão expirada. Por favor, faça login novamente.");
+        return;
+      }
+
+      // Chamar o endpoint do backend que baixa o PDF do Azure Blob Storage
+      // O backend usa X-Usuario-Id para autenticação, não JWT
+      const response = await fetch(`${apiUrl}/Contrato/${contrato.id}/pdf`, {
+        method: "GET",
+        headers: {
+          "X-Usuario-Id": usuarioId,
+          "Accept": "application/pdf, application/octet-stream, */*",
+        },
+      });
+
+      console.log("🔧 Download PDF - Response status:", response.status);
+
+      if (!response.ok) {
+        let errorMessage = "Erro ao baixar o PDF do contrato.";
+        let errorDetails = "";
+
+        try {
+          const errorData = await response.json();
+          console.error("Erro ao baixar PDF:", response.status, errorData);
+
+          if (errorData?.semDocumento) {
+            errorMessage = "Este contrato não possui documento PDF anexado.";
+          } else if (errorData?.mensagem) {
+            errorMessage = errorData.mensagem;
+            if (errorData?.nomeArquivo) {
+              errorDetails = `\n\nArquivo esperado: ${errorData.nomeArquivo}`;
+            }
+          }
+        } catch {
+          console.error("Erro ao baixar PDF:", response.status);
+        }
+
+        if (response.status === 401) {
+          errorMessage = "Sessão expirada. Por favor, faça login novamente.";
+        } else if (response.status === 403) {
+          errorMessage = "Você não tem permissão para baixar este documento.";
+        } else if (response.status === 404) {
+          errorMessage = "O arquivo PDF não foi encontrado no armazenamento.\n\nIsso pode acontecer se:\n• O arquivo foi deletado do servidor\n• O contrato foi criado antes do sistema de upload\n• O upload original falhou\n\nSolução: Edite o contrato e faça upload do PDF novamente.";
+        }
+
+        alert(errorMessage + errorDetails);
+        return;
+      }
+
+      // Criar blob e fazer download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Contrato_${contrato.numeroPasta || contrato.id}_${format(new Date(), "yyyyMMdd")}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      console.log("✅ Download PDF concluído com sucesso");
+
+    } catch (error) {
+      console.error("Erro ao baixar PDF:", error);
+      alert("Erro ao baixar o PDF do contrato. Tente novamente.");
+    }
+  };
+
   if (loading && contratos.length === 0) {
     return (
       <MainLayout>
@@ -744,7 +849,7 @@ export default function ContratosPage() {
         <div className="bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-lg border border-neutral-800 p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-gradient-gold">
+              <h1 className="text-2xl font-bold text-gradient-amber">
                 Gestão de Contratos
               </h1>
               <p className="text-sm text-neutral-400 mt-1">
@@ -758,7 +863,7 @@ export default function ContratosPage() {
                 setClienteSelecionadoId(null);
                 openForm();
               }}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-neutral-950 rounded-lg font-medium transition-all shadow-lg shadow-gold-500/20"
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-neutral-950 rounded-lg font-medium transition-all shadow-lg shadow-amber-500/20"
             >
               <Plus className="w-4 h-4" />
               Novo Contrato
@@ -771,11 +876,11 @@ export default function ContratosPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-gold-500/30 hover:shadow-lg hover:shadow-gold-500/10 transition-all"
+              className="bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/10 transition-all"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="p-3 rounded-2xl bg-gradient-to-r from-gold-500/20 to-gold-600/20 border border-gold-500/30">
-                  <FileText className="w-6 h-6 text-gold-400" />
+                <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/20 to-amber-600/20 border border-amber-500/30">
+                  <FileText className="w-6 h-6 text-amber-400" />
                 </div>
               </div>
               <p className="text-neutral-400 text-sm mb-1">Total de Contratos</p>
@@ -788,11 +893,11 @@ export default function ContratosPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-gold-500/30 hover:shadow-lg hover:shadow-gold-500/10 transition-all"
+              className="bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/10 transition-all"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="p-3 rounded-2xl bg-gradient-to-r from-gold-500/20 to-gold-600/20 border border-gold-500/30">
-                  <Clock className="w-6 h-6 text-gold-400" />
+                <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/20 to-amber-600/20 border border-amber-500/30">
+                  <Clock className="w-6 h-6 text-amber-400" />
                 </div>
               </div>
               <p className="text-neutral-400 text-sm mb-1">Em Andamento</p>
@@ -805,11 +910,11 @@ export default function ContratosPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-gold-500/30 hover:shadow-lg hover:shadow-gold-500/10 transition-all"
+              className="bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/10 transition-all"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="p-3 rounded-2xl bg-gradient-to-r from-gold-500/20 to-gold-600/20 border border-gold-500/30">
-                  <CheckCircle className="w-6 h-6 text-gold-400" />
+                <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/20 to-amber-600/20 border border-amber-500/30">
+                  <CheckCircle className="w-6 h-6 text-amber-400" />
                 </div>
               </div>
               <p className="text-neutral-400 text-sm mb-1">Concluídos</p>
@@ -822,11 +927,11 @@ export default function ContratosPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-gold-500/30 hover:shadow-lg hover:shadow-gold-500/10 transition-all"
+              className="bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/10 transition-all"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="p-3 rounded-2xl bg-gradient-to-r from-gold-500/20 to-gold-600/20 border border-gold-500/30">
-                  <DollarSign className="w-6 h-6 text-gold-400" />
+                <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/20 to-amber-600/20 border border-amber-500/30">
+                  <DollarSign className="w-6 h-6 text-amber-400" />
                 </div>
               </div>
               <p className="text-neutral-400 text-sm mb-1">Valor Total</p>
@@ -839,11 +944,11 @@ export default function ContratosPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-gold-500/30 hover:shadow-lg hover:shadow-gold-500/10 transition-all"
+              className="bg-neutral-900/95 backdrop-blur-xl p-6 rounded-xl border border-neutral-800 hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/10 transition-all"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="p-3 rounded-2xl bg-gradient-to-r from-gold-500/20 to-gold-600/20 border border-gold-500/30">
-                  <TrendingUp className="w-6 h-6 text-gold-400" />
+                <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/20 to-amber-600/20 border border-amber-500/30">
+                  <TrendingUp className="w-6 h-6 text-amber-400" />
                 </div>
               </div>
               <p className="text-neutral-400 text-sm mb-1">Taxa de Conversão</p>
@@ -862,7 +967,7 @@ export default function ContratosPage() {
               className={cn(
                 "flex-1 px-6 py-3 rounded-lg text-sm font-medium transition-all",
                 activeTab === "contratos"
-                  ? "bg-gradient-to-r from-gold-500 to-gold-600 text-neutral-950 shadow-lg shadow-gold-500/20"
+                  ? "bg-gradient-to-r from-amber-500 to-amber-600 text-neutral-950 shadow-lg shadow-amber-500/20"
                   : "text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200"
               )}
             >
@@ -873,7 +978,7 @@ export default function ContratosPage() {
               className={cn(
                 "flex-1 px-6 py-3 rounded-lg text-sm font-medium transition-all",
                 activeTab === "clientes"
-                  ? "bg-gradient-to-r from-gold-500 to-gold-600 text-neutral-950 shadow-lg shadow-gold-500/20"
+                  ? "bg-gradient-to-r from-amber-500 to-amber-600 text-neutral-950 shadow-lg shadow-amber-500/20"
                   : "text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200"
               )}
             >
@@ -888,13 +993,13 @@ export default function ContratosPage() {
             {/* Busca */}
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
                 <input
                   type="text"
                   placeholder="Buscar por cliente, consultor, email, CPF/CNPJ, pasta, tipo de serviço..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-4 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                 />
               </div>
             </div>
@@ -908,7 +1013,7 @@ export default function ContratosPage() {
                     e.target.value as SituacaoContrato | "todas"
                   )
                 }
-                className="appearance-none pl-10 pr-10 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all cursor-pointer"
+                className="appearance-none pl-10 pr-10 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all cursor-pointer"
               >
                 <option value="todas">Todas as Situações</option>
                 {SituacaoContratoOptions.map((option) => (
@@ -917,8 +1022,8 @@ export default function ContratosPage() {
                   </option>
                 ))}
               </select>
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500 pointer-events-none" />
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500 pointer-events-none" />
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500 pointer-events-none" />
             </div>
 
             {/* Filtro de Consultor */}
@@ -932,7 +1037,7 @@ export default function ContratosPage() {
                       : Number(e.target.value)
                   )
                 }
-                className="appearance-none pl-10 pr-10 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all cursor-pointer w-[160px]"
+                className="appearance-none pl-10 pr-10 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all cursor-pointer w-[160px]"
               >
                 <option value="todos">Consultores</option>
                 {consultores.map((consultor) => (
@@ -941,8 +1046,8 @@ export default function ContratosPage() {
                   </option>
                 ))}
               </select>
-              <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500 pointer-events-none" />
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500 pointer-events-none" />
+              <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500 pointer-events-none" />
             </div>
 
             {/* Filtro de Filial */}
@@ -956,7 +1061,7 @@ export default function ContratosPage() {
                       : Number(e.target.value)
                   )
                 }
-                className="appearance-none pl-10 pr-10 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all cursor-pointer w-[140px]"
+                className="appearance-none pl-10 pr-10 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all cursor-pointer w-[140px]"
               >
                 <option value="todos">Filiais</option>
                 {filiais.map((filial) => (
@@ -965,8 +1070,8 @@ export default function ContratosPage() {
                   </option>
                 ))}
               </select>
-              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500 pointer-events-none" />
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500 pointer-events-none" />
+              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500 pointer-events-none" />
             </div>
 
             {/* Filtro de Próximo Contato */}
@@ -978,15 +1083,15 @@ export default function ContratosPage() {
                     e.target.value as "hoje" | "semana" | "mes" | "todos"
                   )
                 }
-                className="appearance-none pl-10 pr-10 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all cursor-pointer"
+                className="appearance-none pl-10 pr-10 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all cursor-pointer"
               >
                 <option value="todos">Todos os Prazos</option>
                 <option value="hoje">Vence Hoje</option>
                 <option value="semana">Vence esta Semana</option>
                 <option value="mes">Vence este Mês</option>
               </select>
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500 pointer-events-none" />
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500 pointer-events-none" />
+              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500 pointer-events-none" />
             </div>
 
             {/* Filtro por Data de Contrato */}
@@ -998,7 +1103,7 @@ export default function ContratosPage() {
                     e.target.value as "hoje" | "semana" | "mes" | "ano" | "todos"
                   )
                 }
-                className="appearance-none pl-10 pr-10 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all cursor-pointer"
+                className="appearance-none pl-10 pr-10 py-2 bg-neutral-800/50 border border-neutral-700 rounded-lg text-sm text-neutral-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all cursor-pointer"
               >
                 <option value="todos">Todas as Datas</option>
                 <option value="hoje">Criados Hoje</option>
@@ -1006,8 +1111,8 @@ export default function ContratosPage() {
                 <option value="mes">Último Mês</option>
                 <option value="ano">Último Ano</option>
               </select>
-              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500 pointer-events-none" />
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-500 pointer-events-none" />
+              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500 pointer-events-none" />
             </div>
 
             {/* Toggle View Mode */}
@@ -1017,7 +1122,7 @@ export default function ContratosPage() {
                 className={cn(
                   "p-2 rounded-lg transition-all",
                   viewMode === "cards"
-                    ? "bg-gradient-to-r from-gold-500 to-gold-600 text-neutral-950 shadow-lg shadow-gold-500/20"
+                    ? "bg-gradient-to-r from-amber-500 to-amber-600 text-neutral-950 shadow-lg shadow-amber-500/20"
                     : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-neutral-200"
                 )}
               >
@@ -1038,7 +1143,7 @@ export default function ContratosPage() {
                 className={cn(
                   "p-2 rounded-lg transition-all",
                   viewMode === "table"
-                    ? "bg-gradient-to-r from-gold-500 to-gold-600 text-neutral-950 shadow-lg shadow-gold-500/20"
+                    ? "bg-gradient-to-r from-amber-500 to-amber-600 text-neutral-950 shadow-lg shadow-amber-500/20"
                     : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-neutral-200"
                 )}
               >
@@ -1072,13 +1177,13 @@ export default function ContratosPage() {
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ delay: index * 0.05 }}
                     whileHover={{ scale: 1.02, y: -4 }}
-                    className="bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-lg border border-neutral-800 hover:border-gold-500/30 hover:shadow-xl hover:shadow-gold-500/10 transition-all duration-300 overflow-hidden group cursor-pointer"
+                    className="bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-lg border border-neutral-800 hover:border-amber-500/30 hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300 overflow-hidden group cursor-pointer"
                   >
                     {/* Header do Card */}
                     <div className="p-4 border-b border-neutral-800">
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-neutral-50 truncate group-hover:text-gradient-gold transition-all">
+                          <h3 className="font-semibold text-neutral-50 truncate group-hover:text-gradient-amber transition-all">
                             {(() => {
                               const nome =
                                 contrato.cliente?.pessoaFisica?.nome ||
@@ -1104,7 +1209,7 @@ export default function ContratosPage() {
                     <div className="p-4 space-y-3 bg-gradient-to-br from-neutral-900 to-neutral-950">
                       {/* Consultor */}
                       <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-gold-500" />
+                        <Users className="w-4 h-4 text-amber-500" />
                         <span className="text-sm text-neutral-300">
                           {contrato.consultor?.pessoaFisica?.nome ||
                             "Sem consultor"}
@@ -1136,7 +1241,7 @@ export default function ContratosPage() {
                       {/* Datas de Contato */}
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-gold-500" />
+                          <Clock className="w-4 h-4 text-amber-500" />
                           <span className="text-xs text-neutral-300">
                             Último: {formatDate(contrato.dataUltimoContato)}
                           </span>
@@ -1166,92 +1271,121 @@ export default function ContratosPage() {
 
                     {/* Ações */}
                     <div className="p-4 bg-neutral-950/50 border-t border-neutral-800">
-                      <div className="flex items-center gap-2">
-                        <Tooltip content="Ver Detalhes">
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => {
-                              setSelectedContrato(contrato);
-                              setShowDetalhes(true);
-                            }}
-                            className="flex-1 flex items-center justify-center gap-1 p-2 bg-neutral-800 hover:bg-blue-500/20 text-blue-400 rounded-lg transition-all border border-neutral-700 hover:border-blue-500/30"
-                          >
-                            <Eye className="w-4 h-4" />
-                            <span className="text-xs font-medium">
-                              Detalhes
-                            </span>
-                          </motion.button>
-                        </Tooltip>
+                      <div className="space-y-2">
+                        {/* Primeira linha - 4 botões principais */}
+                        <div className="flex items-center gap-2">
+                          <Tooltip content="Ver Detalhes">
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => {
+                                setSelectedContrato(contrato);
+                                setShowDetalhes(true);
+                              }}
+                              className="flex-1 flex items-center justify-center gap-1 p-2 bg-neutral-800 hover:bg-blue-500/20 text-blue-400 rounded-lg transition-all border border-neutral-700 hover:border-blue-500/30"
+                            >
+                              <Eye className="w-4 h-4" />
+                              <span className="text-xs font-medium">
+                                Detalhes
+                              </span>
+                            </motion.button>
+                          </Tooltip>
 
-                        <Tooltip content="Alterar Situação">
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => {
-                              setSelectedContrato(contrato);
-                              setShowMudancaSituacao(true);
-                            }}
-                            className="flex-1 flex items-center justify-center gap-1 p-2 bg-neutral-800 hover:bg-orange-500/20 text-orange-400 rounded-lg transition-all border border-neutral-700 hover:border-orange-500/30"
-                          >
-                            <Settings className="w-4 h-4" />
-                            <span className="text-xs font-medium">
-                              Situação
-                            </span>
-                          </motion.button>
-                        </Tooltip>
+                          <Tooltip content="Alterar Situação">
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => {
+                                setSelectedContrato(contrato);
+                                setShowMudancaSituacao(true);
+                              }}
+                              className="flex-1 flex items-center justify-center gap-1 p-2 bg-neutral-800 hover:bg-orange-500/20 text-orange-400 rounded-lg transition-all border border-neutral-700 hover:border-orange-500/30"
+                            >
+                              <Settings className="w-4 h-4" />
+                              <span className="text-xs font-medium">
+                                Situação
+                              </span>
+                            </motion.button>
+                          </Tooltip>
 
-                        <Tooltip content="Ver Boletos">
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => handleViewBoletos(contrato)}
-                            className="flex-1 flex items-center justify-center gap-1 p-2 bg-neutral-800 hover:bg-green-500/20 text-green-400 rounded-lg transition-all border border-neutral-700 hover:border-green-500/30"
-                          >
-                            <CreditCard className="w-4 h-4" />
-                            <span className="text-xs font-medium">Boletos</span>
-                          </motion.button>
-                        </Tooltip>
+                          <Tooltip content="Ver Boletos">
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => handleViewBoletos(contrato)}
+                              className="flex-1 flex items-center justify-center gap-1 p-2 bg-neutral-800 hover:bg-green-500/20 text-green-400 rounded-lg transition-all border border-neutral-700 hover:border-green-500/30"
+                            >
+                              <CreditCard className="w-4 h-4" />
+                              <span className="text-xs font-medium">Boletos</span>
+                            </motion.button>
+                          </Tooltip>
 
-                        <Tooltip content="Análise IA">
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => {
-                              setSelectedContrato(contrato);
-                              setShowAnalysis(true);
-                            }}
-                            className="flex-1 flex items-center justify-center gap-1 p-2 bg-neutral-800 hover:bg-purple-500/20 text-purple-400 rounded-lg transition-all border border-neutral-700 hover:border-purple-500/30"
-                          >
-                            <Brain className="w-4 h-4" />
-                            <span className="text-xs font-medium">IA</span>
-                          </motion.button>
-                        </Tooltip>
+                          <Tooltip content="Análise IA">
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => {
+                                setSelectedContrato(contrato);
+                                setShowAnalysis(true);
+                              }}
+                              className="flex-1 flex items-center justify-center gap-1 p-2 bg-neutral-800 hover:bg-purple-500/20 text-purple-400 rounded-lg transition-all border border-neutral-700 hover:border-purple-500/30"
+                            >
+                              <Brain className="w-4 h-4" />
+                              <span className="text-xs font-medium">IA</span>
+                            </motion.button>
+                          </Tooltip>
+                        </div>
 
-                        <Tooltip content="Editar">
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => {
-                              setSelectedContrato(contrato);
-                              openForm();
-                            }}
-                            className="p-2 bg-neutral-800 hover:bg-gold-500/20 text-gold-400 rounded-lg transition-all border border-neutral-700 hover:border-gold-500/30"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </motion.button>
-                        </Tooltip>
+                        {/* Segunda linha - 3 botões secundários */}
+                        <div className="flex items-center gap-2">
+                          <Tooltip content={contrato.anexoDocumento ? "Baixar PDF anexado" : "Sem PDF anexado"}>
+                            <motion.button
+                              whileHover={{ scale: contrato.anexoDocumento ? 1.05 : 1 }}
+                              whileTap={{ scale: contrato.anexoDocumento ? 0.95 : 1 }}
+                              onClick={() => contrato.anexoDocumento && handleDownloadContratoPDF(contrato)}
+                              disabled={!contrato.anexoDocumento}
+                              className={`flex-1 flex items-center justify-center gap-1 p-2 rounded-lg transition-all border ${
+                                contrato.anexoDocumento
+                                  ? "bg-neutral-800 hover:bg-emerald-500/20 text-emerald-400 border-neutral-700 hover:border-emerald-500/30 cursor-pointer"
+                                  : "bg-neutral-900/50 text-neutral-600 border-neutral-800 cursor-not-allowed"
+                              }`}
+                            >
+                              {contrato.anexoDocumento ? (
+                                <Download className="w-4 h-4" />
+                              ) : (
+                                <FileX className="w-4 h-4" />
+                              )}
+                              <span className="text-xs font-medium">PDF</span>
+                            </motion.button>
+                          </Tooltip>
 
-                        <Tooltip content="Excluir">
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => handleDeleteContrato(contrato.id)}
-                            className="p-2 bg-neutral-800 hover:bg-red-500/20 text-red-400 rounded-lg transition-all border border-neutral-700 hover:border-red-500/30"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </motion.button>
-                        </Tooltip>
+                          <Tooltip content="Editar">
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => {
+                                setSelectedContrato(contrato);
+                                openForm();
+                              }}
+                              className="flex-1 flex items-center justify-center gap-1 p-2 bg-neutral-800 hover:bg-amber-500/20 text-amber-400 rounded-lg transition-all border border-neutral-700 hover:border-amber-500/30"
+                            >
+                              <Edit className="w-4 h-4" />
+                              <span className="text-xs font-medium">Editar</span>
+                            </motion.button>
+                          </Tooltip>
+
+                          <Tooltip content="Excluir">
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => handleDeleteContrato(contrato.id)}
+                              className="flex-1 flex items-center justify-center gap-1 p-2 bg-neutral-800 hover:bg-red-500/20 text-red-400 rounded-lg transition-all border border-neutral-700 hover:border-red-500/30"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              <span className="text-xs font-medium">Excluir</span>
+                            </motion.button>
+                          </Tooltip>
+                        </div>
                       </div>
                     </div>
                   </motion.div>
@@ -1265,7 +1399,7 @@ export default function ContratosPage() {
                 <table className="w-full">
                   <thead className="bg-neutral-950/50 border-b border-neutral-800">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gold-500 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-amber-500 uppercase tracking-wider">
                         Cliente
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
@@ -1379,6 +1513,23 @@ export default function ContratosPage() {
                                 <Brain className="w-4 h-4" />
                               </button>
                             </Tooltip>
+                            <Tooltip content={contrato.anexoDocumento ? "Baixar PDF anexado" : "Sem PDF anexado"}>
+                              <button
+                                onClick={() => contrato.anexoDocumento && handleDownloadContratoPDF(contrato)}
+                                disabled={!contrato.anexoDocumento}
+                                className={`p-1.5 rounded transition-colors ${
+                                  contrato.anexoDocumento
+                                    ? "hover:bg-emerald-500/20 text-emerald-500 cursor-pointer"
+                                    : "text-neutral-600 cursor-not-allowed"
+                                }`}
+                              >
+                                {contrato.anexoDocumento ? (
+                                  <Download className="w-4 h-4" />
+                                ) : (
+                                  <FileX className="w-4 h-4" />
+                                )}
+                              </button>
+                            </Tooltip>
                             <Tooltip content="Editar">
                               <button
                                 onClick={() => {
@@ -1475,7 +1626,7 @@ export default function ContratosPage() {
                             {cliente.tipo === "fisica" ? "Física" : "Jurídica"}
                           </td>
                           <td className="px-4 py-3 text-sm text-neutral-300">
-                            {cliente.cpf || cliente.cnpj || "—"}
+                            {formatDocumentoDisplay(cliente.cpf || cliente.cnpj) || "—"}
                           </td>
                           <td className="px-4 py-3 text-sm text-neutral-300">
                             {cliente.telefone1 || "N/A"}

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { apiClient } from "@/lib/api";
 
 export interface ForecastResumo {
+  receitaMesPassado: number;
   receitaEsperadaMesAtual: number;
   receitaEsperadaProximoMes: number;
   receitaEsperadaTrimestre: number;

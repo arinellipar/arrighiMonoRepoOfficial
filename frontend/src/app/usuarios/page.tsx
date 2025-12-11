@@ -138,7 +138,7 @@ function GrupoAcessoBadge({
       case "cobrança/financeiro":
         return "bg-green-100 text-green-800 border border-green-200 shadow-sm";
       case "administrativo de filial":
-        return "bg-yellow-100 text-yellow-800 border border-yellow-200 shadow-sm";
+        return "bg-amber-100 text-amber-800 border border-amber-200 shadow-sm";
       case "usuario":
       case "usuário":
         return "bg-gray-100 text-gray-800 border border-neutral-700 shadow-sm";
@@ -617,11 +617,11 @@ export default function UsuariosPage() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-yellow-50 border border-yellow-200 rounded-xl p-4"
+                className="bg-amber-50 border border-amber-200 rounded-xl p-4"
               >
                 <div className="flex items-center space-x-3">
-                  <AlertCircle className="w-5 h-5 text-yellow-600" />
-                  <p className="text-yellow-800 text-[11px] sm:text-xs">
+                  <AlertCircle className="w-5 h-5 text-amber-600" />
+                  <p className="text-amber-800 text-[11px] sm:text-xs">
                     <strong>Atenção:</strong> É necessário ter pelo menos uma
                     pessoa física ou jurídica cadastrada para criar usuários.
                   </p>
@@ -689,12 +689,12 @@ export default function UsuariosPage() {
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="bg-neutral-900/95 backdrop-blur-xl rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-5 shadow-lg border border-gold-500/30 w-full"
+                  className="bg-neutral-900/95 backdrop-blur-xl rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-5 shadow-lg border border-amber-500/30 w-full"
                 >
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      <div className="p-2 bg-gold-500/20 rounded-lg">
-                        <CheckCircle className="w-5 h-5 text-gold-400" />
+                      <div className="p-2 bg-amber-500/20 rounded-lg">
+                        <CheckCircle className="w-5 h-5 text-amber-400" />
                       </div>
                       <div>
                         <p className="text-sm font-medium text-neutral-100">
@@ -986,7 +986,7 @@ export default function UsuariosPage() {
                                 }}
                                 className={`hover:bg-neutral-800/50 transition-colors duration-200 cursor-pointer ${
                                   selectedUsuarioId === usuario.id
-                                    ? "bg-gold-500/10 border-l-4 border-gold-500"
+                                    ? "bg-amber-500/10 border-l-4 border-amber-500"
                                     : ""
                                 }`}
                               >

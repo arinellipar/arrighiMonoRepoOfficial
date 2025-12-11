@@ -286,6 +286,9 @@ export function GerarBoletosLoteModal({
                                     Cliente
                                   </th>
                                   <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">
+                                    Filial
+                                  </th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">
                                     Parcela
                                   </th>
                                   <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">
@@ -307,16 +310,25 @@ export function GerarBoletosLoteModal({
                                   >
                                     <td className="px-4 py-3">
                                       <div>
-                                        <p className="font-medium text-neutral-200 truncate max-w-[200px]">
+                                        <p className="font-medium text-neutral-200 truncate max-w-[180px]">
                                           {contrato.clienteNome}
                                         </p>
                                         <p className="text-xs text-neutral-500">
-                                          {contrato.numeroPasta || `#${contrato.contratoId}`}
+                                          {contrato.clienteDocumento || contrato.numeroPasta || `#${contrato.contratoId}`}
                                         </p>
                                       </div>
                                     </td>
                                     <td className="px-4 py-3">
-                                      <span className="px-2 py-1 bg-neutral-700/50 rounded text-sm text-neutral-300">
+                                      <span className="text-xs text-neutral-400 truncate max-w-[100px] block">
+                                        {contrato.filialNome || "-"}
+                                      </span>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                      <span className={`px-2 py-1 rounded text-sm ${
+                                        contrato.totalParcelas === 0
+                                          ? "bg-blue-500/20 text-blue-400"
+                                          : "bg-neutral-700/50 text-neutral-300"
+                                      }`}>
                                         {contrato.parcelaDescricao}
                                       </span>
                                     </td>
@@ -354,10 +366,30 @@ export function GerarBoletosLoteModal({
                     <h3 className="text-xl font-medium text-neutral-300 mb-2">
                       Nenhum boleto para gerar
                     </h3>
-                    <p className="text-neutral-500 max-w-md mx-auto">
+                    <p className="text-neutral-500 max-w-md mx-auto mb-4">
                       Não há contratos com vencimento nos próximos 7 dias que
                       precisem de boleto gerado.
                     </p>
+                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 max-w-md mx-auto">
+                      <p className="text-sm text-blue-400">
+                        <strong>ℹ️ Janela de Geração:</strong> O sistema gera boletos apenas quando faltam 7 dias ou menos para o vencimento da parcela.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Info Box */}
+                {preview.contratosParaGerar > 0 && (
+                  <div className="mt-4 bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
+                    <p className="text-sm text-blue-400">
+                      <strong>ℹ️ Regras de Geração:</strong>
+                    </p>
+                    <ul className="text-xs text-blue-300/80 mt-2 space-y-1 list-disc list-inside">
+                      <li>Contratos com situação <strong>&quot;CLIENTE&quot;</strong> são processados</li>
+                      <li>Boletos são gerados quando faltam <strong>7 dias ou menos</strong> para o vencimento</li>
+                      <li>Contratos correntes (∞) geram boleto todo mês</li>
+                      <li>Baixa automática após 30 dias sem pagamento</li>
+                    </ul>
                   </div>
                 )}
               </>
@@ -466,8 +498,16 @@ export function GerarBoletosLoteModal({
                               <td className="px-4 py-2 text-neutral-200 truncate max-w-[200px]">
                                 {boleto.clienteNome}
                               </td>
-                              <td className="px-4 py-2 text-neutral-400">
-                                {boleto.numeroParcela}/{boleto.totalParcelas}
+                              <td className="px-4 py-2">
+                                <span className={`px-2 py-0.5 rounded text-xs ${
+                                  boleto.totalParcelas === 0
+                                    ? "bg-blue-500/20 text-blue-400"
+                                    : "bg-neutral-700/50 text-neutral-400"
+                                }`}>
+                                  {boleto.totalParcelas === 0
+                                    ? `${boleto.numeroParcela}/∞`
+                                    : `${boleto.numeroParcela}/${boleto.totalParcelas}`}
+                                </span>
                               </td>
                               <td className="px-4 py-2 text-neutral-400 font-mono text-sm">
                                 {boleto.nsuCode}
@@ -510,35 +550,55 @@ export function GerarBoletosLoteModal({
           </div>
 
           {/* Footer */}
-          <div className="sticky bottom-0 bg-neutral-900/95 border-t border-neutral-800 p-4 flex items-center justify-end gap-3">
+          <div className="sticky bottom-0 bg-neutral-900/95 border-t border-neutral-800 p-4 flex items-center justify-between">
             {step === "preview" && (
               <>
                 <button
-                  onClick={onClose}
-                  className="px-6 py-2.5 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-300 rounded-xl font-medium transition-colors"
+                  onClick={fetchPreview}
+                  disabled={loading}
+                  className="px-4 py-2.5 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-300 rounded-xl font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
                 >
-                  Cancelar
+                  <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+                  Atualizar
                 </button>
-                {preview && preview.contratosParaGerar > 0 && (
+                <div className="flex items-center gap-3">
                   <button
-                    onClick={executarGeracao}
-                    disabled={loading}
-                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-neutral-950 rounded-xl font-semibold shadow-lg shadow-amber-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    onClick={onClose}
+                    className="px-6 py-2.5 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-300 rounded-xl font-medium transition-colors"
                   >
-                    <CheckCircle className="w-5 h-5" />
-                    Confirmar Geração
+                    Cancelar
                   </button>
-                )}
+                  {preview && preview.contratosParaGerar > 0 && (
+                    <button
+                      onClick={executarGeracao}
+                      disabled={loading}
+                      className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-neutral-950 rounded-xl font-semibold shadow-lg shadow-amber-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      <CheckCircle className="w-5 h-5" />
+                      Confirmar Geração
+                    </button>
+                  )}
+                </div>
               </>
             )}
 
             {step === "resultado" && (
-              <button
-                onClick={onClose}
-                className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-neutral-950 rounded-xl font-semibold shadow-lg shadow-amber-500/20 transition-all"
-              >
-                Fechar
-              </button>
+              <div className="w-full flex justify-end">
+                <button
+                  onClick={onClose}
+                  className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-neutral-950 rounded-xl font-semibold shadow-lg shadow-amber-500/20 transition-all"
+                >
+                  Fechar
+                </button>
+              </div>
+            )}
+
+            {step === "gerando" && (
+              <div className="w-full flex justify-center">
+                <p className="text-sm text-neutral-500">
+                  Aguarde, isso pode levar alguns minutos...
+                </p>
+              </div>
             )}
           </div>
         </motion.div>

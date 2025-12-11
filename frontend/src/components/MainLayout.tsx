@@ -76,8 +76,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 bg-gold-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-gold-500/30">
-            <Loader2 className="w-8 h-8 text-gold-400 animate-spin" />
+          <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/30">
+            <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
           </div>
           <h2 className="text-xl font-semibold text-neutral-50 mb-2">
             Verificando autenticação...
@@ -112,20 +112,20 @@ export default function MainLayout({ children }: MainLayoutProps) {
           >
             <div className="max-w-[1920px] mx-auto flex items-center justify-between">
               <div className="flex items-center gap-6">
-                <span className="font-medium text-gold-400">Arrighi Advogados © 2025</span>
+                <span className="font-medium text-amber-400">Arrighi Advogados © 2025</span>
                 <span className="text-neutral-600">|</span>
                 <span>CRM Judiciário v2.0</span>
               </div>
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-3.5 h-3.5 text-gold-400" />
+                  <Calendar className="w-3.5 h-3.5 text-amber-400" />
                   <span className="capitalize">
                     {currentTime ? formatDate(currentTime) : ""}
                   </span>
                 </div>
                 <span className="text-neutral-600">|</span>
                 <div className="flex items-center gap-2">
-                  <Clock className="w-3.5 h-3.5 text-gold-400" />
+                  <Clock className="w-3.5 h-3.5 text-amber-400" />
                   <span className="font-mono">
                     {currentTime ? formatTime(currentTime) : ""}
                   </span>
@@ -171,7 +171,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 animate={{ opacity: 1, x: 0 }}
                 className="flex items-center gap-2 text-sm text-neutral-400"
               >
-                <span className="font-medium text-gold-400">Home</span>
+                <span className="font-medium text-amber-400">Home</span>
                 <span>/</span>
                 <span>Dashboard</span>
               </motion.div>
@@ -199,14 +199,14 @@ export default function MainLayout({ children }: MainLayoutProps) {
             className="relative z-5 mt-auto"
           >
             {/* Footer Gradient Line */}
-            <div className="h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
+            <div className="h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
 
             <div className="bg-neutral-900/80 backdrop-blur-sm border-t border-neutral-800">
               <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Company Info */}
                   <div>
-                    <h4 className="text-sm font-bold text-gold-400 mb-2">
+                    <h4 className="text-sm font-bold text-amber-400 mb-2">
                       Arrighi Advogados
                     </h4>
                     <p className="text-xs text-neutral-400">
@@ -220,7 +220,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                   {/* Quick Stats */}
                   <div className="flex items-center justify-center gap-8">
                     <div className="text-center">
-                      <p className="text-2xl font-bold text-gold-400">
+                      <p className="text-2xl font-bold text-amber-400">
                         {clientesLoading ? (
                           <span className="animate-pulse">...</span>
                         ) : (
@@ -233,7 +233,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                     </div>
                     <div className="w-px h-12 bg-neutral-700" />
                     <div className="text-center">
-                      <p className="text-2xl font-bold text-gold-400">99.9%</p>
+                      <p className="text-2xl font-bold text-amber-400">99.9%</p>
                       <p className="text-xs text-neutral-400">
                         Disponibilidade
                       </p>
@@ -250,21 +250,21 @@ export default function MainLayout({ children }: MainLayoutProps) {
                     <div className="flex items-center justify-end gap-4 mb-2">
                       <a
                         href="#"
-                        className="text-xs text-neutral-400 hover:text-gold-400 transition-colors"
+                        className="text-xs text-neutral-400 hover:text-amber-400 transition-colors"
                       >
                         Termos de Uso
                       </a>
                       <span className="text-neutral-600">|</span>
                       <a
                         href="#"
-                        className="text-xs text-neutral-400 hover:text-gold-400 transition-colors"
+                        className="text-xs text-neutral-400 hover:text-amber-400 transition-colors"
                       >
                         Privacidade
                       </a>
                       <span className="text-neutral-600">|</span>
                       <a
                         href="#"
-                        className="text-xs text-neutral-400 hover:text-gold-400 transition-colors"
+                        className="text-xs text-neutral-400 hover:text-amber-400 transition-colors"
                       >
                         Suporte
                       </a>

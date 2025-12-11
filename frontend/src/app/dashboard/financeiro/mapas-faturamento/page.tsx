@@ -93,9 +93,17 @@ export default function MapasFaturamentoPage() {
         )
       );
 
+      // Verificar se foi pago usando foiPago ou paidValue
+      const foiPago = boleto.foiPago ??
+        (boleto.status === "LIQUIDADO" ||
+         (boleto.status === "BAIXADO" && (boleto.paidValue ?? 0) > 0));
+
       let status: FaturaDetalhada["status"] = "PENDENTE";
-      if (boleto.status === "LIQUIDADO" || boleto.status === "BAIXADO") {
+      if (foiPago) {
         status = "LIQUIDADO";
+      } else if (boleto.status === "BAIXADO") {
+        // BAIXADO sem pagamento = Expirado (tratamos como vencido)
+        status = "VENCIDO";
       } else if (boleto.status === "CANCELADO") {
         status = "CANCELADO";
       } else if (diasAtraso > 0) {
@@ -316,7 +324,7 @@ export default function MapasFaturamentoPage() {
       case "CANCELADO":
         return "bg-gray-100 text-gray-800 border-gray-200";
       default:
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return "bg-amber-100 text-amber-800 border-amber-200";
     }
   };
 
@@ -342,7 +350,7 @@ export default function MapasFaturamentoPage() {
       <MainLayout>
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950">
           <div className="text-center">
-            <RefreshCw className="w-12 h-12 animate-spin text-gold-500 mx-auto mb-4" />
+            <RefreshCw className="w-12 h-12 animate-spin text-amber-500 mx-auto mb-4" />
             <p className="text-neutral-400">
               Carregando mapas de faturamento...
             </p>
@@ -360,11 +368,11 @@ export default function MapasFaturamentoPage() {
           <div className="container mx-auto px-6 py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-br from-gold-500 to-gold-600 rounded-xl shadow-lg">
+                <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-lg">
                   <MapPin className="w-8 h-8 text-neutral-950" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gradient-gold">
+                  <h1 className="text-3xl font-bold text-gradient-amber">
                     Mapas de Faturamento
                   </h1>
                   <p className="text-neutral-400 mt-1">
@@ -416,8 +424,8 @@ export default function MapasFaturamentoPage() {
               className="bg-neutral-900/95 backdrop-blur-xl rounded-xl border border-neutral-800 p-6"
             >
               <div className="flex items-center justify-between mb-4">
-                <div className="p-2 bg-gold-500/20 rounded-lg">
-                  <DollarSign className="w-6 h-6 text-gold-400" />
+                <div className="p-2 bg-amber-500/20 rounded-lg">
+                  <DollarSign className="w-6 h-6 text-amber-400" />
                 </div>
                 <span className="text-sm text-neutral-400">Valor</span>
               </div>
@@ -480,7 +488,7 @@ export default function MapasFaturamentoPage() {
                     placeholder="Buscar por empresa, documento ou contrato..."
                     value={busca}
                     onChange={(e) => setBusca(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-neutral-800/50 border border-neutral-700 rounded-xl text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent"
+                    className="w-full pl-12 pr-4 py-3 bg-neutral-800/50 border border-neutral-700 rounded-xl text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -492,7 +500,7 @@ export default function MapasFaturamentoPage() {
                   onChange={(e) =>
                     setFiltroStatus(e.target.value as FiltroStatus)
                   }
-                  className="px-4 py-3 bg-neutral-800/50 border border-neutral-700 rounded-xl text-neutral-100 focus:outline-none focus:ring-2 focus:ring-gold-500"
+                  className="px-4 py-3 bg-neutral-800/50 border border-neutral-700 rounded-xl text-neutral-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 >
                   <option value="todos">Todos os Status</option>
                   <option value="pendente">Pendentes</option>
@@ -505,7 +513,7 @@ export default function MapasFaturamentoPage() {
                   onChange={(e) =>
                     setOrdenacao(e.target.value as OrdenacaoTipo)
                   }
-                  className="px-4 py-3 bg-neutral-800/50 border border-neutral-700 rounded-xl text-neutral-100 focus:outline-none focus:ring-2 focus:ring-gold-500"
+                  className="px-4 py-3 bg-neutral-800/50 border border-neutral-700 rounded-xl text-neutral-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 >
                   <option value="nome">Ordenar por Nome</option>
                   <option value="valor">Ordenar por Valor</option>
@@ -580,11 +588,11 @@ export default function MapasFaturamentoPage() {
                             animate={{ rotate: isExpanded ? 90 : 0 }}
                             transition={{ duration: 0.2 }}
                           >
-                            <ChevronDown className="w-6 h-6 text-gold-400" />
+                            <ChevronDown className="w-6 h-6 text-amber-400" />
                           </motion.div>
 
-                          <div className="p-3 bg-gradient-to-br from-gold-500/20 to-gold-600/20 rounded-lg border border-gold-500/30">
-                            <Building2 className="w-6 h-6 text-gold-400" />
+                          <div className="p-3 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-lg border border-amber-500/30">
+                            <Building2 className="w-6 h-6 text-amber-400" />
                           </div>
 
                           <div>
@@ -609,7 +617,7 @@ export default function MapasFaturamentoPage() {
                               </span>
                             )}
                             {empresa.boletosPendentes > 0 && (
-                              <span className="px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded-lg text-sm font-medium">
+                              <span className="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-lg text-sm font-medium">
                                 {empresa.boletosPendentes} pendente
                                 {empresa.boletosPendentes !== 1 ? "s" : ""}
                               </span>
@@ -675,7 +683,7 @@ export default function MapasFaturamentoPage() {
                                     Pendente
                                   </span>
                                 </div>
-                                <p className="text-lg font-semibold text-yellow-400">
+                                <p className="text-lg font-semibold text-amber-400">
                                   {formatCurrency(empresa.valorPendente)}
                                 </p>
                               </div>
@@ -708,7 +716,7 @@ export default function MapasFaturamentoPage() {
                                     Total
                                   </span>
                                 </div>
-                                <p className="text-lg font-semibold text-gold-400">
+                                <p className="text-lg font-semibold text-amber-400">
                                   {formatCurrency(empresa.valorTotal)}
                                 </p>
                               </div>
@@ -785,9 +793,9 @@ export default function MapasFaturamentoPage() {
                                           e.stopPropagation();
                                           handleVerDetalhes(fatura.boleto);
                                         }}
-                                        className="p-2 hover:bg-gold-500/20 rounded-lg transition-colors"
+                                        className="p-2 hover:bg-amber-500/20 rounded-lg transition-colors"
                                       >
-                                        <Eye className="w-4 h-4 text-gold-400" />
+                                        <Eye className="w-4 h-4 text-amber-400" />
                                       </button>
                                     </div>
                                   </motion.div>
@@ -821,7 +829,7 @@ export default function MapasFaturamentoPage() {
                 onClick={(e) => e.stopPropagation()}
                 className="bg-neutral-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-neutral-800"
               >
-                <div className="sticky top-0 bg-gradient-to-r from-gold-500 to-gold-600 p-6 rounded-t-2xl">
+                <div className="sticky top-0 bg-gradient-to-r from-amber-500 to-amber-600 p-6 rounded-t-2xl">
                   <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold text-neutral-950">
                       Detalhes do Boleto
@@ -846,7 +854,7 @@ export default function MapasFaturamentoPage() {
                     </div>
                     <div>
                       <p className="text-sm text-neutral-400 mb-1">Valor</p>
-                      <p className="text-lg font-bold text-gold-400">
+                      <p className="text-lg font-bold text-amber-400">
                         {formatCurrency(boletoSelecionado.nominalValue)}
                       </p>
                     </div>

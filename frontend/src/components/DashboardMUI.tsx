@@ -1100,6 +1100,18 @@ const ForecastCard = () => {
                 justifyContent="space-between"
               >
                 <Typography variant="caption" color="text.secondary">
+                  Mês passado
+                </Typography>
+                <Typography variant="caption" fontWeight="bold" color="#f59e0b">
+                  {formatCurrency(resumo?.receitaMesPassado || 0)}
+                </Typography>
+              </Box>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Typography variant="caption" color="text.secondary">
                   Este mês
                 </Typography>
                 <Typography variant="caption" fontWeight="bold" color="#10b981">
@@ -1294,7 +1306,7 @@ export default function DashboardMUI() {
           >
             <StatCard
               title="Receita Total"
-              value={`R$ ${receita?.ReceitaTotal?.toLocaleString() || "0"}`}
+              value={`R$ ${receita?.receitaTotal?.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) || "0"}`}
               trend="up"
               trendValue="+12.5%"
               icon={<AttachMoney />}

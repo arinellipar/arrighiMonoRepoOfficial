@@ -443,7 +443,7 @@ export function ForecastModal({ isOpen, onClose }: ForecastModalProps) {
                                     mes.confiabilidade === "Alta"
                                       ? "bg-green-100 text-green-700"
                                       : mes.confiabilidade === "Média"
-                                      ? "bg-yellow-100 text-yellow-700"
+                                      ? "bg-amber-100 text-amber-700"
                                       : "bg-gray-100 text-gray-700"
                                   }`}
                                 >
@@ -553,14 +553,14 @@ export function ForecastModal({ isOpen, onClose }: ForecastModalProps) {
                     </div>
 
                     {/* Legenda */}
-                    <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200">
+                    <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
                       <div className="flex items-start gap-2">
-                        <Percent className="w-5 h-5 text-yellow-600 mt-0.5" />
+                        <Percent className="w-5 h-5 text-amber-600 mt-0.5" />
                         <div>
-                          <p className="font-medium text-yellow-800">
+                          <p className="font-medium text-amber-800">
                             Sobre o Valor Ponderado
                           </p>
-                          <p className="text-sm text-yellow-700">
+                          <p className="text-sm text-amber-700">
                             O valor ponderado é calculado multiplicando o valor
                             total de cada etapa pela probabilidade de conversão.
                             Lead (10%), Prospecto (30%), Contrato Enviado (70%),

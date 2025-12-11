@@ -15,6 +15,7 @@ namespace CrmArrighi.Models
         // Status e datas
         public string? Status { get; set; }
         public string? StatusDescription { get; set; }
+        public bool FoiPago { get; set; } // Indica se o boleto foi realmente pago (LIQUIDADO ou BAIXADO com paidValue > 0)
         public string? DueDate { get; set; }
         public string? IssueDate { get; set; }
         public string? EntryDate { get; set; }
